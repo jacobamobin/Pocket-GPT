@@ -143,7 +143,14 @@ export default function ModelDropdown() {
                           if (e.key === 'Enter')  handleRename(m.id)
                           if (e.key === 'Escape') setRenamingId(null)
                         }}
-                        onBlur={() => handleRename(m.id)}
+                        onBlur={(e) => {
+                          // If focus moved to another element within the dropdown, skip rename
+                          if (ref.current && ref.current.contains(e.relatedTarget)) {
+                            setRenamingId(null)
+                            return
+                          }
+                          handleRename(m.id)
+                        }}
                         className="flex-1 text-xs bg-slate-800 border border-blue-500 rounded
                                    px-2 py-1 text-slate-200 focus:outline-none"
                       />
