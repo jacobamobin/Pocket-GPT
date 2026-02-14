@@ -4,6 +4,8 @@ checkpoint_manager.py — Save/load model checkpoints and manage the registry.
 
 import json
 import os
+import tempfile
+import threading
 import uuid
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -12,6 +14,8 @@ import torch
 
 CHECKPOINTS_DIR = os.path.join(os.path.dirname(__file__), 'checkpoints')
 REGISTRY_PATH   = os.path.join(CHECKPOINTS_DIR, 'models_registry.json')
+
+_registry_lock = threading.Lock()
 
 
 def _ensure_dir():
@@ -22,14 +26,23 @@ def load_registry() -> List[Dict]:
     _ensure_dir()
     if not os.path.exists(REGISTRY_PATH):
         return []
-    with open(REGISTRY_PATH, 'r') as f:
-        return json.load(f)
+    try:
+        with open(REGISTRY_PATH, 'r') as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return []
 
 
 def _save_registry(records: List[Dict]):
     _ensure_dir()
-    with open(REGISTRY_PATH, 'w') as f:
-        json.dump(records, f, indent=2)
+    fd, tmp = tempfile.mkstemp(dir=CHECKPOINTS_DIR, suffix='.json')
+    try:
+        with os.fdopen(fd, 'w') as f:
+            json.dump(records, f, indent=2)
+        os.replace(tmp, REGISTRY_PATH)
+    except Exception:
+        os.unlink(tmp)
+        raise
 
 
 def save_checkpoint(
@@ -51,14 +64,20 @@ def save_checkpoint(
     filename   = f"{record_id}.pt"
     filepath   = os.path.join(CHECKPOINTS_DIR, filename)
 
-    torch.save({
-        'model_state':     model.state_dict(),
-        'optimizer_state': optimizer.state_dict(),
-        'model_config':    model_config,
-        'training_config': training_config,
-        'step':            step,
-        'train_loss':      train_loss,
-    }, filepath)
+    model_state = {k: v.cpu() for k, v in model.state_dict().items()}
+    optimizer_state = optimizer.state_dict()
+
+    try:
+        torch.save({
+            'model_state':     model_state,
+            'optimizer_state': optimizer_state,
+            'model_config':    model_config,
+            'training_config': training_config,
+            'step':            step,
+            'train_loss':      train_loss,
+        }, filepath)
+    except Exception as e:
+        raise RuntimeError(f"Failed to save checkpoint: {e}") from e
 
     entry = {
         'id':           record_id,
@@ -70,9 +89,10 @@ def save_checkpoint(
         'created_at':   datetime.utcnow().isoformat() + 'Z',
     }
 
-    records = load_registry()
-    records.append(entry)
-    _save_registry(records)
+    with _registry_lock:
+        records = load_registry()
+        records.append(entry)
+        _save_registry(records)
     return entry
 
 
@@ -92,22 +112,24 @@ def load_checkpoint(record_id: str) -> Optional[Dict]:
 
 
 def rename_checkpoint(record_id: str, new_name: str) -> bool:
-    records = load_registry()
-    for r in records:
-        if r['id'] == record_id:
-            r['name'] = new_name
-            _save_registry(records)
-            return True
+    with _registry_lock:
+        records = load_registry()
+        for r in records:
+            if r['id'] == record_id:
+                r['name'] = new_name
+                _save_registry(records)
+                return True
     return False
 
 
 def delete_checkpoint(record_id: str) -> bool:
-    records = load_registry()
-    entry   = next((r for r in records if r['id'] == record_id), None)
-    if not entry:
-        return False
-    filepath = os.path.join(CHECKPOINTS_DIR, entry['filename'])
-    if os.path.exists(filepath):
-        os.remove(filepath)
-    _save_registry([r for r in records if r['id'] != record_id])
+    with _registry_lock:
+        records = load_registry()
+        entry   = next((r for r in records if r['id'] == record_id), None)
+        if not entry:
+            return False
+        filepath = os.path.join(CHECKPOINTS_DIR, entry['filename'])
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        _save_registry([r for r in records if r['id'] != record_id])
     return True
