@@ -88,10 +88,9 @@ def emit_attention_snapshot(
     Emit one attention matrix.
 
     `matrix` must already be a plain Python list-of-lists (not a tensor).
-    Throttled to prevent flooding the client.
+    No per-emit throttle — these are already gated by eval_interval in the
+    training loop (e.g. 16 heads × once every 100 steps = very low volume).
     """
-    if not _limiter.allow():
-        return
     payload = {
         'session_id': session_id,
         'step':       step,
