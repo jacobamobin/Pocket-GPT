@@ -6,7 +6,7 @@ import { UIContext }       from '../../contexts/UIContext'
 import { useWebSocket }    from '../../hooks/useWebSocket'
 import { useTrainingSession } from '../../hooks/useTrainingSession'
 import { useTabPersistence } from '../../hooks/useTabPersistence'
-import { createSession }   from '../../utils/apiClient'
+import { createSession, uploadDataset, datasetFromText } from '../../utils/apiClient'
 import { SESSION_STATUS }  from '../../types/index.js'
 import TrainingControls    from '../shared/TrainingControls'
 import ViewModeToggle      from './ViewModeToggle'
@@ -17,6 +17,8 @@ import Heatmap2D           from './Heatmap2D'
 import Heatmap3D           from './Heatmap3D'
 import ScrubBar            from '../shared/ScrubBar'
 import InfoIcon            from '../shared/InfoIcon'
+import DatasetSelector     from '../shared/DatasetSelector'
+import TextInputPanel      from './TextInputPanel'
 
 export default function AttentionCinemaTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
@@ -35,6 +37,10 @@ export default function AttentionCinemaTab() {
   const [maxItersConfig,    setMaxItersConfig] = useState(5000)
   const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
   const [modelSizeConfig,   setModelSizeConfig] = useState('medium')
+  const [datasetId,         setDatasetId]     = useState('shakespeare')
+  const [text,              setText]          = useState('')
+  const [uploadedId,        setUploadedId]    = useState(null)
+  const [useCustom,         setUseCustom]     = useState(false)
 
   // Persist state when navigating away
   const { savedState, clear } = useTabPersistence('attention_cinema', {
@@ -45,6 +51,8 @@ export default function AttentionCinemaTab() {
     renderMode,
     selectedLayer,
     selectedHead,
+    datasetId,
+    useCustom,
   })
 
   // Restore saved state on mount
@@ -57,11 +65,35 @@ export default function AttentionCinemaTab() {
       if (savedState.renderMode !== undefined) setRenderMode(savedState.renderMode)
       if (savedState.selectedLayer !== undefined) setSelectedLayer(savedState.selectedLayer)
       if (savedState.selectedHead !== undefined) setSelectedHead(savedState.selectedHead)
+      if (savedState.datasetId  !== undefined) setDatasetId(savedState.datasetId)
+      if (savedState.useCustom  !== undefined) setUseCustom(savedState.useCustom)
     }
   }, [savedState, sessionId])
 
   // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
+
+  async function handleUploadFile(file) {
+    const isTxt  = file.name.toLowerCase().endsWith('.txt')
+    const isDocx = file.name.toLowerCase().endsWith('.docx')
+    if (isTxt) {
+      const reader = new FileReader()
+      reader.onload  = (e) => { setText(e.target.result || ''); setUploadedId(null) }
+      reader.onerror = () => uiDispatch({ type: 'SHOW_ERROR', payload: 'Failed to read file' })
+      reader.readAsText(file, 'utf-8')
+    } else if (isDocx) {
+      try {
+        const data = await uploadDataset(file)
+        setUploadedId(data.dataset_id)
+        setText('')
+        uiDispatch({ type: 'SHOW_SUCCESS', payload: `✓ ${file.name} uploaded (${data.word_count?.toLocaleString() ?? '?'} words)` })
+      } catch (err) {
+        uiDispatch({ type: 'SHOW_ERROR', payload: err.message })
+      }
+    } else {
+      uiDispatch({ type: 'SHOW_ERROR', payload: 'Only .txt and .docx files are supported' })
+    }
+  }
 
   // Derived data
   const session    = sessionId ? training.sessions[sessionId] : null
@@ -98,41 +130,37 @@ export default function AttentionCinemaTab() {
 
   // Session start
   async function handlePlay() {
-    if (status === SESSION_STATUS.PAUSED) {
-      controls.resume()
-      return
-    }
+    if (status === SESSION_STATUS.PAUSED) { controls.resume(); return }
 
     setStarting(true)
     try {
+      let resolvedDatasetId = uploadedId
+      if (!resolvedDatasetId && useCustom && text.trim()) {
+        const dsData = await datasetFromText(text)
+        resolvedDatasetId = dsData.dataset_id
+      }
+      if (!resolvedDatasetId) {
+        resolvedDatasetId = datasetId
+      }
+
       const data = await createSession({
         feature_type: 'attention_cinema',
-        dataset_id:   'shakespeare',
+        dataset_id:   resolvedDatasetId,
         hyperparameters: {
-          max_iters: maxItersConfig,
+          max_iters:     maxItersConfig,
           eval_interval: evalIntervalConfig,
-          model_size: modelSizeConfig,
+          model_size:    modelSizeConfig,
         },
       })
 
       const sid = data.session_id
       setSessionId(sid)
-
-      trainingDispatch({
-        type: 'CREATE_SESSION',
-        payload: {
-          sessionId:      sid,
-          featureType:    'attention_cinema',
-          status:         'idle',
-          modelConfig:    data.model_config,
-          trainingConfig: data.training_config,
-        },
-      })
+      trainingDispatch({ type: 'CREATE_SESSION', payload: { sessionId: sid, featureType: 'attention_cinema', status: 'idle', modelConfig: data.model_config, trainingConfig: data.training_config } })
       metricsDispatch({ type: 'INIT_SESSION', payload: { sessionId: sid } })
 
       setTimeout(() => {
-        socket?.emit('join_session',    { session_id: sid })
-        socket?.emit('start_training',  { session_id: sid })
+        socket?.emit('join_session',   { session_id: sid })
+        socket?.emit('start_training', { session_id: sid })
         trainingDispatch({ type: 'SESSION_STARTED', payload: { session_id: sid } })
       }, 50)
     } catch (err) {
@@ -163,8 +191,35 @@ export default function AttentionCinemaTab() {
         <InfoIcon topicId="attention-cinema" />
       </div>
 
-      {/* Top row: controls + view toggle */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Top row: corpus + controls + view toggle */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Corpus */}
+        <div className="flex flex-col gap-2">
+          {!useCustom ? (
+            <DatasetSelector
+              value={datasetId}
+              onChange={setDatasetId}
+              onError={(msg) => uiDispatch({ type: 'SHOW_ERROR', payload: msg })}
+              disabled={status === SESSION_STATUS.RUNNING || starting}
+            />
+          ) : (
+            <TextInputPanel
+              text={text}
+              onChange={(v) => { setText(v); setUploadedId(null) }}
+              onUploadFile={handleUploadFile}
+              disabled={status === SESSION_STATUS.RUNNING || starting}
+              placeholder="Paste your text corpus here..."
+            />
+          )}
+          <button
+            onClick={() => { setUseCustom(v => !v); setText(''); setUploadedId(null) }}
+            disabled={status === SESSION_STATUS.RUNNING || starting}
+            className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors self-start disabled:opacity-40"
+          >
+            {useCustom ? '← use built-in dataset' : 'or paste / upload custom text →'}
+          </button>
+        </div>
+
         <TrainingControls
           status={status}
           currentIter={currentIter}
@@ -178,6 +233,7 @@ export default function AttentionCinemaTab() {
           disabled={starting}
           isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
         />
+
         <ViewModeToggle
           viewMode={viewMode}
           onViewMode={setViewMode}
@@ -223,7 +279,7 @@ export default function AttentionCinemaTab() {
                     className="px-4 py-2 rounded-lg border border-blue-600 bg-blue-600 text-white text-sm
                                hover:bg-blue-500 transition-colors disabled:opacity-40"
                   >
-                    {starting ? 'Starting…' : '▶ Start Training (Shakespeare)'}
+                    {starting ? 'Starting…' : '▶ Start Training'}
                   </button>
                 </>
               ) : (
