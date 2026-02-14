@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(npm run dev:*)",
+      "Bash(python app.py:*)",
+      "Bash(python:*)",
+      "Bash(FLASK_ENV=production python3:*)",
+      "Bash(pkill:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}
