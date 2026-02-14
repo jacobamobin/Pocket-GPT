@@ -130,6 +130,8 @@ def run_training(session: TrainingSession, socketio) -> None:
     try:
         model = MicroGPT(session.model_config).to(device)
         session.model_instance = model
+        # Restore weights if this session was loaded from a saved checkpoint
+        resume_ckpt = getattr(session, '_resume_checkpoint', None)
     except Exception as e:
         session.status = SessionStatus.ERROR
         session.error_message = str(e)
@@ -149,6 +151,15 @@ def run_training(session: TrainingSession, socketio) -> None:
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.0)
     session.optimizer = optimizer
+
+    if resume_ckpt:
+        model.load_state_dict(resume_ckpt['model_state'])
+        try:
+            optimizer.load_state_dict(resume_ckpt['optimizer_state'])
+        except Exception:
+            pass  # optimizer state mismatch is non-fatal (e.g. different param groups)
+        session.current_iter = getattr(session, '_resume_from_step', 0)
+        session._resume_checkpoint = None  # free memory
 
     # ── 2b. Emit vocab info once ─────────────────────────────────────────
     emit_vocab_info(
