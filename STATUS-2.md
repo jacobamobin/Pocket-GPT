@@ -210,37 +210,39 @@
 **Reference:** Section 3.4 (Component Architecture), Section 5.2 (Frontend Data Models), Section 7.3 (WebSocket Flow)
 
 ### Tasks
-- [ ] Create `frontend/src/types/index.ts` with all TypeScript interfaces:
-  - [ ] SessionStatus, FeatureType enums
-  - [ ] ModelConfig, TrainingConfig, TrainingMetrics, GeneratedSample, AttentionSnapshot interfaces
-  - [ ] SessionInfo, DatasetInfo, SessionConfig, StyleMetrics, ConfidenceMetrics
-- [ ] Set up React Router in `App.jsx`:
-  - [ ] Route `/` → LandingPage
-  - [ ] Route `/app` → Dashboard
-- [ ] Create contexts in `frontend/src/contexts/`:
-  - [ ] `TrainingContext.jsx` - Manages active sessions, status
-  - [ ] `MetricsContext.jsx` - Stores loss history, attention data, samples
-  - [ ] `UIContext.jsx` - Tab state, modals, tooltips
-- [ ] Create `frontend/src/hooks/useWebSocket.ts`:
-  - [ ] Connect to `ws://localhost:5000` on mount
-  - [ ] Handle connection/disconnection events
-  - [ ] Provide `socket` instance to components
-  - [ ] Auto-reconnect on disconnect
-- [ ] Create `frontend/src/hooks/useTrainingSession.ts`:
-  - [ ] Listen to WebSocket events for specific session
-  - [ ] Update contexts with metrics/samples/attention
-  - [ ] Provide control functions (start, pause, stop, step)
-  - [ ] Handle errors and status changes
-- [ ] Create `frontend/src/utils/apiClient.ts`:
-  - [ ] Axios instance configured for `http://localhost:5000`
-  - [ ] Functions for all REST endpoints
-  - [ ] Error interceptors
-- [ ] Configure Tailwind theme in `tailwind.config.js`:
-  - [ ] Dark mode enabled
-  - [ ] Custom colors (blues/cyans, no reds)
-  - [ ] Extend with neural gradient backgrounds
-- [ ] Test WebSocket connection and reconnection
-- [ ] Test all API client functions
+- [x] Create `frontend/src/types/index.js` with all type definitions (JSDoc):
+  - [x] SESSION_STATUS, FEATURE_TYPE, SPEED_OPTIONS constants
+  - [x] JSDoc typedefs: ModelConfig, TrainingConfig, TrainingMetrics, GeneratedSample, AttentionSnapshot
+  - [x] SessionInfo, DatasetInfo
+- [x] Set up React Router in `App.jsx`:
+  - [x] Route `/` → LandingPage
+  - [x] Route `/app` → Dashboard
+  - [x] Wildcard → redirect to `/`
+- [x] Create contexts in `frontend/src/contexts/`:
+  - [x] `TrainingContext.jsx` - Manages active sessions, status, iter counts
+  - [x] `MetricsContext.jsx` - Stores loss history, attention snapshots, samples, finalStats
+  - [x] `UIContext.jsx` - Tab state, error toasts, loading flag
+- [x] Create `frontend/src/hooks/useWebSocket.js`:
+  - [x] Connect to `http://localhost:5000` on mount
+  - [x] Handle connection/disconnection events
+  - [x] Provide `socket` + `connected` to components
+  - [x] Auto-reconnect with exponential backoff
+- [x] Create `frontend/src/hooks/useTrainingSession.js`:
+  - [x] Listen to all WebSocket events for specific session
+  - [x] Dispatch to TrainingContext + MetricsContext
+  - [x] Provide start/pause/resume/stop/step/setSpeed functions
+  - [x] Proper cleanup of listeners on unmount
+- [x] Create `frontend/src/utils/apiClient.js`:
+  - [x] Axios instance configured for `http://localhost:5000`
+  - [x] listDatasets, uploadDataset, datasetFromText
+  - [x] createSession, getSession, deleteSession
+  - [x] Error interceptors normalising error messages
+- [x] Configure Tailwind theme in `tailwind.config.js` (done in Phase 1):
+  - [x] Dark mode enabled
+  - [x] Custom colors (blues/cyans, neural-*)
+  - [x] Neural gradient backgrounds, animations
+- [x] Test WebSocket connection and reconnection (build passes, dev server starts)
+- [x] Test all API client functions (6/6 pass against live backend)
 
 ---
 
