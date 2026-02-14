@@ -16,6 +16,7 @@ import AttentionEvolutionDisplay from './AttentionEvolutionDisplay'
 import Heatmap2D           from './Heatmap2D'
 import Heatmap3D           from './Heatmap3D'
 import PlaybackTimeline    from './PlaybackTimeline'
+import InfoIcon            from '../shared/InfoIcon'
 
 export default function AttentionCinemaTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
@@ -155,6 +156,12 @@ export default function AttentionCinemaTab() {
 
   return (
     <div className="p-6 flex flex-col gap-6 max-w-6xl mx-auto">
+
+      {/* Tab heading */}
+      <div className="flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-slate-200">Attention Cinema</h2>
+        <InfoIcon topicId="attention-cinema" />
+      </div>
 
       {/* Top row: controls + view toggle */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

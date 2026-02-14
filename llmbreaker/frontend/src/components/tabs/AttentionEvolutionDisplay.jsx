@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Heatmap2D from './Heatmap2D'
+import InfoIcon from '../shared/InfoIcon'
 
 /**
  * Shows attention evolution: early training vs late training side-by-side.
@@ -22,9 +23,12 @@ export default function AttentionEvolutionDisplay({ snapshots, layer, head }) {
   if (!early || !late) {
     return (
       <div className="card">
-        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
-          Attention Evolution
-        </h3>
+        <div className="flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+            Attention Evolution
+          </h3>
+          <InfoIcon topicId="attention-evolution" />
+        </div>
         <div className="flex flex-col items-center justify-center h-40 text-slate-600 text-sm gap-2">
           <p>Need at least 2 checkpoints to show evolution</p>
           <p className="text-xs text-slate-500">
@@ -41,9 +45,12 @@ export default function AttentionEvolutionDisplay({ snapshots, layer, head }) {
 
   return (
     <div className="card">
-      <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
-        Attention Evolution — Layer {layer}, Head {head}
-      </h3>
+      <div className="flex items-center gap-2 mb-4">
+        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+          Attention Evolution — Layer {layer}, Head {head}
+        </h3>
+        <InfoIcon topicId="attention-evolution" />
+      </div>
 
       {/* Progress indicator */}
       <div className="mb-4 px-3 py-2 rounded-md bg-slate-800/50 border border-slate-700">

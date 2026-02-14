@@ -18,10 +18,13 @@ const initialState = {}
 
 function makeEmpty() {
   return {
-    lossHistory:        [],
-    samples:            [],
-    attentionSnapshots: [],
-    finalStats:         null,
+    lossHistory:          [],
+    samples:              [],
+    attentionSnapshots:   [],
+    finalStats:           null,
+    vocabInfo:            null,     // { vocab, charToIdx, textPreview }
+    embeddingSnapshots:   [],      // [{ step, coords, labels }]
+    tokenProbabilities:   [],      // [{ step, logits, generatedToken, vocab }]
   }
 }
 
@@ -72,6 +75,45 @@ function reducer(state, action) {
           attentionSnapshots: [
             ...prev.attentionSnapshots,
             { step, layer, head, matrix, tokens, timestamp },
+          ],
+        },
+      }
+    }
+
+    case 'SET_VOCAB_INFO': {
+      const { session_id, vocab, char_to_idx, text_preview } = action.payload
+      const prev = state[session_id] ?? makeEmpty()
+      return {
+        ...state,
+        [session_id]: {
+          ...prev,
+          vocabInfo: { vocab, charToIdx: char_to_idx, textPreview: text_preview },
+        },
+      }
+    }
+
+    case 'ADD_EMBEDDING': {
+      const { session_id, step, coords, labels } = action.payload
+      const prev = state[session_id] ?? makeEmpty()
+      return {
+        ...state,
+        [session_id]: {
+          ...prev,
+          embeddingSnapshots: [...prev.embeddingSnapshots, { step, coords, labels }],
+        },
+      }
+    }
+
+    case 'ADD_TOKEN_PROBS': {
+      const { session_id, step, logits, generated_token, vocab } = action.payload
+      const prev = state[session_id] ?? makeEmpty()
+      return {
+        ...state,
+        [session_id]: {
+          ...prev,
+          tokenProbabilities: [
+            ...prev.tokenProbabilities,
+            { step, logits, generatedToken: generated_token, vocab },
           ],
         },
       }

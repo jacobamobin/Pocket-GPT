@@ -5,6 +5,7 @@ import { FEATURE_TYPE }   from '../../types/index.js'
 import { useWebSocket }   from '../../hooks/useWebSocket'
 import Header             from './Header'
 import TabBar             from './TabBar'
+import InfoDrawer         from '../shared/InfoDrawer'
 import WatchItLearnTab    from '../tabs/WatchItLearnTab'
 import AttentionCinemaTab from '../tabs/AttentionCinemaTab'
 import StyleTransferTab   from '../tabs/StyleTransferTab'
@@ -69,6 +70,7 @@ export default function Dashboard() {
           </motion.div>
         </AnimatePresence>
       </main>
+      <InfoDrawer />
     </motion.div>
   )
 }

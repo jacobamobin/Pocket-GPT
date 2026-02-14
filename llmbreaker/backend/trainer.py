@@ -24,6 +24,9 @@ from metrics_emitter import (
     emit_attention_snapshot,
     emit_error,
     emit_step_progress,
+    emit_vocab_info,
+    emit_embedding_snapshot,
+    emit_token_probabilities,
 )
 
 # Path to pre-bundled datasets directory (set by app.py before first use)
@@ -147,6 +150,14 @@ def run_training(session: TrainingSession, socketio) -> None:
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.0)
     session.optimizer = optimizer
 
+    # ── 2b. Emit vocab info once ─────────────────────────────────────────
+    emit_vocab_info(
+        socketio, session_id,
+        vocab=ds['vocab'],
+        char_to_idx=ds['char_to_idx'],
+        text_preview=text[:500],
+    )
+
     # ── 3. Training loop ───────────────────────────────────────────────────
     model.train()
 
@@ -206,8 +217,11 @@ def run_training(session: TrainingSession, socketio) -> None:
                 step + 1, train_loss, val_loss,
             )
 
-            # Generate a text sample
-            sample_text = _generate_sample(model, ds['idx_to_char'], device, temperature=temperature)
+            # Generate a text sample (with logits for probability tower)
+            sample_text, last_logits = _generate_sample(
+                model, ds['idx_to_char'], device,
+                temperature=temperature, return_logits=True,
+            )
             sample_record = {
                 'step':   step + 1,
                 'text':   sample_text,
@@ -217,6 +231,26 @@ def run_training(session: TrainingSession, socketio) -> None:
             emit_generated_sample(
                 socketio, session_id,
                 step + 1, sample_text,
+            )
+
+            # Emit token probabilities for the last generated character
+            if last_logits is not None:
+                gen_char = sample_text[-1] if sample_text else ''
+                emit_token_probabilities(
+                    socketio, session_id,
+                    step + 1,
+                    logits=last_logits,
+                    generated_token=gen_char,
+                    vocab=ds['vocab'],
+                )
+
+            # Emit embedding snapshot (3D-reduced)
+            coords_3d = model.extract_embeddings_3d()
+            emit_embedding_snapshot(
+                socketio, session_id,
+                step + 1,
+                coords=coords_3d,
+                labels=ds['vocab'],
             )
 
             # Extract and emit attention snapshots
@@ -268,20 +302,31 @@ def _generate_sample(
     device: torch.device,
     max_new_tokens: int = 100,
     temperature: float = 0.8,
-) -> str:
+    return_logits: bool = False,
+) -> str | tuple[str, list[float] | None]:
     """Generate a short text sample from the current model weights.
 
-    Lower temperature = more deterministic output
-    Higher temperature = more random/creative output
+    If return_logits is True, also returns raw logits for the last token
+    as a plain Python list (for the probability tower feature).
     """
     model.eval()
     seed = torch.zeros((1, 1), dtype=torch.long, device=device)
     with torch.no_grad():
-        out = model.generate(seed, max_new_tokens=max_new_tokens,
-                             temperature=temperature)
+        result = model.generate(
+            seed, max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            return_last_logits=return_logits,
+        )
     model.train()
-    tokens = out[0].tolist()
-    return decode(tokens, idx_to_char)
+
+    if return_logits:
+        out, raw_logits = result
+        tokens = out[0].tolist()
+        text = decode(tokens, idx_to_char)
+        return text, raw_logits.numpy().tolist()
+    else:
+        tokens = result[0].tolist()
+        return decode(tokens, idx_to_char)
 
 
 def _emit_attention(

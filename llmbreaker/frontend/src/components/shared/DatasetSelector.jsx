@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import FileUploader from './FileUploader'
 import { listDatasets, uploadDataset } from '../../utils/apiClient'
+import InfoIcon from './InfoIcon'
 
 export default function DatasetSelector({ value, onChange, onError, disabled }) {
   const [datasets, setDatasets]     = useState([])
@@ -41,7 +42,10 @@ export default function DatasetSelector({ value, onChange, onError, disabled }) 
   return (
     <div className="card flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Dataset</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Dataset</h3>
+          <InfoIcon topicId="dataset-selector" />
+        </div>
         {uploading && (
           <span className="text-xs text-blue-400 animate-pulse">Uploading…</span>
         )}

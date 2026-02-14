@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { useState, useEffect, useMemo } from 'react'
 import { SPEED_OPTIONS, SESSION_STATUS } from '../../types/index.js'
 import TrainingConfigPanel from './TrainingConfigPanel.jsx'
+import InfoIcon from './InfoIcon'
 
 function IconButton({ onClick, disabled, title, children, variant = 'default' }) {
   const base = `
@@ -102,7 +103,10 @@ export default function TrainingControls({
 
   return (
     <div className="card flex flex-col gap-4">
-      <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Controls</h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Controls</h3>
+        <InfoIcon topicId="training-controls" />
+      </div>
 
       {/* Main control row */}
       <div className="flex items-center gap-2">

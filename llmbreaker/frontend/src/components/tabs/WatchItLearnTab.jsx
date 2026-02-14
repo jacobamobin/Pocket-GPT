@@ -9,9 +9,13 @@ import { createSession }   from '../../utils/apiClient'
 import { SESSION_STATUS }  from '../../types/index.js'
 import DatasetSelector     from '../shared/DatasetSelector'
 import TrainingControls    from '../shared/TrainingControls'
-import TrainingConfigPanel from '../shared/TrainingConfigPanel'
 import LossCurveChart      from '../shared/LossCurveChart'
 import TextProgressionDisplay from './TextProgressionDisplay'
+import TokenStreamDisplay  from './TokenStreamDisplay'
+import EmbeddingStarMap    from './EmbeddingStarMap'
+import ProbabilityTower    from './ProbabilityTower'
+import PhaseLabel          from './PhaseLabel'
+import InfoIcon            from '../shared/InfoIcon'
 
 export default function WatchItLearnTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
@@ -120,6 +124,19 @@ export default function WatchItLearnTab() {
   return (
     <div className="p-6 flex flex-col gap-6 max-w-5xl mx-auto">
 
+      {/* Tab heading */}
+      <div className="flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-slate-200">Watch It Learn</h2>
+        <InfoIcon topicId="watch-it-learn" />
+      </div>
+
+      {/* Phase label */}
+      <PhaseLabel
+        currentStep={currentIter}
+        maxIters={maxIters}
+        status={status}
+      />
+
       {/* Top row: dataset + controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DatasetSelector
@@ -149,6 +166,12 @@ export default function WatchItLearnTab() {
         />
       </div>
 
+      {/* Token stream */}
+      <TokenStreamDisplay
+        vocabInfo={sessionMetrics?.vocabInfo ?? null}
+        currentStep={currentIter}
+      />
+
       {/* Loss curve */}
       <LossCurveChart
         lossHistory={sessionMetrics?.lossHistory ?? []}
@@ -156,10 +179,24 @@ export default function WatchItLearnTab() {
         onHoverStep={setHoverStep}
       />
 
-      {/* Text progression */}
-      <TextProgressionDisplay
-        samples={sessionMetrics?.samples ?? []}
-        highlightStep={hoverStep}
+      {/* Text progression + Probability tower side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <TextProgressionDisplay
+            samples={sessionMetrics?.samples ?? []}
+            highlightStep={hoverStep}
+          />
+        </div>
+        <ProbabilityTower
+          tokenProbabilities={sessionMetrics?.tokenProbabilities ?? []}
+          samples={sessionMetrics?.samples ?? []}
+        />
+      </div>
+
+      {/* Embedding star map */}
+      <EmbeddingStarMap
+        embeddingSnapshots={sessionMetrics?.embeddingSnapshots ?? []}
+        vocabInfo={sessionMetrics?.vocabInfo ?? null}
       />
 
       {/* Completion banner */}

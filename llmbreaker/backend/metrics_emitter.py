@@ -120,6 +120,62 @@ def emit_error(
     socketio.emit('error', payload, room=session_id)
 
 
+def emit_vocab_info(
+    socketio: Any,
+    session_id: str,
+    vocab: List[str],
+    char_to_idx: Dict[str, int],
+    text_preview: str = '',
+) -> None:
+    """Emit vocabulary mapping once at training start."""
+    payload = {
+        'session_id':   session_id,
+        'vocab':        vocab,
+        'char_to_idx':  char_to_idx,
+        'text_preview': text_preview[:500],
+        'timestamp':    _ts(),
+    }
+    socketio.emit('vocab_info', payload, room=session_id)
+
+
+def emit_embedding_snapshot(
+    socketio: Any,
+    session_id: str,
+    step: int,
+    coords: List[List[float]],
+    labels: List[str],
+) -> None:
+    """Emit 3D-reduced embedding coordinates."""
+    payload = {
+        'session_id': session_id,
+        'step':       step,
+        'coords':     coords,
+        'labels':     labels,
+        'timestamp':  _ts(),
+    }
+    socketio.emit('embedding_snapshot', payload, room=session_id)
+
+
+def emit_token_probabilities(
+    socketio: Any,
+    session_id: str,
+    step: int,
+    logits: List[float],
+    generated_token: str,
+    vocab: List[str],
+) -> None:
+    """Emit raw logits for the last generated token (frontend applies temperature)."""
+    payload = {
+        'session_id':      session_id,
+        'step':            step,
+        'logits':          logits,
+        'generated_token': generated_token,
+        'vocab':           vocab,
+        'timestamp':       _ts(),
+    }
+    socketio.emit('token_probabilities', payload, room=session_id)
+
+
 def emit_step_progress(
     socketio: Any,
     session_id: str,

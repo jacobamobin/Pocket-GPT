@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import InfoIcon from '../shared/InfoIcon'
 
 /**
  * Shows style evolution during training.
@@ -55,9 +56,12 @@ export default function StyleEvolutionDisplay({ text, samples, finalStats, showE
   if (!text || text.trim().length === 0) {
     return (
       <div className="card">
-        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
-          {showEvolution ? 'Style Evolution' : 'Style Comparison'}
-        </h3>
+        <div className="flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+            {showEvolution ? 'Style Evolution' : 'Style Comparison'}
+          </h3>
+          <InfoIcon topicId="style-evolution" />
+        </div>
         <div className="flex flex-col items-center justify-center h-40 gap-3 text-slate-600 text-sm">
           <p>Paste your writing sample to get started</p>
         </div>
@@ -92,9 +96,12 @@ export default function StyleEvolutionDisplay({ text, samples, finalStats, showE
       {/* Evolution View */}
       {showEvolution ? (
         <div className="card">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
-            Style Learning Progress
-          </h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+              Style Learning Progress
+            </h3>
+            <InfoIcon topicId="style-evolution" />
+          </div>
 
           {samples.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 gap-3 text-slate-600 text-sm">

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import InfoIcon from '../shared/InfoIcon'
 
 const MAX_3D = 16  // first 16×16 tokens for 3D performance
 
@@ -142,6 +143,10 @@ export default function Heatmap3D({ matrix }) {
 
   return (
     <div className="w-full rounded-lg overflow-hidden">
+      <div className="flex items-center gap-2 mb-1 px-1">
+        <span className="text-xs text-slate-500 font-mono">3D Attention View</span>
+        <InfoIcon topicId="attention-3d" />
+      </div>
       <canvas
         ref={canvasRef}
         className="w-full cursor-grab active:cursor-grabbing"

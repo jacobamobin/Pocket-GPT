@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import Heatmap2D from './Heatmap2D'
+import InfoIcon from '../shared/InfoIcon'
 
 /**
  * Dynamic grid showing ALL attention heads simultaneously.
@@ -31,8 +32,12 @@ export default function AttentionHeatmapGrid({ snapshots, currentStep, onSelectC
     <div className="space-y-4">
       {/* Educational header */}
       <div className="px-4 py-3 rounded-md bg-slate-800/50 border border-slate-700">
-        <p className="text-xs text-slate-400 mb-2">
-          <strong className="text-slate-300">What you're seeing:</strong> Attention patterns show which tokens each head focuses on when generating text.
+        <div className="flex items-center gap-2 mb-2">
+          <p className="text-xs text-slate-400">
+            <strong className="text-slate-300">What you're seeing:</strong> Attention patterns show which tokens each head focuses on when generating text.</p>
+          <InfoIcon topicId="attention-heatmap" />
+        </div>
+        <p className="text-xs text-slate-400">
           Watch how patterns become more structured during training.
         </p>
         <div className="grid grid-cols-2 gap-2 text-xs">

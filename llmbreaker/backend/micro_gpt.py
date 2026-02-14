@@ -15,6 +15,7 @@ Architecture (per design doc Section 4):
 """
 
 import math
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -215,28 +216,56 @@ class MicroGPT(nn.Module):
         idx: torch.Tensor,
         max_new_tokens: int,
         temperature: float = 1.0,
-    ) -> torch.Tensor:
+        return_last_logits: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         """
         Autoregressively generate `max_new_tokens` tokens.
 
         Args:
-            idx:            (1, T) seed context
-            max_new_tokens: number of tokens to generate
-            temperature:    sampling temperature (>1 = more random)
+            idx:                (1, T) seed context
+            max_new_tokens:     number of tokens to generate
+            temperature:        sampling temperature (>1 = more random)
+            return_last_logits: if True, also return raw logits for the last token
 
         Returns:
             (1, T + max_new_tokens) token tensor
+            If return_last_logits: tuple of (token_tensor, raw_logits)
         """
+        last_raw_logits = None
         for _ in range(max_new_tokens):
             # Crop to block_size
             idx_cond = idx[:, -self.block_size:]
             logits, _ = self.forward(idx_cond)
             # Take logits at the last time step
-            logits = logits[:, -1, :] / temperature        # (1, vocab_size)
-            probs  = F.softmax(logits, dim=-1)
+            raw = logits[:, -1, :]                          # (1, vocab_size)
+            last_raw_logits = raw
+            scaled = raw / temperature                      # (1, vocab_size)
+            probs  = F.softmax(scaled, dim=-1)
             idx_next = torch.multinomial(probs, num_samples=1)  # (1, 1)
             idx = torch.cat([idx, idx_next], dim=1)
+        if return_last_logits:
+            return idx, last_raw_logits[0]                  # (vocab_size,)
         return idx
+
+    @torch.no_grad()
+    def extract_embeddings_3d(self) -> list[list[float]]:
+        """
+        Extract token embeddings, reduce to 3D via PCA.
+
+        Returns list of [x, y, z] coordinates, one per vocab token.
+        """
+        emb = self.token_embedding_table.weight.detach().cpu().numpy()  # (V, D)
+        # Centre
+        mean = emb.mean(axis=0)
+        centred = emb - mean
+        # SVD → top 3 components
+        _, _, Vt = np.linalg.svd(centred, full_matrices=False)
+        coords = centred @ Vt[:3].T  # (V, 3)
+        # Normalise to [-1, 1] for easier rendering
+        mx = np.abs(coords).max()
+        if mx > 0:
+            coords = coords / mx
+        return coords.tolist()
 
     def extract_attention_weights(self) -> list[dict]:
         """

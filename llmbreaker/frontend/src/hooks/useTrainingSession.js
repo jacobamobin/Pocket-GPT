@@ -39,6 +39,18 @@ export function useTrainingSession(socket, sessionId) {
       if (data.session_id !== sessionId) return
       metricsDispatch({ type: 'ADD_ATTENTION', payload: data })
     }
+    const onVocabInfo = (data) => {
+      if (data.session_id !== sessionId) return
+      metricsDispatch({ type: 'SET_VOCAB_INFO', payload: data })
+    }
+    const onEmbedding = (data) => {
+      if (data.session_id !== sessionId) return
+      metricsDispatch({ type: 'ADD_EMBEDDING', payload: data })
+    }
+    const onTokenProbs = (data) => {
+      if (data.session_id !== sessionId) return
+      metricsDispatch({ type: 'ADD_TOKEN_PROBS', payload: data })
+    }
     const onPaused = (data) => {
       if (data.session_id !== sessionId) return
       trainingDispatch({ type: 'UPDATE_STATUS', payload: { sessionId, status: 'paused' } })
@@ -65,8 +77,11 @@ export function useTrainingSession(socket, sessionId) {
     socket.on('training_metrics',   onMetrics)
     socket.on('step_progress',      onStepProgress)
     socket.on('generated_sample',   onSample)
-    socket.on('attention_snapshot', onAttention)
-    socket.on('training_paused',    onPaused)
+    socket.on('attention_snapshot',  onAttention)
+    socket.on('vocab_info',          onVocabInfo)
+    socket.on('embedding_snapshot',  onEmbedding)
+    socket.on('token_probabilities', onTokenProbs)
+    socket.on('training_paused',     onPaused)
     socket.on('training_resumed',   onResumed)
     socket.on('training_stopped',   onStopped)
     socket.on('training_completed', onCompleted)
@@ -77,8 +92,11 @@ export function useTrainingSession(socket, sessionId) {
       socket.off('training_metrics',   onMetrics)
       socket.off('step_progress',      onStepProgress)
       socket.off('generated_sample',   onSample)
-      socket.off('attention_snapshot', onAttention)
-      socket.off('training_paused',    onPaused)
+      socket.off('attention_snapshot',  onAttention)
+      socket.off('vocab_info',          onVocabInfo)
+      socket.off('embedding_snapshot',  onEmbedding)
+      socket.off('token_probabilities', onTokenProbs)
+      socket.off('training_paused',     onPaused)
       socket.off('training_resumed',   onResumed)
       socket.off('training_stopped',   onStopped)
       socket.off('training_completed', onCompleted)

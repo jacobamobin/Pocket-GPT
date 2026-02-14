@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import InfoIcon from './InfoIcon'
 
 /**
  * TrainingConfigPanel — Collapsible panel for configuring training parameters.
@@ -88,6 +89,7 @@ export default function TrainingConfigPanel({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span className="text-sm font-medium text-slate-300">Training Configuration</span>
+          <InfoIcon topicId="training-config" />
         </div>
         <motion.svg
           animate={{ rotate: isExpanded ? 180 : 0 }}

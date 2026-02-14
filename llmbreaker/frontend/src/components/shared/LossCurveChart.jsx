@@ -5,6 +5,7 @@ import { scaleLinear } from '@visx/scale'
 import { AxisBottom, AxisLeft } from '@visx/axis'
 import { GridRows } from '@visx/grid'
 import { localPoint } from '@visx/event'
+import InfoIcon from './InfoIcon'
 
 const MARGIN = { top: 16, right: 24, bottom: 40, left: 52 }
 
@@ -62,7 +63,10 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
   return (
     <div className="card">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Learning Progress</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Learning Progress</h3>
+          <InfoIcon topicId="loss-curve" />
+        </div>
         <div className="flex items-center gap-4 text-xs text-slate-500">
           <span className="flex items-center gap-1.5">
             <span className="w-6 h-0.5 bg-blue-500 inline-block" />Train

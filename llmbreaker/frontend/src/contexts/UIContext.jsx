@@ -18,6 +18,7 @@ const initialState = {
   tooltipId:  null,
   errorToast: null,
   isLoading:  false,
+  infoDrawerTopic: null,
 }
 
 function reducer(state, action) {
@@ -34,6 +35,10 @@ function reducer(state, action) {
       return { ...state, errorToast: null }
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload }
+    case 'OPEN_INFO_DRAWER':
+      return { ...state, infoDrawerTopic: action.payload }
+    case 'CLOSE_INFO_DRAWER':
+      return { ...state, infoDrawerTopic: null }
     default:
       return state
   }
