@@ -381,39 +381,36 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
     let frame
     const lerp = () => {
       t = Math.min(t + 0.05, 1)
+      const target = new THREE.Vector3()
       for (let i = 0; i < count; i++) {
-        const tx = coords[i][0] * 2.2
-        const ty = coords[i][1] * 2.2
-        const tz = coords[i][2] * 2.2
-        meshes[i].position.lerpVectors(starts[i], new THREE.Vector3(tx, ty, tz), t)
+        target.set(coords[i][0] * 2.2, coords[i][1] * 2.2, coords[i][2] * 2.2)
+        meshes[i].position.lerpVectors(starts[i], target, t)
         glows[i].position.copy(meshes[i].position)
-
-        // Update connection line endpoints during animation
-        const { lines: currentLines } = sceneRef.current
-        currentLines.forEach(line => {
-          const { a, b } = line.userData
-          if (a === undefined || b === undefined) return
-          const pos = line.geometry.attributes.position
-          if (!pos) return
-          const ma = meshes[a], mb = meshes[b]
-          if (!ma || !mb) return
-          pos.setXYZ(0, ma.position.x, ma.position.y, ma.position.z)
-          pos.setXYZ(1, mb.position.x, mb.position.y, mb.position.z)
-          pos.needsUpdate = true
-        })
       }
+      // Update line endpoints ONCE per frame (outside the per-node loop)
+      const { lines: currentLines } = sceneRef.current
+      currentLines.forEach(line => {
+        const { a, b } = line.userData
+        if (a === undefined || b === undefined) return
+        const pos = line.geometry.attributes.position
+        if (!pos) return
+        const ma = meshes[a], mb = meshes[b]
+        if (!ma || !mb) return
+        pos.setXYZ(0, ma.position.x, ma.position.y, ma.position.z)
+        pos.setXYZ(1, mb.position.x, mb.position.y, mb.position.z)
+        pos.needsUpdate = true
+      })
       coordsRef.current = coords
       if (t < 1) {
         frame = requestAnimationFrame(lerp)
       } else {
-        // Rebuild connection lines once positions settle
         const s = sceneRef.current
         if (s) s.lines = buildConnectionLines(s.scene, s.lines, meshes, coords, labelsRef.current)
       }
     }
     lerp()
     return () => cancelAnimationFrame(frame)
-  }, [latest])
+  }, [latest?.step])
 
   useEffect(() => {
     labelsRef.current = labels
