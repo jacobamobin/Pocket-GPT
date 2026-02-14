@@ -1,14 +1,21 @@
 """
 Dataset loader: character-level tokenisation, train/val split, batch generation.
 
-This module is used by trainer.py and directly by app.py when preparing a
-session's corpus.  A full version with file-upload / .docx support lives here
-too (anticipating Phase 5 tasks), but the training loop only depends on:
+Public API
+----------
+load_dataset(name, datasets_dir)   →  str           pre-bundled dataset
+load_from_file(path)               →  str           user .txt / .docx upload
+load_from_text(text)               →  str           pasted text (identity, validated)
 
-    load_text(text_or_path)  →  text: str
-    build_vocab(text)        →  char_to_idx, idx_to_char
-    encode / decode
-    get_batch(...)           →  (x, y) torch tensors
+build_vocab(text)                  →  vocab, char_to_idx, idx_to_char
+encode(text, char_to_idx)          →  List[int]
+decode(indices, idx_to_char)       →  str
+
+train_val_split(encoded)           →  (train, val) tensors
+get_batch(data, block_size, ...)   →  (x, y) tensors
+
+prepare_dataset(text)              →  full dict (used by trainer.py)
+dataset_metadata(text)             →  {char_count, word_count, vocab_size}
 """
 
 import os
@@ -86,6 +93,23 @@ def load_from_file(path: str) -> str:
     if ext == 'docx':
         return load_text_from_docx(path)
     return load_text_from_file(path)
+
+
+def load_from_text(text: str) -> str:
+    """
+    Accept pasted text directly.
+
+    Validates minimum length; returns the text unchanged so the caller
+    can pass it straight into prepare_dataset().
+
+    Raises ValueError if the text is too short to train on.
+    """
+    text = text.strip()
+    if len(text) < 100:
+        raise ValueError(
+            f'Text too short ({len(text)} chars). Minimum 100 characters required.'
+        )
+    return text
 
 
 def dataset_metadata(text: str) -> Dict:

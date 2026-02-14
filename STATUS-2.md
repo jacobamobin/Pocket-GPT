@@ -172,34 +172,34 @@
 **Reference:** Section 5.1 (Backend Data Models), Section 7.1 (Dataset Endpoints), Section 9.1 (Input Validation)
 
 ### Tasks
-- [ ] Create `backend/dataset_loader.py`
-- [ ] Implement character-level tokenization:
-  - [ ] Build vocabulary from text (sorted unique chars)
-  - [ ] Create `char_to_idx` and `idx_to_char` mappings
-  - [ ] `encode(text)` → List[int]
-  - [ ] `decode(indices)` → str
-- [ ] Implement dataset loading:
-  - [ ] `load_dataset(name)` - Load pre-bundled dataset
-  - [ ] `load_from_file(path)` - Load user-uploaded file
-  - [ ] `load_from_text(text)` - Use pasted text directly
-  - [ ] Return: text, vocab, char_to_idx, idx_to_char
-- [ ] Implement train/val split (90/10)
-- [ ] Implement batch generation:
-  - [ ] `get_batch(split, batch_size, block_size)` → (x, y)
-  - [ ] Random sampling of sequences
-  - [ ] Return torch tensors on correct device
-- [ ] Implement file upload validation:
-  - [ ] Check file size (max 10MB)
-  - [ ] Check file type (.txt, .docx)
-  - [ ] Parse .docx files with python-docx
-  - [ ] Validate text length (min 100 chars, max 5M chars)
-- [ ] Implement metadata extraction:
-  - [ ] Character count
-  - [ ] Word count (split on whitespace)
-  - [ ] Vocabulary size
-- [ ] Test loading all three pre-bundled datasets
-- [ ] Test uploading .txt and .docx files
-- [ ] Test pasting text directly
+- [x] Create `backend/dataset_loader.py`
+- [x] Implement character-level tokenization:
+  - [x] Build vocabulary from text (sorted unique chars)
+  - [x] Create `char_to_idx` and `idx_to_char` mappings
+  - [x] `encode(text)` → List[int]
+  - [x] `decode(indices)` → str
+- [x] Implement dataset loading:
+  - [x] `load_dataset(name)` - Load pre-bundled dataset
+  - [x] `load_from_file(path)` - Load user-uploaded file
+  - [x] `load_from_text(text)` - Use pasted text directly (validates min 100 chars)
+  - [x] Return: text, vocab, char_to_idx, idx_to_char (via prepare_dataset)
+- [x] Implement train/val split (90/10)
+- [x] Implement batch generation:
+  - [x] `get_batch(data, batch_size, block_size)` → (x, y)
+  - [x] Random sampling of sequences
+  - [x] Return torch tensors on correct device
+- [x] Implement file upload validation (in app.py):
+  - [x] Check file size (max 10MB via Flask MAX_CONTENT_LENGTH)
+  - [x] Check file type (.txt, .docx)
+  - [x] Parse .docx files with python-docx
+  - [x] Validate text length (min 100 chars, max 5M chars)
+- [x] Implement metadata extraction:
+  - [x] Character count
+  - [x] Word count (split on whitespace)
+  - [x] Vocabulary size
+- [x] Test loading all three pre-bundled datasets (30/30 unit tests passed)
+- [x] Test uploading .txt and .docx files
+- [x] Test pasting text directly
 
 ---
 
