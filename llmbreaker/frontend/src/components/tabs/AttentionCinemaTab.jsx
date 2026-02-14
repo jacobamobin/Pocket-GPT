@@ -15,7 +15,7 @@ import AttentionHeatmapGrid from './AttentionHeatmapGrid'
 import AttentionEvolutionDisplay from './AttentionEvolutionDisplay'
 import Heatmap2D           from './Heatmap2D'
 import Heatmap3D           from './Heatmap3D'
-import PlaybackTimeline    from './PlaybackTimeline'
+import ScrubBar            from '../shared/ScrubBar'
 import InfoIcon            from '../shared/InfoIcon'
 
 export default function AttentionCinemaTab() {
@@ -32,7 +32,6 @@ export default function AttentionCinemaTab() {
   const [selectedLayer,     setSelectedLayer] = useState(0)
   const [selectedHead,      setSelectedHead]  = useState(0)
   const [playbackStep,      setPlaybackStep]  = useState(null)          // null = follow latest
-  const [isPlaying,         setIsPlaying]     = useState(false)
   const [maxItersConfig,    setMaxItersConfig] = useState(5000)
   const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
   const [modelSizeConfig,   setModelSizeConfig] = useState('medium')
@@ -300,14 +299,12 @@ export default function AttentionCinemaTab() {
         )}
       </AnimatePresence>
 
-      {/* Playback timeline */}
+      {/* Scrub bar */}
       {steps.length > 0 && (
-        <PlaybackTimeline
+        <ScrubBar
           steps={steps}
-          currentStep={playbackStep}
-          onStepChange={(s) => { setPlaybackStep(s); setIsPlaying(false) }}
-          isPlaying={isPlaying}
-          onPlayToggle={() => setIsPlaying(v => !v)}
+          displayStep={playbackStep}
+          onDisplayStep={setPlaybackStep}
           maxIters={maxIters}
         />
       )}
