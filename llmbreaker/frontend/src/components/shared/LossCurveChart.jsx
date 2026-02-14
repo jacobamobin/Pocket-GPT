@@ -15,7 +15,7 @@ const ANNOTATIONS = [
   { step: 5000, label: 'Converging' },
 ]
 
-export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHoverStep }) {
+export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHoverStep, displayStep = null }) {
   const [tooltip, setTooltip] = useState(null)   // { x, y, step, train, val }
   const [hovered, setHovered] = useState(false)
 
@@ -160,6 +160,15 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
                   />
                 )
               })()}
+
+              {/* Pinned displayStep line */}
+              {displayStep != null && (
+                <line
+                  x1={xScale(displayStep)} y1={0}
+                  x2={xScale(displayStep)} y2={innerH}
+                  stroke="#60A5FA" strokeDasharray="3 3" strokeOpacity={0.7} strokeWidth={1.5}
+                />
+              )}
 
               {/* Crosshair */}
               {tooltip && (

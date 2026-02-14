@@ -1,4 +1,4 @@
-import { useState, useContext, useCallback, useEffect } from 'react'
+import { useState, useContext, useCallback, useEffect, useMemo } from 'react'
 import { TrainingContext } from '../../contexts/TrainingContext'
 import { MetricsContext }  from '../../contexts/MetricsContext'
 import { UIContext }       from '../../contexts/UIContext'
@@ -17,6 +17,7 @@ import ProbabilityTower    from './ProbabilityTower'
 import PhaseLabel          from './PhaseLabel'
 import InfoIcon            from '../shared/InfoIcon'
 import TrainingConfigPanel from '../shared/TrainingConfigPanel'
+import ScrubBar            from '../shared/ScrubBar'
 
 export default function WatchItLearnTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
@@ -28,6 +29,7 @@ export default function WatchItLearnTab() {
   const [sessionId,     setSessionId]     = useState(null)
   const [speed,         setSpeedLocal]    = useState(1)
   const [hoverStep,     setHoverStep]     = useState(null)
+  const [displayStep,   setDisplayStep]   = useState(null)
   const [starting,      setStarting]      = useState(false)
   const [configOpen,    setConfigOpen]    = useState(false)
   const [maxItersConfig, setMaxItersConfig] = useState(5000)
@@ -60,6 +62,11 @@ export default function WatchItLearnTab() {
 
   // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
+
+  const steps = useMemo(
+    () => (sessionMetrics?.lossHistory ?? []).map(r => r.step),
+    [sessionMetrics?.lossHistory]
+  )
 
   const session     = sessionId ? training.sessions[sessionId] : null
   const sessionMetrics = sessionId ? metrics[sessionId] : null
@@ -193,6 +200,7 @@ export default function WatchItLearnTab() {
         lossHistory={sessionMetrics?.lossHistory ?? []}
         maxIters={maxIters}
         onHoverStep={setHoverStep}
+        displayStep={displayStep}
       />
 
       {/* Text progression + Probability tower side by side */}
@@ -200,11 +208,15 @@ export default function WatchItLearnTab() {
         <div className="lg:col-span-2">
           <TextProgressionDisplay
             samples={sessionMetrics?.samples ?? []}
-            highlightStep={hoverStep}
+            highlightStep={displayStep ?? hoverStep}
           />
         </div>
         <ProbabilityTower
-          tokenProbabilities={sessionMetrics?.tokenProbabilities ?? []}
+          tokenProbabilities={
+            displayStep != null
+              ? (sessionMetrics?.tokenProbabilities ?? []).filter(p => p.step <= displayStep)
+              : (sessionMetrics?.tokenProbabilities ?? [])
+          }
           samples={sessionMetrics?.samples ?? []}
         />
       </div>
@@ -213,6 +225,7 @@ export default function WatchItLearnTab() {
       <EmbeddingStarMap
         embeddingSnapshots={sessionMetrics?.embeddingSnapshots ?? []}
         vocabInfo={sessionMetrics?.vocabInfo ?? null}
+        displayStep={displayStep}
       />
 
       {/* Completion banner */}
@@ -230,6 +243,14 @@ export default function WatchItLearnTab() {
           </p>
         </div>
       )}
+
+      {/* Time-travel scrub bar */}
+      <ScrubBar
+        steps={steps}
+        displayStep={displayStep}
+        onDisplayStep={setDisplayStep}
+        maxIters={maxIters}
+      />
 
       {/* ── Config Drawer ── */}
       {configOpen && (
