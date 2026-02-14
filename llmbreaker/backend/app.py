@@ -12,6 +12,7 @@ from flask_cors import CORS
 from models import SessionStatus
 from training_manager import TrainingManager
 import trainer as _trainer
+import checkpoint_manager as _ckpt
 
 # ---------------------------------------------------------------------------
 # App setup
@@ -243,6 +244,101 @@ def delete_session(session_id):
 @app.route('/api/sessions', methods=['GET'])
 def list_sessions():
     return jsonify({'sessions': manager.get_all_sessions()})
+
+
+# ---------------------------------------------------------------------------
+# REST: Model Library
+# ---------------------------------------------------------------------------
+
+@app.route('/api/models', methods=['GET'])
+def list_models():
+    return jsonify({'models': _ckpt.load_registry()})
+
+
+@app.route('/api/models/<session_id>/save', methods=['POST'])
+def save_model(session_id):
+    body    = request.get_json(force=True) or {}
+    name    = body.get('name', 'Untrained Model')
+    session = manager.get_session(session_id)
+    if not session:
+        return jsonify({'error': 'Session not found'}), 404
+    if not session.model_instance or not session.optimizer:
+        return jsonify({'error': 'No model in session yet'}), 400
+
+    last_loss = session.loss_history[-1].get('train_loss') if session.loss_history else None
+    entry = _ckpt.save_checkpoint(
+        model           = session.model_instance,
+        optimizer       = session.optimizer,
+        model_config    = dict(session.model_config),
+        training_config = dict(session.training_config),
+        feature_type    = session.feature_type.value,
+        step            = session.current_iter,
+        train_loss      = last_loss,
+        name            = name,
+    )
+    return jsonify(entry), 201
+
+
+@app.route('/api/models/<record_id>/rename', methods=['PATCH'])
+def rename_model(record_id):
+    body     = request.get_json(force=True) or {}
+    new_name = body.get('name', '')
+    if not new_name.strip():
+        return jsonify({'error': 'name required'}), 400
+    ok = _ckpt.rename_checkpoint(record_id, new_name.strip())
+    if not ok:
+        return jsonify({'error': 'Not found'}), 404
+    return jsonify({'ok': True})
+
+
+@app.route('/api/models/<record_id>', methods=['DELETE'])
+def delete_model(record_id):
+    ok = _ckpt.delete_checkpoint(record_id)
+    if not ok:
+        return jsonify({'error': 'Not found'}), 404
+    return jsonify({'ok': True})
+
+
+@app.route('/api/models/<record_id>/load', methods=['POST'])
+def load_model_as_session(record_id):
+    ckpt = _ckpt.load_checkpoint(record_id)
+    if not ckpt:
+        return jsonify({'error': 'Checkpoint not found'}), 404
+
+    hp = {**ckpt['training_config'], **{
+        k: ckpt['model_config'][k]
+        for k in ('block_size', 'dropout')
+        if k in ckpt['model_config']
+    }}
+    hp['model_size'] = _infer_model_size(ckpt['model_config'])
+
+    records  = _ckpt.load_registry()
+    entry    = next((r for r in records if r['id'] == record_id), None)
+    ft       = entry['feature_type'] if entry else 'watch_learn'
+    dataset  = ckpt['training_config'].get('dataset_name', 'shakespeare')
+
+    session_id = manager.create_session(
+        feature_type    = ft,
+        dataset_id      = dataset,
+        hyperparameters = hp,
+    )
+    session = manager.get_session(session_id)
+    session._resume_checkpoint = ckpt
+    session._resume_from_step  = ckpt.get('step', 0)
+
+    return jsonify({
+        'session_id':      session_id,
+        'model_config':    session.model_config,
+        'training_config': session.training_config,
+        'resume_step':     ckpt.get('step', 0),
+    })
+
+
+def _infer_model_size(mc: dict) -> str:
+    n = mc.get('n_embd', 64)
+    if n <= 32: return 'small'
+    if n <= 64: return 'medium'
+    return 'large'
 
 
 # ---------------------------------------------------------------------------
