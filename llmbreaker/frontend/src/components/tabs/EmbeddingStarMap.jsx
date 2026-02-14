@@ -100,6 +100,58 @@ function buildConnectionLines(scene, existingLines, meshes, coords, labels) {
   return newLines
 }
 
+// ── HoverPanel ────────────────────────────────────────────────────────────────
+function HoverPanel({ idx, labels, coords, pos }) {
+  if (idx === null || idx === undefined || !labels[idx]) return null
+  const ch    = labels[idx]
+  const group = getGroup(ch)
+  const meta  = GROUP_META[group]
+  const cp    = `U+${ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}`
+
+  const base = coords[idx] || []
+  const neighbors = coords
+    .map((c, i) => ({ i, sim: i === idx ? -Infinity : cosineSim(base, c) }))
+    .sort((a, b) => b.sim - a.sim)
+    .slice(0, 5)
+
+  const displayChar = ch === ' ' ? '(space)' : ch === '\n' ? '(newline)' : ch === '\t' ? '(tab)' : ch
+
+  return (
+    <div
+      className="pointer-events-none absolute z-20 min-w-[160px] bg-neural-card border border-neural-border rounded-lg shadow-xl p-3 text-xs"
+      style={{ left: pos.x + 12, top: Math.max(0, pos.y - 20) }}
+    >
+      <div className="flex items-baseline gap-2 mb-2">
+        <span className="text-2xl font-mono font-bold" style={{ color: meta.css }}>{displayChar}</span>
+        <div>
+          <div className="text-slate-300 font-medium">{meta.label}</div>
+          <div className="text-slate-500 font-mono">{cp}</div>
+        </div>
+      </div>
+      <div className="border-t border-neural-border pt-2">
+        <div className="text-slate-500 mb-1">Nearest neighbors</div>
+        {neighbors.map(({ i, sim }) => {
+          const nc = labels[i]
+          if (!nc) return null
+          const nd = nc === ' ' ? '(space)' : nc === '\n' ? '(newline)' : nc === '\t' ? '(tab)' : nc
+          const pct = Math.round(clamp(sim, 0, 1) * 100)
+          return (
+            <div key={i} className="flex items-center justify-between gap-3 py-0.5">
+              <span className="font-mono w-12 text-slate-300" style={{ color: GROUP_META[getGroup(nc)].css }}>{nd}</span>
+              <div className="flex items-center gap-1.5 flex-1">
+                <div className="flex-1 h-1 bg-neural-border rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-cyan-500" style={{ width: `${pct}%` }} />
+                </div>
+                <span className="text-slate-500 w-7 text-right">{pct}%</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Full Three.js component ───────────────────────────────────────────────────
 export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo }) {
   const wrapperRef = useRef(null)
@@ -122,7 +174,7 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
     const canvas  = canvasRef.current
     const wrapper = wrapperRef.current
     const W = wrapper.clientWidth || 600
-    const H = 360
+    const H = wrapper.clientHeight || 360
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false })
@@ -199,18 +251,80 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
       glows.push(sprite)
     })
 
-    // Pointer orbit (horizontal only)
-    let isDragging = false, prevX = 0
-    const onPointerDown = (e) => { isDragging = true; prevX = e.clientX; canvas.setPointerCapture(e.pointerId) }
+    // ResizeObserver
+    const ro = new ResizeObserver(() => {
+      if (!sceneRef.current) return
+      const W = wrapper.clientWidth
+      const H = wrapper.clientHeight || 360
+      renderer.setSize(W, H)
+      camera.aspect = W / H
+      camera.updateProjectionMatrix()
+    })
+    ro.observe(wrapper)
+
+    // Full orbit + zoom controls
+    let isDragging = false, prevX = 0, prevY = 0
+
+    const onPointerDown = (e) => {
+      isDragging = true
+      sceneRef.current.isDragging = true
+      prevX = e.clientX
+      prevY = e.clientY
+      canvas.setPointerCapture(e.pointerId)
+    }
     const onPointerMove = (e) => {
       if (!isDragging || !sceneRef.current) return
-      sceneRef.current.theta -= (e.clientX - prevX) * 0.006
+      const dx = e.clientX - prevX
+      const dy = e.clientY - prevY
       prevX = e.clientX
+      prevY = e.clientY
+      sceneRef.current.theta -= dx * 0.006
+      sceneRef.current.phi    = clamp(sceneRef.current.phi + dy * 0.006, 0.15, Math.PI - 0.15)
     }
-    const onPointerUp   = () => { isDragging = false }
+    const onPointerUp = () => {
+      isDragging = false
+      if (sceneRef.current) sceneRef.current.isDragging = false
+    }
+    const onWheel = (e) => {
+      e.preventDefault()
+      if (!sceneRef.current) return
+      sceneRef.current.radius = clamp(sceneRef.current.radius + e.deltaY * 0.005, 1.5, 8)
+    }
+
     canvas.addEventListener('pointerdown', onPointerDown)
     canvas.addEventListener('pointermove', onPointerMove)
     canvas.addEventListener('pointerup',   onPointerUp)
+    canvas.addEventListener('wheel',       onWheel, { passive: false })
+
+    // Raycaster hover
+    const raycaster = new THREE.Raycaster()
+    const mouse     = new THREE.Vector2()
+
+    const onHover = (e) => {
+      if (!sceneRef.current) return
+      const rect = canvas.getBoundingClientRect()
+      mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1
+      mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1
+      raycaster.setFromCamera(mouse, sceneRef.current.camera)
+      const hits = raycaster.intersectObjects(sceneRef.current.meshes)
+      if (hits.length > 0) {
+        const idx = hits[0].object.userData.idx
+        setHoveredIdx(idx)
+        setHoverPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+        sceneRef.current.meshes.forEach((m, i) => {
+          m.scale.setScalar(i === idx ? 1.8 : 1.0)
+          m.material.emissiveIntensity = i === idx ? 0.9 : 0.3
+        })
+      } else {
+        setHoveredIdx(null)
+        sceneRef.current.meshes.forEach(m => {
+          m.scale.setScalar(1.0)
+          m.material.emissiveIntensity = 0.3
+        })
+      }
+    }
+
+    canvas.addEventListener('pointermove', onHover)
 
     // Set sceneRef BEFORE animate so the render loop reads/writes it directly
     sceneRef.current = {
@@ -221,7 +335,7 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
 
     const animate = () => {
       sceneRef.current.animId = requestAnimationFrame(animate)
-      sceneRef.current.theta += 0.004
+      if (!sceneRef.current.isDragging) sceneRef.current.theta += 0.004
       const s = sceneRef.current
       camera.position.x = s.radius * Math.sin(s.phi) * Math.sin(s.theta)
       camera.position.y = s.radius * Math.cos(s.phi)
@@ -235,9 +349,12 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
 
     return () => {
       cancelAnimationFrame(sceneRef.current?.animId)
+      ro.disconnect()
       canvas.removeEventListener('pointerdown', onPointerDown)
       canvas.removeEventListener('pointermove', onPointerMove)
       canvas.removeEventListener('pointerup',   onPointerUp)
+      canvas.removeEventListener('wheel',       onWheel)
+      canvas.removeEventListener('pointermove', onHover)
       meshes.forEach(m => m.material.dispose())
       glows.forEach(g => g.material.dispose())
       sphereGeo.dispose()
@@ -270,6 +387,20 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
         const tz = coords[i][2] * 2.2
         meshes[i].position.lerpVectors(starts[i], new THREE.Vector3(tx, ty, tz), t)
         glows[i].position.copy(meshes[i].position)
+
+        // Update connection line endpoints during animation
+        const { lines: currentLines } = sceneRef.current
+        currentLines.forEach(line => {
+          const { a, b } = line.userData
+          if (a === undefined || b === undefined) return
+          const pos = line.geometry.attributes.position
+          if (!pos) return
+          const ma = meshes[a], mb = meshes[b]
+          if (!ma || !mb) return
+          pos.setXYZ(0, ma.position.x, ma.position.y, ma.position.z)
+          pos.setXYZ(1, mb.position.x, mb.position.y, mb.position.z)
+          pos.needsUpdate = true
+        })
       }
       coordsRef.current = coords
       if (t < 1) {
@@ -288,8 +419,18 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
     labelsRef.current = labels
   }, [labels])
 
+  // ESC key handler
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') setIsFullscreen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   return (
-    <div className="card">
+    <div className={isFullscreen
+      ? 'fixed inset-0 z-50 bg-neural-bg flex flex-col p-4'
+      : 'card'
+    }>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Embedding Space</h3>
@@ -297,14 +438,35 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
         </div>
         <div className="flex items-center gap-3">
           {latest && <span className="text-xs text-slate-500 font-mono">step {latest.step}</span>}
+          <button
+            onClick={() => setIsFullscreen(f => !f)}
+            className="text-slate-500 hover:text-white transition-colors p-1"
+            title={isFullscreen ? 'Exit fullscreen (ESC)' : 'Fullscreen'}
+          >
+            {isFullscreen ? (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 
-      <div ref={wrapperRef} className="relative rounded-lg overflow-hidden">
+      <div ref={wrapperRef} className={`relative rounded-lg overflow-hidden ${isFullscreen ? 'flex-1' : ''}`}>
         <canvas
           ref={canvasRef}
           className="w-full cursor-grab active:cursor-grabbing"
-          style={{ height: 360, display: 'block' }}
+          style={{ height: isFullscreen ? '100%' : 360, display: 'block' }}
+        />
+        <HoverPanel
+          idx={hoveredIdx}
+          labels={labelsRef.current || []}
+          coords={coordsRef.current || []}
+          pos={hoverPos}
         />
       </div>
 
