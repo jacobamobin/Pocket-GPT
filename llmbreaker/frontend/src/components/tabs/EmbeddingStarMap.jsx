@@ -155,37 +155,44 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
     // Pointer orbit (horizontal only)
     let isDragging = false, prevX = 0
     const onPointerDown = (e) => { isDragging = true; prevX = e.clientX; canvas.setPointerCapture(e.pointerId) }
-    const onPointerMove = (e) => { if (isDragging) { sceneRef.current.theta -= (e.clientX - prevX) * 0.006; prevX = e.clientX } }
+    const onPointerMove = (e) => {
+      if (!isDragging || !sceneRef.current) return
+      sceneRef.current.theta -= (e.clientX - prevX) * 0.006
+      prevX = e.clientX
+    }
     const onPointerUp   = () => { isDragging = false }
     canvas.addEventListener('pointerdown', onPointerDown)
     canvas.addEventListener('pointermove', onPointerMove)
     canvas.addEventListener('pointerup',   onPointerUp)
 
-    // Render loop
-    const state = { theta: 0, phi: 1.2, radius: 5, isDragging: false, animId: null }
+    // Set sceneRef BEFORE animate so the render loop reads/writes it directly
+    sceneRef.current = {
+      renderer, scene, camera, meshes, glows, lines: [],
+      sphereGeo, glowTex, starGeo,
+      theta: 0, phi: 1.2, radius: 5, isDragging: false, animId: null,
+    }
+
     const animate = () => {
-      state.animId = requestAnimationFrame(animate)
-      state.theta += 0.004
-      camera.position.x = state.radius * Math.sin(state.phi) * Math.sin(state.theta)
-      camera.position.y = state.radius * Math.cos(state.phi)
-      camera.position.z = state.radius * Math.sin(state.phi) * Math.cos(state.theta)
+      sceneRef.current.animId = requestAnimationFrame(animate)
+      sceneRef.current.theta += 0.004
+      const s = sceneRef.current
+      camera.position.x = s.radius * Math.sin(s.phi) * Math.sin(s.theta)
+      camera.position.y = s.radius * Math.cos(s.phi)
+      camera.position.z = s.radius * Math.sin(s.phi) * Math.cos(s.theta)
       camera.lookAt(0, 0, 0)
       renderer.render(scene, camera)
     }
     animate()
 
-    sceneRef.current = {
-      renderer, scene, camera, meshes, glows, lines: [],
-      sphereGeo, glowTex, starGeo,
-      ...state,
-    }
     labelsRef.current = labels
 
     return () => {
-      cancelAnimationFrame(state.animId)
+      cancelAnimationFrame(sceneRef.current?.animId)
       canvas.removeEventListener('pointerdown', onPointerDown)
       canvas.removeEventListener('pointermove', onPointerMove)
       canvas.removeEventListener('pointerup',   onPointerUp)
+      meshes.forEach(m => m.material.dispose())
+      glows.forEach(g => g.material.dispose())
       sphereGeo.dispose()
       glowTex.dispose()
       starGeo.dispose()
