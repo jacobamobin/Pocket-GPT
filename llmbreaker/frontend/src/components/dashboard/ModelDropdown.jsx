@@ -8,7 +8,7 @@ import { saveModel, renameModel, deleteModel } from '../../utils/apiClient'
 export default function ModelDropdown() {
   const { state: modelState, dispatch: modelDispatch } = useContext(ModelContext)
   const { state: training } = useContext(TrainingContext)
-  const { dispatch: uiDispatch } = useContext(UIContext)
+  const { state: ui, dispatch: uiDispatch } = useContext(UIContext)
 
   const [open, setOpen]                   = useState(false)
   const [saveName, setSaveName]           = useState('')
@@ -27,9 +27,12 @@ export default function ModelDropdown() {
     return () => document.removeEventListener('mousedown', onDown)
   }, [])
 
+  const currentFeatureType = ui.activeTab
+
   // Find active session — running, paused, or completed (anything with a model)
   const activeSession = Object.values(training.sessions).find(
-    s => s.status === 'running' || s.status === 'paused' || s.status === 'completed'
+    s => (s.status === 'running' || s.status === 'paused' || s.status === 'completed')
+      && s.featureType === currentFeatureType
   )
 
   async function handleSave() {
@@ -68,7 +71,7 @@ export default function ModelDropdown() {
     }
   }
 
-  const { models } = modelState
+  const models = modelState.models.filter(m => m.feature_type === currentFeatureType)
 
   return (
     <div ref={ref} className="relative">
