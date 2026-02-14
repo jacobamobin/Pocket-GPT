@@ -5,6 +5,7 @@ import { MetricsContext }  from '../../contexts/MetricsContext'
 import { UIContext }       from '../../contexts/UIContext'
 import { useWebSocket }    from '../../hooks/useWebSocket'
 import { useTrainingSession } from '../../hooks/useTrainingSession'
+import { useTabPersistence } from '../../hooks/useTabPersistence'
 import { createSession }   from '../../utils/apiClient'
 import { SESSION_STATUS }  from '../../types/index.js'
 import TrainingControls    from '../shared/TrainingControls'
@@ -18,11 +19,11 @@ import PlaybackTimeline    from './PlaybackTimeline'
 
 export default function AttentionCinemaTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
-  const { state: metrics,  dispatch: metricsDispatch  } = useContext(MetricsContext)
+  const { state: metrics, dispatch: metricsDispatch  } = useContext(MetricsContext)
   const { dispatch: uiDispatch }                         = useContext(UIContext)
   const { socket }                                       = useWebSocket()
 
-  // ── Local state ────────────────────────────────────────────────────
+  // Local state
   const [sessionId,         setSessionId]     = useState(null)
   const [starting,          setStarting]      = useState(false)
   const [viewMode,          setViewMode]      = useState('evolution') // 'evolution' | 'grid' | 'detail'
@@ -35,9 +36,34 @@ export default function AttentionCinemaTab() {
   const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
   const [modelSizeConfig,   setModelSizeConfig] = useState('medium')
 
+  // Persist state when navigating away
+  const { savedState, clear } = useTabPersistence('attention_cinema', {
+    maxItersConfig,
+    evalIntervalConfig,
+    modelSizeConfig,
+    viewMode,
+    renderMode,
+    selectedLayer,
+    selectedHead,
+  })
+
+  // Restore saved state on mount
+  useEffect(() => {
+    if (savedState && !sessionId) {
+      if (savedState.maxItersConfig !== undefined) setMaxItersConfig(savedState.maxItersConfig)
+      if (savedState.evalIntervalConfig !== undefined) setEvalIntervalConfig(savedState.evalIntervalConfig)
+      if (savedState.modelSizeConfig !== undefined) setModelSizeConfig(savedState.modelSizeConfig)
+      if (savedState.viewMode !== undefined) setViewMode(savedState.viewMode)
+      if (savedState.renderMode !== undefined) setRenderMode(savedState.renderMode)
+      if (savedState.selectedLayer !== undefined) setSelectedLayer(savedState.selectedLayer)
+      if (savedState.selectedHead !== undefined) setSelectedHead(savedState.selectedHead)
+    }
+  }, [savedState, sessionId])
+
+  // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
 
-  // ── Derived data ───────────────────────────────────────────────────
+  // Derived data
   const session    = sessionId ? training.sessions[sessionId] : null
   const snapshots  = sessionId ? (metrics[sessionId]?.attentionSnapshots ?? []) : []
   const status     = session?.status ?? null
@@ -63,24 +89,14 @@ export default function AttentionCinemaTab() {
 
   const detailSnap = findSnap(selectedLayer, selectedHead, displayStep)
 
-  // ── Auto-advance playback ──────────────────────────────────────────────────
+  // Clear saved state when training completes
   useEffect(() => {
-    if (!isPlaying || steps.length < 2) return
-    const id = setInterval(() => {
-      setPlaybackStep(prev => {
-        const cur = prev ?? steps[steps.length - 1]
-        const idx = steps.indexOf(cur)
-        if (idx === -1 || idx >= steps.length - 1) {
-          setIsPlaying(false)
-          return null  // loop back to follow-latest
-        }
-        return steps[idx + 1]
-      })
-    }, 600)
-    return () => clearInterval(id)
-  }, [isPlaying, steps])
+    if (status === SESSION_STATUS.COMPLETED || status === SESSION_STATUS.STOPPED) {
+      clear()
+    }
+  }, [status, clear])
 
-  // ── Session start ──────────────────────────────────────────────────────────
+  // Session start
   async function handlePlay() {
     if (status === SESSION_STATUS.PAUSED) {
       controls.resume()
@@ -220,7 +236,7 @@ export default function AttentionCinemaTab() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            >
+          >
             {viewMode === 'evolution' ? (
               <AttentionEvolutionDisplay
                 snapshots={snapshots}

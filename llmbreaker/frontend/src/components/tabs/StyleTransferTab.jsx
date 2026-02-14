@@ -1,46 +1,80 @@
-import { useState, useContext, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useContext, useCallback, useEffect } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { TrainingContext } from '../../contexts/TrainingContext'
 import { MetricsContext }  from '../../contexts/MetricsContext'
 import { UIContext }       from '../../contexts/UIContext'
 import { useWebSocket }    from '../../hooks/useWebSocket'
 import { useTrainingSession } from '../../hooks/useTrainingSession'
+import { useTabPersistence } from '../../hooks/useTabPersistence'
 import { createSession, datasetFromText, uploadDataset } from '../../utils/apiClient'
 import { SESSION_STATUS } from '../../types/index.js'
 import TrainingControls    from '../shared/TrainingControls'
 import LossCurveChart      from '../shared/LossCurveChart'
 import TextInputPanel      from './TextInputPanel'
-import SideBySideComparison from './SideBySideComparison'
+import StyleEvolutionDisplay from './StyleEvolutionDisplay'
 
 export default function StyleTransferTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
-  const { state: metrics,  dispatch: metricsDispatch  } = useContext(MetricsContext)
+  const { state: metrics, dispatch: metricsDispatch  } = useContext(MetricsContext)
   const { dispatch: uiDispatch }                         = useContext(UIContext)
   const { socket }                                       = useWebSocket()
 
-  // ── Local state ────────────────────────────────────────────────────────────
-  const [text,       setText]       = useState('')
-  const [uploadedId, setUploadedId] = useState(null)   // dataset_id from .docx upload
-  const [sessionId,  setSessionId]  = useState(null)
-  const [speed,      setSpeedLocal] = useState(2)       // default 2× for style transfer
-  const [starting,   setStarting]   = useState(false)
+  // Local state
+  const [sessionId,         setSessionId]    = useState(null)
+  const [text,              setText]       = useState('')
+  const [uploadedId,        setUploadedId]   = useState(null)
+  const [speed,             setSpeedLocal]  = useState(2)
+  const [starting,          setStarting]     = useState(false)
+  const [maxItersConfig,    setMaxItersConfig] = useState(5000)
+  const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
+  const [modelSizeConfig,   setModelSizeConfig] = useState('medium')
+  const [viewMode,          setViewMode]      = useState('overview')
 
+  // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
 
-  // ── Derived ────────────────────────────────────────────────────────────────
-  const session      = sessionId ? training.sessions[sessionId] : null
+  // Persist state when navigating away
+  const { savedState, clear } = useTabPersistence('style_transfer', {
+    text,
+    uploadedId,
+    maxItersConfig,
+    evalIntervalConfig,
+    modelSizeConfig,
+    viewMode,
+    speed,
+  })
+
+  // Restore saved state on mount
+  useEffect(() => {
+    if (savedState && !sessionId) {
+      if (savedState.text !== undefined) setText(savedState.text)
+      if (savedState.uploadedId !== undefined) setUploadedId(savedState.uploadedId)
+      if (savedState.maxItersConfig !== undefined) setMaxItersConfig(savedState.maxItersConfig)
+      if (savedState.evalIntervalConfig !== undefined) setEvalIntervalConfig(savedState.evalIntervalConfig)
+      if (savedState.modelSizeConfig !== undefined) setModelSizeConfig(savedState.modelSizeConfig)
+      if (savedState.viewMode !== undefined) setViewMode(savedState.viewMode)
+      if (savedState.speed !== undefined) setSpeedLocal(savedState.speed)
+    }
+  }, [savedState, sessionId])
+
+  // Derived data
+  const session     = sessionId ? training.sessions[sessionId] : null
   const sessionMet   = sessionId ? metrics[sessionId] : null
   const status       = session?.status ?? null
-  const currentIter  = session?.currentIter ?? 0
-  const maxIters     = session?.maxIters ?? 500
-
-  const wordCount    = (text.match(/\S+/g) || []).length
-  const canTrain     = (text.length > 0 && wordCount >= 50) || uploadedId !== null
   const isActive     = status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED
+  const currentIter = session?.currentIter ?? 0
+  const maxIters     = session?.maxIters ?? 5000
 
-  // ── File upload handler ────────────────────────────────────────────────────
+  // Clear saved state when training completes or user starts fresh
+  useEffect(() => {
+    if (status === SESSION_STATUS.COMPLETED || status === SESSION_STATUS.STOPPED) {
+      clear()
+    }
+  }, [status, clear])
+
+  // File upload handler
   async function handleUploadFile(file) {
-    const isTxt  = file.name.toLowerCase().endsWith('.txt')
+    const isTxt = file.name.toLowerCase().endsWith('.txt')
     const isDocx = file.name.toLowerCase().endsWith('.docx')
 
     if (isTxt) {
@@ -57,8 +91,11 @@ export default function StyleTransferTab() {
       try {
         const data = await uploadDataset(file)
         setUploadedId(data.dataset_id)
-        setText('')   // clear textarea since we're using the upload
-        uiDispatch({ type: 'SHOW_ERROR', payload: `✓ ${file.name} uploaded (${data.word_count?.toLocaleString() ?? '?'} words, vocab ${data.vocab_size})` })
+        setText('')   // clear textarea since we're using an upload
+        uiDispatch({
+          type: 'SHOW_SUCCESS',
+          payload: `✓ ${file.name} uploaded (${data.word_count?.toLocaleString() ?? '?'} words, vocab ${data.vocab_size})`
+        })
       } catch (err) {
         uiDispatch({ type: 'SHOW_ERROR', payload: err.message })
       }
@@ -67,13 +104,15 @@ export default function StyleTransferTab() {
     }
   }
 
-  // ── Training start ─────────────────────────────────────────────────────────
+  // Session start
   async function handlePlay() {
+    // If session exists and is paused, just resume
     if (status === SESSION_STATUS.PAUSED) {
       controls.resume()
       return
     }
 
+    // For completed/stopped/idle: create a fresh session
     setStarting(true)
     try {
       // Get dataset_id
@@ -85,9 +124,9 @@ export default function StyleTransferTab() {
 
       // Create session
       const data = await createSession({
-        feature_type:    'style_transfer',
-        dataset_id:      datasetId,
-        hyperparameters: { max_iters: 500, eval_interval: 50 },
+        feature_type: 'style_transfer',
+        dataset_id:   datasetId,
+        hyperparameters: { max_iters: maxItersConfig, eval_interval: evalIntervalConfig },
       })
 
       const sid = data.session_id
@@ -105,10 +144,10 @@ export default function StyleTransferTab() {
       })
       metricsDispatch({ type: 'INIT_SESSION', payload: { sessionId: sid } })
 
+      // Emit start after a tick so hook has re-bound to new sessionId
       setTimeout(() => {
-        socket?.emit('join_session',   { session_id: sid })
+        socket?.emit('join_session',    { session_id: sid })
         socket?.emit('start_training', { session_id: sid })
-        socket?.emit('set_speed',      { session_id: sid, speed_multiplier: speed })
         trainingDispatch({ type: 'SESSION_STARTED', payload: { session_id: sid } })
       }, 50)
     } catch (err) {
@@ -118,76 +157,125 @@ export default function StyleTransferTab() {
     }
   }
 
-  const handlePause = () => controls.pause()
-  const handleStop  = () => controls.stop()
-  const handleStep  = () => controls.step()
-  const handleSpeedChange = useCallback((v) => {
-    setSpeedLocal(v)
-    controls.setSpeed(v)
-  }, [controls])
-
-  const isDisabled = starting || !canTrain
+  const handlePause     = () => controls.pause()
+  const handleStop      = () => controls.stop()
+  const handleStep      = () => controls.step()
+  const handleSpeed     = useCallback((v) => controls.setSpeed(v), [controls])
 
   return (
-    <div className="p-6 flex flex-col gap-6 max-w-5xl mx-auto">
+    <div className="p-6 flex flex-col gap-6 max-w-6xl mx-auto">
 
-      {/* Text input */}
-      <TextInputPanel
-        text={text}
-        onChange={(v) => { setText(v); setUploadedId(null) }}
-        onUploadFile={handleUploadFile}
-        disabled={isActive || starting}
-      />
+      {/* Top row: text input + controls */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TextInputPanel
+          text={text}
+          onChange={(v) => { setText(v); setUploadedId(null) }}
+          onUploadFile={handleUploadFile}
+          disabled={isActive || starting}
+          placeholder="Paste your writing sample here (at least 10 words)..."
+        />
+        <TrainingControls
+          status={status}
+          currentIter={currentIter}
+          maxIters={maxIters}
+          speed={speed}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onStop={handleStop}
+          onStep={handleStep}
+          onSpeedChange={handleSpeed}
+          onMaxItersChange={setMaxItersConfig}
+          onEvalIntervalChange={setEvalIntervalConfig}
+          onModelSizeChange={setModelSizeConfig}
+          disabled={starting || !text}
+          isTraining={isActive}
+          maxItersConfig={maxItersConfig}
+          evalIntervalConfig={evalIntervalConfig}
+          modelSizeConfig={modelSizeConfig}
+        />
+      </div>
 
-      {/* Training controls */}
-      <TrainingControls
-        status={status}
-        currentIter={currentIter}
-        maxIters={maxIters}
-        speed={speed}
-        onPlay={handlePlay}
-        onPause={handlePause}
-        onStop={handleStop}
-        onStep={handleStep}
-        onSpeedChange={handleSpeedChange}
-        disabled={isDisabled}
-      />
+      {/* Learning Progress Banner */}
+      {isActive && sessionMet?.samples && sessionMet.samples.length > 0 && (
+        <div className="card bg-gradient-to-r from-blue-950/30 to-cyan-950/30 border-cyan-500/30">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <h3 className="text-sm font-semibold text-cyan-300 uppercase tracking-wider">
+                Learning Your Style
+              </h3>
+            </div>
+            <span className="text-xs text-cyan-400 font-mono">
+              {sessionMet.samples.length} sample{sessionMet.samples.length !== 1 ? 's' : ''} generated
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">
+            The model is analyzing your writing patterns and learning to replicate them.
+            Watch samples evolve to match your style!
+          </p>
+        </div>
+      )}
 
-      {/* Loss curve */}
-      <LossCurveChart
-        lossHistory={sessionMet?.lossHistory ?? []}
-        maxIters={maxIters}
-      />
+      {/* Loss Curve */}
+      {isActive && (
+        <LossCurveChart
+          lossHistory={sessionMet?.lossHistory ?? []}
+          maxIters={maxIters}
+        />
+      )}
 
-      {/* Side-by-side comparison — visible as soon as there are samples */}
-      <AnimatePresence>
-        {(sessionMet?.samples?.length > 0 || status === SESSION_STATUS.COMPLETED) && (
-          <motion.div
-            key="comparison"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <SideBySideComparison
-              originalText={text}
-              samples={sessionMet?.samples ?? []}
-              finalStats={sessionMet?.finalStats ?? null}
-            />
-          </motion.div>
+      {/* Visualization */}
+      <AnimatePresence mode="wait">
+        {viewMode === 'overview' ? (
+          <StyleEvolutionDisplay
+            text={text}
+            samples={sessionMet?.samples ?? []}
+            finalStats={sessionMet?.finalStats ?? null}
+            showEvolution={false}
+          />
+        ) : (
+          <StyleEvolutionDisplay
+            text={text}
+            samples={sessionMet?.samples ?? []}
+            finalStats={sessionMet?.finalStats ?? null}
+            showEvolution={true}
+          />
         )}
       </AnimatePresence>
 
+      {/* View Mode Toggle */}
+      <div className="flex justify-center">
+        <div className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 p-2">
+          <span className="text-xs text-slate-400 uppercase tracking-wide">View:</span>
+          {['overview', 'evolution'].map(mode => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              className={`
+                px-3 py-1.5 text-xs font-medium rounded-md border transition-all duration-150
+                focus:outline-none focus:ring-1 focus:ring-blue-500/60
+                ${viewMode === mode
+                  ? 'border-blue-500 bg-blue-500/20 text-blue-300'
+                  : 'border-slate-600 bg-slate-700 text-slate-400 hover:text-slate-200'}
+              `}
+              title={mode === 'evolution' ? 'Evolution: Watch style develop over time' : 'Overview: Side-by-side comparison'}
+            >
+              {mode === 'evolution' ? 'Evolution' : 'Overview'}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Completion banner */}
       {status === SESSION_STATUS.COMPLETED && sessionMet?.finalStats && (
-        <div className="card border-blue-500/40 bg-blue-950/30 text-center py-4">
-          <p className="text-blue-300 font-medium">Style transfer complete!</p>
+        <div className="card border-green-500/40 bg-green-950/30 text-center py-4">
+          <p className="text-green-300 font-medium">Style transfer complete!</p>
           <p className="text-slate-400 text-sm mt-1">
-            Final loss:&nbsp;
-            <span className="text-blue-300 font-mono">
+            Final loss: <span className="text-green-300 font-mono">
               {sessionMet.finalStats.finalTrainLoss?.toFixed(4)}
             </span>
-            &nbsp;·&nbsp;Time:&nbsp;
-            <span className="text-blue-300 font-mono">
+            &nbsp;·&nbsp;
+            Time: <span className="text-green-300 font-mono">
               {sessionMet.finalStats.totalTime?.toFixed(1)}s
             </span>
           </p>
@@ -197,10 +285,10 @@ export default function StyleTransferTab() {
       {/* "Not enough text" hint when idle and nothing is typed */}
       {!session && !starting && !uploadedId && text.length === 0 && (
         <p className="text-center text-slate-600 text-sm -mt-2">
-          Paste your writing above to get started — the model will learn to imitate it.
+          Type or paste your writing sample above to get started.
+          The model needs at least 10 words to learn your style.
         </p>
       )}
-
     </div>
   )
 }

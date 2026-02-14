@@ -1,9 +1,10 @@
-import { useState, useContext, useCallback } from 'react'
+import { useState, useContext, useCallback, useEffect } from 'react'
 import { TrainingContext } from '../../contexts/TrainingContext'
 import { MetricsContext }  from '../../contexts/MetricsContext'
 import { UIContext }       from '../../contexts/UIContext'
 import { useWebSocket }    from '../../hooks/useWebSocket'
 import { useTrainingSession } from '../../hooks/useTrainingSession'
+import { useTabPersistence } from '../../hooks/useTabPersistence'
 import { createSession }   from '../../utils/apiClient'
 import { SESSION_STATUS }  from '../../types/index.js'
 import DatasetSelector     from '../shared/DatasetSelector'
@@ -27,6 +28,24 @@ export default function WatchItLearnTab() {
   const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
   const [modelSizeConfig, setModelSizeConfig] = useState('medium')
 
+  // Persist state when navigating away
+  const { savedState, clear } = useTabPersistence('watch_learn', {
+    datasetId,
+    maxItersConfig,
+    evalIntervalConfig,
+    modelSizeConfig,
+  })
+
+  // Restore saved state on mount
+  useEffect(() => {
+    if (savedState && !sessionId) {
+      if (savedState.datasetId !== undefined) setDatasetId(savedState.datasetId)
+      if (savedState.maxItersConfig !== undefined) setMaxItersConfig(savedState.maxItersConfig)
+      if (savedState.evalIntervalConfig !== undefined) setEvalIntervalConfig(savedState.evalIntervalConfig)
+      if (savedState.modelSizeConfig !== undefined) setModelSizeConfig(savedState.modelSizeConfig)
+    }
+  }, [savedState, sessionId])
+
   // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
 
@@ -34,7 +53,14 @@ export default function WatchItLearnTab() {
   const sessionMetrics = sessionId ? metrics[sessionId] : null
   const status      = session?.status ?? null
   const currentIter = session?.currentIter ?? 0
-  const maxIters    = session?.maxIters ?? 500
+  const maxIters    = session?.maxIters ?? 5000
+
+  // Clear saved state when training completes
+  useEffect(() => {
+    if (status === SESSION_STATUS.COMPLETED || status === SESSION_STATUS.STOPPED) {
+      clear()
+    }
+  }, [status, clear])
 
   // ── Start / restart training ───────────────────────────────────────────
   async function handlePlay() {
@@ -50,11 +76,7 @@ export default function WatchItLearnTab() {
       const data = await createSession({
         feature_type: 'watch_learn',
         dataset_id:   datasetId,
-        hyperparameters: {
-          max_iters: maxItersConfig,
-          eval_interval: evalIntervalConfig,
-          model_size: modelSizeConfig,
-        },
+        hyperparameters: { max_iters: maxItersConfig, eval_interval: evalIntervalConfig },
       })
 
       const sid = data.session_id
