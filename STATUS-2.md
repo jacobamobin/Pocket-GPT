@@ -52,26 +52,26 @@
 **Reference:** Section 3.1 (Architecture), Section 7.1 (REST Endpoints), Section 7.2 (WebSocket Events)
 
 ### Tasks
-- [ ] Create `backend/app.py` with Flask app initialization
-- [ ] Configure Flask-SocketIO with eventlet async mode
-- [ ] Enable Flask-CORS for frontend communication
-- [ ] Implement REST endpoints:
-  - [ ] `GET /api/datasets` - List pre-bundled datasets
-  - [ ] `POST /api/datasets/upload` - Handle file uploads
-  - [ ] `POST /api/datasets/from-text` - Handle pasted text
-  - [ ] `POST /api/sessions/create` - Initialize training session
-  - [ ] `GET /api/sessions/{session_id}` - Get session status
-  - [ ] `DELETE /api/sessions/{session_id}` - Terminate session
-- [ ] Implement WebSocket event handlers:
-  - [ ] `start_training` - Begin training
-  - [ ] `pause_training` - Pause execution
-  - [ ] `resume_training` - Resume training
-  - [ ] `stop_training` - Terminate training
-  - [ ] `step_training` - Execute single step
-  - [ ] `set_speed` - Adjust training speed
-- [ ] Create `backend/uploads/` directory for user files
-- [ ] Test all endpoints with Postman or curl
-- [ ] Verify WebSocket connection from simple test client
+- [x] Create `backend/app.py` with Flask app initialization
+- [x] Configure Flask-SocketIO with eventlet async mode
+- [x] Enable Flask-CORS for frontend communication
+- [x] Implement REST endpoints:
+  - [x] `GET /api/datasets` - List pre-bundled datasets
+  - [x] `POST /api/datasets/upload` - Handle file uploads
+  - [x] `POST /api/datasets/from-text` - Handle pasted text
+  - [x] `POST /api/sessions/create` - Initialize training session
+  - [x] `GET /api/sessions/{session_id}` - Get session status
+  - [x] `DELETE /api/sessions/{session_id}` - Terminate session
+- [x] Implement WebSocket event handlers:
+  - [x] `start_training` - Begin training (with stub loop emitting mock metrics)
+  - [x] `pause_training` - Pause execution
+  - [x] `resume_training` - Resume training
+  - [x] `stop_training` - Terminate training
+  - [x] `step_training` - Execute single step
+  - [x] `set_speed` - Adjust training speed
+- [x] Create `backend/uploads/` directory for user files
+- [x] Test all endpoints with Postman or curl
+- [x] Verify WebSocket connection from simple test client
 
 ---
 
