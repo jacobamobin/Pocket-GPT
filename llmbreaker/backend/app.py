@@ -305,33 +305,36 @@ def load_model_as_session(record_id):
     if not ckpt:
         return jsonify({'error': 'Checkpoint not found'}), 404
 
-    hp = {**ckpt['training_config'], **{
-        k: ckpt['model_config'][k]
-        for k in ('block_size', 'dropout')
-        if k in ckpt['model_config']
-    }}
-    hp['model_size'] = _infer_model_size(ckpt['model_config'])
+    try:
+        hp = {**ckpt['training_config'], **{
+            k: ckpt['model_config'][k]
+            for k in ('block_size', 'dropout')
+            if k in ckpt['model_config']
+        }}
+        hp['model_size'] = _infer_model_size(ckpt['model_config'])
 
-    records  = _ckpt.load_registry()
-    entry    = next((r for r in records if r['id'] == record_id), None)
-    ft       = entry['feature_type'] if entry else 'watch_learn'
-    dataset  = ckpt['training_config'].get('dataset_name', 'shakespeare')
+        records  = _ckpt.load_registry()
+        entry    = next((r for r in records if r['id'] == record_id), None)
+        ft       = entry['feature_type'] if entry else 'watch_learn'
+        dataset  = ckpt['training_config'].get('dataset_name', 'shakespeare')
 
-    session_id = manager.create_session(
-        feature_type    = ft,
-        dataset_id      = dataset,
-        hyperparameters = hp,
-    )
-    session = manager.get_session(session_id)
-    session._resume_checkpoint = ckpt
-    session._resume_from_step  = ckpt.get('step', 0)
+        session_id = manager.create_session(
+            feature_type    = ft,
+            dataset_id      = dataset,
+            hyperparameters = hp,
+        )
+        session = manager.get_session(session_id)
+        session._resume_checkpoint = ckpt
+        session._resume_from_step  = ckpt.get('step', 0)
 
-    return jsonify({
-        'session_id':      session_id,
-        'model_config':    session.model_config,
-        'training_config': session.training_config,
-        'resume_step':     ckpt.get('step', 0),
-    })
+        return jsonify({
+            'session_id':      session_id,
+            'model_config':    session.model_config,
+            'training_config': session.training_config,
+            'resume_step':     ckpt.get('step', 0),
+        })
+    except Exception as e:
+        return jsonify({'error': f'Failed to load checkpoint: {str(e)}'}), 500
 
 
 def _infer_model_size(mc: dict) -> str:

@@ -108,7 +108,10 @@ def load_checkpoint(record_id: str) -> Optional[Dict]:
     filepath = os.path.join(CHECKPOINTS_DIR, entry['filename'])
     if not os.path.exists(filepath):
         return None
-    return torch.load(filepath, map_location='cpu', weights_only=False)
+    try:
+        return torch.load(filepath, map_location='cpu', weights_only=False)
+    except Exception as e:
+        return None  # corrupt or incompatible checkpoint
 
 
 def rename_checkpoint(record_id: str, new_name: str) -> bool:

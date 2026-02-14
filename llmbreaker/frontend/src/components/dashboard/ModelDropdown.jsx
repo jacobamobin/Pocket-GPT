@@ -10,11 +10,12 @@ export default function ModelDropdown() {
   const { state: training } = useContext(TrainingContext)
   const { dispatch: uiDispatch } = useContext(UIContext)
 
-  const [open, setOpen]             = useState(false)
-  const [saveName, setSaveName]     = useState('')
-  const [saving, setSaving]         = useState(false)
-  const [renamingId, setRenamingId] = useState(null)
-  const [renameVal, setRenameVal]   = useState('')
+  const [open, setOpen]                   = useState(false)
+  const [saveName, setSaveName]           = useState('')
+  const [saving, setSaving]               = useState(false)
+  const [renamingId, setRenamingId]       = useState(null)
+  const [renameVal, setRenameVal]         = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const ref = useRef(null)
 
   // Close on outside click
@@ -165,28 +166,46 @@ export default function ModelDropdown() {
                     )}
 
                     {renamingId !== m.id && (
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                        <button
-                          onClick={() => { setRenamingId(m.id); setRenameVal(m.name) }}
-                          className="text-slate-500 hover:text-slate-300 p-1"
-                          title="Rename"
-                        >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(m.id)}
-                          className="text-slate-500 hover:text-red-400 p-1"
-                          title="Delete"
-                        >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
+                      confirmDeleteId === m.id ? (
+                        <div className="flex gap-1 items-center shrink-0">
+                          <span className="text-[10px] text-red-400">Delete?</span>
+                          <button
+                            onClick={() => { handleDelete(m.id); setConfirmDeleteId(null) }}
+                            className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30"
+                          >
+                            Yes
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-400 hover:bg-slate-600 border border-slate-600"
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                          <button
+                            onClick={() => { setRenamingId(m.id); setRenameVal(m.name) }}
+                            className="text-slate-500 hover:text-slate-300 p-1"
+                            title="Rename"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteId(m.id)}
+                            className="text-slate-500 hover:text-red-400 p-1"
+                            title="Delete"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      )
                     )}
                   </div>
                 ))

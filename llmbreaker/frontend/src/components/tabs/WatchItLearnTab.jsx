@@ -63,13 +63,13 @@ export default function WatchItLearnTab() {
   // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
 
+  const session        = sessionId ? training.sessions[sessionId] : null
+  const sessionMetrics = sessionId ? metrics[sessionId] : null
+
   const steps = useMemo(
     () => (sessionMetrics?.lossHistory ?? []).map(r => r.step),
     [sessionMetrics?.lossHistory]
   )
-
-  const session     = sessionId ? training.sessions[sessionId] : null
-  const sessionMetrics = sessionId ? metrics[sessionId] : null
   const status      = session?.status ?? null
   const currentIter = session?.currentIter ?? 0
   const maxIters    = session?.maxIters ?? 5000

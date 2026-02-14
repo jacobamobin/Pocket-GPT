@@ -11,15 +11,17 @@ import { motion } from 'framer-motion'
  *   maxIters    — total planned training steps (unused currently, reserved)
  */
 export default function ScrubBar({ steps = [], displayStep, onDisplayStep }) {
-  if (steps.length < 2) return null
-
   const isLive = displayStep === null
 
   const currentIdx = useMemo(() => {
+    if (!steps.length) return 0
     if (isLive) return steps.length - 1
     const idx = steps.indexOf(displayStep)
     return idx >= 0 ? idx : steps.length - 1
   }, [displayStep, steps, isLive])
+
+  // Guard AFTER hooks
+  if (steps.length < 2) return null
 
   function handleChange(e) {
     const idx  = Number(e.target.value)
