@@ -31,6 +31,12 @@ export default function WatchItLearnTab() {
   const [maxItersConfig, setMaxItersConfig] = useState(5000)
   const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
   const [modelSizeConfig, setModelSizeConfig] = useState('medium')
+  const [learningRateConfig, setLearningRateConfig] = useState('balanced')
+  const [batchSizeConfig,    setBatchSizeConfig]    = useState('medium')
+  const [blockSizeConfig,    setBlockSizeConfig]    = useState(128)
+  const [dropoutConfig,      setDropoutConfig]      = useState(0.0)
+  const [warmupConfig,       setWarmupConfig]       = useState(true)
+  const [temperatureConfig,  setTemperatureConfig]  = useState(0.8)
 
   // Persist state when navigating away
   const { savedState, clear } = useTabPersistence('watch_learn', {
@@ -77,10 +83,23 @@ export default function WatchItLearnTab() {
     // For completed/stopped/idle: create a fresh session
     setStarting(true)
     try {
+      const LR_MAP    = { slow: 1e-4, balanced: 1e-3, fast: 3e-3 }
+      const BATCH_MAP = { small: 16, medium: 32, large: 64 }
+
       const data = await createSession({
         feature_type: 'watch_learn',
         dataset_id:   datasetId,
-        hyperparameters: { max_iters: maxItersConfig, eval_interval: evalIntervalConfig },
+        hyperparameters: {
+          max_iters:     maxItersConfig,
+          eval_interval: evalIntervalConfig,
+          model_size:    modelSizeConfig,
+          block_size:    blockSizeConfig,
+          dropout:       dropoutConfig,
+          learning_rate: LR_MAP[learningRateConfig] ?? 1e-3,
+          batch_size:    BATCH_MAP[batchSizeConfig] ?? 32,
+          warmup_steps:  warmupConfig ? 100 : 0,
+          temperature:   temperatureConfig,
+        },
       })
 
       const sid = data.session_id
@@ -163,6 +182,18 @@ export default function WatchItLearnTab() {
           maxItersConfig={maxItersConfig}
           evalIntervalConfig={evalIntervalConfig}
           modelSizeConfig={modelSizeConfig}
+          learningRateConfig={learningRateConfig}
+          batchSizeConfig={batchSizeConfig}
+          blockSizeConfig={blockSizeConfig}
+          dropoutConfig={dropoutConfig}
+          warmupConfig={warmupConfig}
+          temperatureConfig={temperatureConfig}
+          onLearningRateChange={setLearningRateConfig}
+          onBatchSizeChange={setBatchSizeConfig}
+          onBlockSizeChange={setBlockSizeConfig}
+          onDropoutChange={setDropoutConfig}
+          onWarmupChange={setWarmupConfig}
+          onTemperatureChange={setTemperatureConfig}
         />
       </div>
 
