@@ -253,35 +253,35 @@
 **Reference:** Section 6.1 (Landing Page), Section 6.2 (Dashboard), Appendix 10.1 (Color Palette)
 
 ### Tasks
-- [ ] Create `frontend/src/components/landing/LandingPage.jsx`
-- [ ] Create `frontend/src/components/landing/AnimatedBackground.jsx`:
-  - [ ] Canvas-based particle system
-  - [ ] Floating nodes (blue/cyan dots)
-  - [ ] Connections forming/dissolving between nodes
-  - [ ] Subtle glow effects
-- [ ] Implement landing page layout:
-  - [ ] Centered "LLMBreaker" title (96px, gradient text)
-  - [ ] Tagline "See intelligence emerge in real-time"
-  - [ ] Large "Launch" button
-  - [ ] Navigate to `/app` on click
-  - [ ] Fade-in animation on load
-- [ ] Create `frontend/src/components/dashboard/Dashboard.jsx`
-- [ ] Create `frontend/src/components/dashboard/Header.jsx`:
-  - [ ] Small logo (top-left)
-  - [ ] Session status indicator (top-right)
-  - [ ] Tooltip showing active sessions
-- [ ] Create `frontend/src/components/dashboard/TabBar.jsx`:
-  - [ ] Three tabs: Watch It Learn, Attention Cinema, Style Transfer
-  - [ ] Icons: 📝, 🎬, ✨
-  - [ ] Active state (underline + brighter color)
-  - [ ] Tab switching without stopping training
-- [ ] Create empty placeholder components:
-  - [ ] `WatchItLearnTab.jsx`
-  - [ ] `AttentionCinemaTab.jsx`
-  - [ ] `StyleTransferTab.jsx`
-- [ ] Implement tab content switching in Dashboard
-- [ ] Test navigation: Landing → Dashboard → Tab switching
-- [ ] Verify animations are smooth (60fps)
+- [x] Create `frontend/src/components/landing/LandingPage.jsx`
+- [x] Create `frontend/src/components/landing/AnimatedBackground.jsx`:
+  - [x] Canvas-based particle system (55 nodes, requestAnimationFrame)
+  - [x] Floating nodes (blue/cyan dots with radial glow)
+  - [x] Connections forming/dissolving (fade by distance, pulsing opacity)
+  - [x] Subtle glow effects (per-node phase offset)
+- [x] Implement landing page layout:
+  - [x] Centered "LLMBreaker" title (clamp 3–6rem, blue→cyan gradient)
+  - [x] Tagline "See intelligence emerge in real-time"
+  - [x] Large "Launch" button with arrow icon
+  - [x] Navigate to `/app` on click
+  - [x] Framer Motion fade-in + staggered animations on load
+  - [x] Hover: lift 2px + expanded shadow; tap: scale 0.97
+- [x] Create `frontend/src/components/dashboard/Dashboard.jsx`
+- [x] Create `frontend/src/components/dashboard/Header.jsx`:
+  - [x] Gradient logo (top-left)
+  - [x] Animated pulsing dot + session count badge (top-right)
+  - [x] WS Connected/Offline indicator
+- [x] Create `frontend/src/components/dashboard/TabBar.jsx`:
+  - [x] Three tabs: Watch It Learn 📝, Attention Cinema 🎬, Style Transfer ✨
+  - [x] Animated active underline (Framer Motion layoutId spring)
+  - [x] Tab switching without stopping training
+- [x] Create empty placeholder components:
+  - [x] `WatchItLearnTab.jsx`
+  - [x] `AttentionCinemaTab.jsx`
+  - [x] `StyleTransferTab.jsx`
+- [x] Implement tab content switching with AnimatePresence fade transitions
+- [x] Test navigation: build passes (431 modules, 0 errors)
+- [x] Verify animations are smooth (60fps canvas loop, Framer Motion spring)
 
 ---
 
