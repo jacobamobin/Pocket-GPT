@@ -86,7 +86,7 @@ export default function AttentionCinemaTab() {
         const data = await uploadDataset(file)
         setUploadedId(data.dataset_id)
         setText('')
-        uiDispatch({ type: 'SHOW_SUCCESS', payload: `✓ ${file.name} uploaded (${data.word_count?.toLocaleString() ?? '?'} words)` })
+        uiDispatch({ type: 'SHOW_SUCCESS', payload: `Uploaded ${file.name} (${data.word_count?.toLocaleString() ?? '?'} words)` })
       } catch (err) {
         uiDispatch({ type: 'SHOW_ERROR', payload: err.message })
       }
