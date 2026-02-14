@@ -201,6 +201,39 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
     }
   }, [labels.length])
 
+  // ── Lerp spheres to new PCA coords on each snapshot ───────────────────────────
+  useEffect(() => {
+    if (!latest || !sceneRef.current) return
+    const { meshes, glows } = sceneRef.current
+    const coords = latest.coords
+    if (!coords || coords.length === 0) return
+    const count = Math.min(meshes.length, coords.length)
+
+    // Capture start positions
+    const starts = meshes.slice(0, count).map(m => m.position.clone())
+
+    let t = 0
+    let frame
+    const lerp = () => {
+      t = Math.min(t + 0.05, 1)
+      for (let i = 0; i < count; i++) {
+        const tx = coords[i][0] * 2.2
+        const ty = coords[i][1] * 2.2
+        const tz = coords[i][2] * 2.2
+        meshes[i].position.lerpVectors(starts[i], new THREE.Vector3(tx, ty, tz), t)
+        glows[i].position.copy(meshes[i].position)
+      }
+      coordsRef.current = coords
+      if (t < 1) frame = requestAnimationFrame(lerp)
+    }
+    lerp()
+    return () => cancelAnimationFrame(frame)
+  }, [latest])
+
+  useEffect(() => {
+    labelsRef.current = labels
+  }, [labels])
+
   return (
     <div className="card">
       <div className="flex items-center justify-between mb-3">
