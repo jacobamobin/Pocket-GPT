@@ -8,7 +8,8 @@
       "Bash(python:*)",
       "Bash(FLASK_ENV=production python3:*)",
       "Bash(pkill:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(ps:*)"
     ]
   }
 }

@@ -38,3 +38,15 @@
     @apply bg-neural-card border border-neural-border rounded-xl p-4;
   }
 }
+
+/* Tutorial spotlight pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.5), inset 0 0 20px rgba(34, 211, 238, 0.2);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.8), inset 0 0 30px rgba(34, 211, 238, 0.4);
+  }
+}

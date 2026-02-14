@@ -31,6 +31,7 @@ export default function TabBar() {
               ${isActive ? 'text-white' : 'text-slate-500 hover:text-slate-300'}
             `}
             title={tab.label}
+            data-tutorial={`tab-${tab.id}`}
           >
             <span className="text-base leading-none">{tab.icon}</span>
             <span>{tab.label}</span>

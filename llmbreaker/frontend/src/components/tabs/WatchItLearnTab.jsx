@@ -1,4 +1,4 @@
-import { useState, useContext, useCallback, useEffect, useMemo } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { TrainingContext } from '../../contexts/TrainingContext'
 import { MetricsContext }  from '../../contexts/MetricsContext'
 import { UIContext }       from '../../contexts/UIContext'
@@ -17,7 +17,6 @@ import ProbabilityTower    from './ProbabilityTower'
 import PhaseLabel          from './PhaseLabel'
 import InfoIcon            from '../shared/InfoIcon'
 import TrainingConfigPanel from '../shared/TrainingConfigPanel'
-import ScrubBar            from '../shared/ScrubBar'
 
 export default function WatchItLearnTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
@@ -27,7 +26,6 @@ export default function WatchItLearnTab() {
 
   const [datasetId,     setDatasetId]     = useState('shakespeare')
   const [sessionId,     setSessionId]     = useState(null)
-  const [speed,         setSpeedLocal]    = useState(1)
   const [hoverStep,     setHoverStep]     = useState(null)
   const [displayStep,   setDisplayStep]   = useState(null)
   const [starting,      setStarting]      = useState(false)
@@ -44,6 +42,7 @@ export default function WatchItLearnTab() {
 
   // Persist state when navigating away
   const { savedState, clear } = useTabPersistence('watch_learn', {
+    sessionId,
     datasetId,
     maxItersConfig,
     evalIntervalConfig,
@@ -53,6 +52,7 @@ export default function WatchItLearnTab() {
   // Restore saved state on mount
   useEffect(() => {
     if (savedState && !sessionId) {
+      if (savedState.sessionId !== undefined) setSessionId(savedState.sessionId)
       if (savedState.datasetId !== undefined) setDatasetId(savedState.datasetId)
       if (savedState.maxItersConfig !== undefined) setMaxItersConfig(savedState.maxItersConfig)
       if (savedState.evalIntervalConfig !== undefined) setEvalIntervalConfig(savedState.evalIntervalConfig)
@@ -66,10 +66,6 @@ export default function WatchItLearnTab() {
   const session        = sessionId ? training.sessions[sessionId] : null
   const sessionMetrics = sessionId ? metrics[sessionId] : null
 
-  const steps = useMemo(
-    () => (sessionMetrics?.lossHistory ?? []).map(r => r.step),
-    [sessionMetrics?.lossHistory]
-  )
   const status      = session?.status ?? null
   const currentIter = session?.currentIter ?? 0
   const maxIters    = session?.maxIters ?? 5000
@@ -142,10 +138,6 @@ export default function WatchItLearnTab() {
   const handlePause     = () => controls.pause()
   const handleStop      = () => controls.stop()
   const handleStep      = () => controls.step()
-  const handleSpeedChange = useCallback((v) => {
-    setSpeedLocal(v)
-    controls.setSpeed(v)
-  }, [controls])
 
   const handleDatasetError = (msg) => uiDispatch({ type: 'SHOW_ERROR', payload: msg })
 
@@ -159,49 +151,59 @@ export default function WatchItLearnTab() {
       </div>
 
       {/* Phase label */}
-      <PhaseLabel
-        currentStep={currentIter}
-        maxIters={maxIters}
-        status={status}
-      />
-
-      {/* Top row: dataset + controls */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <DatasetSelector
-          value={datasetId}
-          onChange={setDatasetId}
-          onError={handleDatasetError}
-          disabled={status === SESSION_STATUS.RUNNING || starting}
-        />
-        <TrainingControls
-          status={status}
-          currentIter={currentIter}
+      <div data-tutorial="phase-label">
+        <PhaseLabel
+          currentStep={currentIter}
           maxIters={maxIters}
-          speed={speed}
-          onPlay={handlePlay}
-          onPause={handlePause}
-          onStop={handleStop}
-          onStep={handleStep}
-          onSpeedChange={handleSpeedChange}
-          onOpenConfig={() => setConfigOpen(true)}
-          disabled={starting || !datasetId}
-          isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
+          status={status}
         />
       </div>
 
+      {/* Top row: dataset + controls */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div data-tutorial="dataset-selector">
+          <DatasetSelector
+            value={datasetId}
+            onChange={setDatasetId}
+            onError={handleDatasetError}
+            disabled={status === SESSION_STATUS.RUNNING || starting}
+          />
+        </div>
+        <div data-tutorial="training-controls">
+          <TrainingControls
+            status={status}
+            currentIter={currentIter}
+            maxIters={maxIters}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            onStop={handleStop}
+            onStep={handleStep}
+            onOpenConfig={() => setConfigOpen(true)}
+            disabled={starting || !datasetId}
+            isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
+            displayStep={displayStep}
+            onScrub={setDisplayStep}
+          />
+        </div>
+      </div>
+
       {/* Token stream */}
-      <TokenStreamDisplay
-        vocabInfo={sessionMetrics?.vocabInfo ?? null}
-        currentStep={currentIter}
-      />
+      <div data-tutorial="token-stream">
+        <TokenStreamDisplay
+          vocabInfo={sessionMetrics?.vocabInfo ?? null}
+          currentStep={currentIter}
+        />
+      </div>
 
       {/* Loss curve */}
-      <LossCurveChart
-        lossHistory={sessionMetrics?.lossHistory ?? []}
-        maxIters={maxIters}
-        onHoverStep={setHoverStep}
-        displayStep={displayStep}
-      />
+      <div data-tutorial="loss-curve">
+        <LossCurveChart
+          lossHistory={sessionMetrics?.lossHistory ?? []}
+          maxIters={maxIters}
+          onHoverStep={setHoverStep}
+          displayStep={displayStep}
+        />
+      </div>
 
       {/* Text progression + Probability tower side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -243,14 +245,6 @@ export default function WatchItLearnTab() {
           </p>
         </div>
       )}
-
-      {/* Time-travel scrub bar */}
-      <ScrubBar
-        steps={steps}
-        displayStep={displayStep}
-        onDisplayStep={setDisplayStep}
-        maxIters={maxIters}
-      />
 
       {/* ── Config Drawer ── */}
       {configOpen && (

@@ -270,14 +270,8 @@ def run_training(session: TrainingSession, socketio) -> None:
                 x, ds['idx_to_char'],
             )
 
-        # ── speed-aware sleep ──
-        speed = max(session.speed_multiplier, 0.1)
-        # At 1× we yield briefly so the event loop can breathe (0.05s = 50ms).
-        # At 10× we skip the yield entirely (max throughput).
-        if speed < 10.0:
-            socketio.sleep(0.05 / speed)
-        else:
-            socketio.sleep(0)
+        # Yield briefly so the event loop can emit WebSocket events (10ms)
+        socketio.sleep(0.01)
 
     # ── 4. Completion ──────────────────────────────────────────────────────
     from datetime import datetime

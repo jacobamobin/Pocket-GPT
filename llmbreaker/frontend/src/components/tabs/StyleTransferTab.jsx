@@ -1,4 +1,4 @@
-import { useState, useContext, useCallback, useEffect } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { TrainingContext } from '../../contexts/TrainingContext'
 import { MetricsContext }  from '../../contexts/MetricsContext'
@@ -24,7 +24,6 @@ export default function StyleTransferTab() {
   const [sessionId,         setSessionId]    = useState(null)
   const [text,              setText]       = useState('')
   const [uploadedId,        setUploadedId]   = useState(null)
-  const [speed,             setSpeedLocal]  = useState(2)
   const [starting,          setStarting]     = useState(false)
   const [maxItersConfig,    setMaxItersConfig] = useState(5000)
   const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
@@ -36,25 +35,25 @@ export default function StyleTransferTab() {
 
   // Persist state when navigating away
   const { savedState, clear } = useTabPersistence('style_transfer', {
+    sessionId,
     text,
     uploadedId,
     maxItersConfig,
     evalIntervalConfig,
     modelSizeConfig,
     viewMode,
-    speed,
   })
 
   // Restore saved state on mount
   useEffect(() => {
     if (savedState && !sessionId) {
+      if (savedState.sessionId !== undefined) setSessionId(savedState.sessionId)
       if (savedState.text !== undefined) setText(savedState.text)
       if (savedState.uploadedId !== undefined) setUploadedId(savedState.uploadedId)
       if (savedState.maxItersConfig !== undefined) setMaxItersConfig(savedState.maxItersConfig)
       if (savedState.evalIntervalConfig !== undefined) setEvalIntervalConfig(savedState.evalIntervalConfig)
       if (savedState.modelSizeConfig !== undefined) setModelSizeConfig(savedState.modelSizeConfig)
       if (savedState.viewMode !== undefined) setViewMode(savedState.viewMode)
-      if (savedState.speed !== undefined) setSpeedLocal(savedState.speed)
     }
   }, [savedState, sessionId])
 
@@ -161,7 +160,6 @@ export default function StyleTransferTab() {
   const handlePause     = () => controls.pause()
   const handleStop      = () => controls.stop()
   const handleStep      = () => controls.step()
-  const handleSpeed     = useCallback((v) => { setSpeedLocal(v); controls.setSpeed(v) }, [controls])
 
   return (
     <div className="p-6 flex flex-col gap-6 max-w-6xl mx-auto">
@@ -174,26 +172,28 @@ export default function StyleTransferTab() {
 
       {/* Top row: text input + controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <TextInputPanel
-          text={text}
-          onChange={(v) => { setText(v); setUploadedId(null) }}
-          onUploadFile={handleUploadFile}
-          disabled={isActive || starting}
-          placeholder="Paste your writing sample here (at least 10 words)..."
-        />
-        <TrainingControls
-          status={status}
-          currentIter={currentIter}
-          maxIters={maxIters}
-          speed={speed}
-          onPlay={handlePlay}
-          onPause={handlePause}
-          onStop={handleStop}
-          onStep={handleStep}
-          onSpeedChange={handleSpeed}
-          disabled={starting || !text}
-          isTraining={isActive}
-        />
+        <div data-tutorial="style-input">
+          <TextInputPanel
+            text={text}
+            onChange={(v) => { setText(v); setUploadedId(null) }}
+            onUploadFile={handleUploadFile}
+            disabled={isActive || starting}
+            placeholder="Paste your writing sample here (at least 10 words)..."
+          />
+        </div>
+        <div data-tutorial="style-controls">
+          <TrainingControls
+            status={status}
+            currentIter={currentIter}
+            maxIters={maxIters}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            onStop={handleStop}
+            onStep={handleStep}
+            disabled={starting || !text}
+            isTraining={isActive}
+          />
+        </div>
       </div>
 
       {/* Learning Progress Banner */}
@@ -219,33 +219,39 @@ export default function StyleTransferTab() {
 
       {/* Loss Curve */}
       {isActive && (
-        <LossCurveChart
-          lossHistory={sessionMet?.lossHistory ?? []}
-          maxIters={maxIters}
-        />
+        <div data-tutorial="loss-curve">
+          <LossCurveChart
+            lossHistory={sessionMet?.lossHistory ?? []}
+            maxIters={maxIters}
+          />
+        </div>
       )}
 
       {/* Visualization */}
       <AnimatePresence mode="wait">
         {viewMode === 'overview' ? (
-          <StyleEvolutionDisplay
-            text={text}
-            samples={sessionMet?.samples ?? []}
-            finalStats={sessionMet?.finalStats ?? null}
-            showEvolution={false}
-          />
+          <div data-tutorial="style-evolution">
+            <StyleEvolutionDisplay
+              text={text}
+              samples={sessionMet?.samples ?? []}
+              finalStats={sessionMet?.finalStats ?? null}
+              showEvolution={false}
+            />
+          </div>
         ) : (
-          <StyleEvolutionDisplay
-            text={text}
-            samples={sessionMet?.samples ?? []}
-            finalStats={sessionMet?.finalStats ?? null}
-            showEvolution={true}
-          />
+          <div data-tutorial="style-evolution">
+            <StyleEvolutionDisplay
+              text={text}
+              samples={sessionMet?.samples ?? []}
+              finalStats={sessionMet?.finalStats ?? null}
+              showEvolution={true}
+            />
+          </div>
         )}
       </AnimatePresence>
 
       {/* View Mode Toggle */}
-      <div className="flex justify-center">
+      <div className="flex justify-center" data-tutorial="view-toggle">
         <div className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 p-2">
           <span className="text-xs text-slate-400 uppercase tracking-wide">View:</span>
           {['overview', 'evolution'].map(mode => (

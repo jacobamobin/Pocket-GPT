@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
-import { useState, useEffect, useMemo } from 'react'
-import { SPEED_OPTIONS, SESSION_STATUS } from '../../types/index.js'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { SESSION_STATUS } from '../../types/index.js'
 import InfoIcon from './InfoIcon'
 
 function IconButton({ onClick, disabled, title, children, variant = 'default' }) {
@@ -32,15 +32,15 @@ export default function TrainingControls({
   status,
   currentIter = 0,
   maxIters = 500,
-  speed = 1,
   onPlay,
   onPause,
   onStop,
   onStep,
-  onSpeedChange,
   onOpenConfig,
   disabled,
   isTraining,
+  displayStep = null,
+  onScrub,
 }) {
   const isIdle      = !status || status === SESSION_STATUS.IDLE
   const isRunning   = status === SESSION_STATUS.RUNNING
@@ -50,6 +50,7 @@ export default function TrainingControls({
   const isActive    = isRunning || isPaused
 
   const progress = maxIters > 0 ? Math.round((currentIter / maxIters) * 100) : 0
+  const barRef = useRef(null)
 
   // ETA calculation
   const [startTime, setStartTime] = useState(null)
@@ -95,6 +96,31 @@ export default function TrainingControls({
     }
   }, [isRunning, currentIter, elapsed, maxIters])
 
+  // Scrub bar interaction
+  function scrubFromEvent(e) {
+    if (!onScrub || !barRef.current) return
+    const rect = barRef.current.getBoundingClientRect()
+    const fraction = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+    const step = Math.round(fraction * maxIters)
+    // Snap to live if dragged to the end (within 2%)
+    onScrub(fraction > 0.98 ? null : step)
+  }
+
+  function handleBarMouseDown(e) {
+    if (!onScrub) return
+    e.preventDefault()
+    scrubFromEvent(e)
+    function onMove(ev) { scrubFromEvent(ev) }
+    function onUp() {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
+
+  const scrubProgress = displayStep != null ? Math.round((displayStep / maxIters) * 100) : null
+
   return (
     <div className="card flex flex-col gap-4">
       <div className="flex items-center gap-2">
@@ -121,7 +147,7 @@ export default function TrainingControls({
             variant="primary"
             onClick={onPlay}
             disabled={disabled || (!isIdle && !isPaused && !isCompleted && !isStopped)}
-            title={isCompleted || isStopped ? 'Restart training' : 'Start training. Start training from scratch'}
+            title={isCompleted || isStopped ? 'Restart training' : 'Start training'}
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z"/>
@@ -152,58 +178,66 @@ export default function TrainingControls({
           </svg>
         </IconButton>
 
-        {/* Config */}
-        <IconButton
-          onClick={onOpenConfig}
-          disabled={isTraining}
-          title="Training configuration"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </IconButton>
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Speed selector */}
-        <div className="flex items-center gap-2" title="Adjust training speed (faster = less smooth)">
-          <span className="text-xs text-slate-500">Speed</span>
-          <select
-            value={speed}
-            onChange={e => onSpeedChange(Number(e.target.value))}
-            disabled={disabled || isIdle}
-            className="bg-neural-surface border border-neural-border rounded-md px-2 py-1.5
-                       text-sm text-white focus:outline-none focus:border-blue-500
-                       disabled:opacity-40 disabled:cursor-not-allowed"
+        {/* Config (only when handler is provided) */}
+        {onOpenConfig && (
+          <IconButton
+            onClick={onOpenConfig}
+            disabled={isTraining}
+            title="Training configuration"
           >
-            {SPEED_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-        </div>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </IconButton>
+        )}
       </div>
 
-      {/* Progress bar + step counter */}
+      {/* Progress bar / scrub bar */}
       {(isActive || isCompleted) && (
         <div className="flex flex-col gap-1.5">
           <div className="flex justify-between text-xs text-slate-500">
-            <span>Step {currentIter.toLocaleString()} / {maxIters.toLocaleString()}</span>
+            <span>
+              {displayStep != null
+                ? <>Reviewing step <span className="text-cyan-400 font-mono">{displayStep.toLocaleString()}</span> / {maxIters.toLocaleString()}</>
+                : <>Step {currentIter.toLocaleString()} / {maxIters.toLocaleString()}</>
+              }
+            </span>
             <span className="flex items-center gap-2">
-              {progress}%
-              {eta && isRunning && (
+              {displayStep == null && <>{progress}%</>}
+              {eta && isRunning && displayStep == null && (
                 <span className="text-cyan-400 font-medium">ETA: {eta}</span>
+              )}
+              {displayStep != null && onScrub && (
+                <button
+                  onClick={() => onScrub(null)}
+                  className="flex items-center gap-1 text-cyan-400 hover:text-cyan-300 transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  Live
+                </button>
               )}
             </span>
           </div>
-          <div className="h-1.5 rounded-full bg-neural-border overflow-hidden">
+          <div
+            ref={barRef}
+            onMouseDown={handleBarMouseDown}
+            className={`relative h-2.5 rounded-full bg-neural-border select-none ${onScrub ? 'cursor-pointer' : ''}`}
+          >
+            {/* Training progress fill */}
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
+              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-blue-500/50 to-cyan-400/50"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.3 }}
             />
+            {/* Scrub position indicator */}
+            {displayStep != null && (
+              <div
+                className="absolute top-1/2 w-3 h-3 rounded-full bg-cyan-400 border-2 border-slate-900 shadow-lg shadow-cyan-400/30 pointer-events-none"
+                style={{ left: `${scrubProgress}%`, transform: 'translate(-50%, -50%)' }}
+              />
+            )}
           </div>
         </div>
       )}
@@ -220,7 +254,7 @@ export default function TrainingControls({
             ${status === SESSION_STATUS.ERROR ? 'bg-orange-400' : ''}
           `} />
           <span className="text-xs text-slate-500 capitalize">{status}</span>
-          {isCompleted && <span className="text-xs text-blue-400 ml-1">— click ▶ to replay</span>}
+          {isCompleted && <span className="text-xs text-blue-400 ml-1">— drag progress bar to review</span>}
         </div>
       )}
     </div>

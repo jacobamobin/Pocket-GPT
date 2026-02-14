@@ -74,12 +74,3 @@ export const FEATURE_TYPE = /** @type {const} */ ({
   STYLE_TRANSFER:   'style_transfer',
 })
 
-export const SPEED_OPTIONS = [
-  { label: '0.1×', value: 0.1 },
-  { label: '0.25×', value: 0.25 },
-  { label: '0.5×', value: 0.5 },
-  { label: '1×',   value: 1   },
-  { label: '2×',   value: 2   },
-  { label: '5×',   value: 5   },
-  { label: '10×',  value: 10  },
-]

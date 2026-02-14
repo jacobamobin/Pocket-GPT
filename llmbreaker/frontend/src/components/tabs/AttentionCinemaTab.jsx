@@ -1,4 +1,4 @@
-import { useState, useContext, useCallback, useEffect } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { TrainingContext } from '../../contexts/TrainingContext'
 import { MetricsContext }  from '../../contexts/MetricsContext'
@@ -15,7 +15,6 @@ import AttentionHeatmapGrid from './AttentionHeatmapGrid'
 import AttentionEvolutionDisplay from './AttentionEvolutionDisplay'
 import Heatmap2D           from './Heatmap2D'
 import Heatmap3D           from './Heatmap3D'
-import ScrubBar            from '../shared/ScrubBar'
 import InfoIcon            from '../shared/InfoIcon'
 import DatasetSelector     from '../shared/DatasetSelector'
 import TextInputPanel      from './TextInputPanel'
@@ -45,6 +44,7 @@ export default function AttentionCinemaTab() {
 
   // Persist state when navigating away
   const { savedState, clear } = useTabPersistence('attention_cinema', {
+    sessionId,
     maxItersConfig,
     evalIntervalConfig,
     modelSizeConfig,
@@ -59,6 +59,7 @@ export default function AttentionCinemaTab() {
   // Restore saved state on mount
   useEffect(() => {
     if (savedState && !sessionId) {
+      if (savedState.sessionId !== undefined) setSessionId(savedState.sessionId)
       if (savedState.maxItersConfig !== undefined) setMaxItersConfig(savedState.maxItersConfig)
       if (savedState.evalIntervalConfig !== undefined) setEvalIntervalConfig(savedState.evalIntervalConfig)
       if (savedState.modelSizeConfig !== undefined) setModelSizeConfig(savedState.modelSizeConfig)
@@ -174,8 +175,6 @@ export default function AttentionCinemaTab() {
   const handlePause     = () => controls.pause()
   const handleStop      = () => controls.stop()
   const handleStep      = () => controls.step()
-  const [speed, setSpeedLocal] = useState(1)
-  const handleSpeed     = useCallback((v) => { setSpeedLocal(v); controls.setSpeed(v) }, [controls])
 
   function handleSelectCell(layer, head) {
     setSelectedLayer(layer)
@@ -195,7 +194,7 @@ export default function AttentionCinemaTab() {
       {/* Top row: corpus + controls + view toggle */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Corpus */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" data-tutorial="attention-dataset">
           {!useCustom ? (
             <DatasetSelector
               value={datasetId}
@@ -221,30 +220,36 @@ export default function AttentionCinemaTab() {
           </button>
         </div>
 
-        <TrainingControls
-          status={status}
-          currentIter={currentIter}
-          maxIters={maxIters}
-          onPlay={handlePlay}
-          onPause={handlePause}
-          onStop={handleStop}
-          onStep={handleStep}
-          speed={speed}
-          onSpeedChange={handleSpeed}
-          disabled={starting}
-          isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
-        />
+        <div className="flex flex-col gap-2" data-tutorial="attention-controls">
+          <TrainingControls
+            status={status}
+            currentIter={currentIter}
+            maxIters={maxIters}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            onStop={handleStop}
+            onStep={handleStep}
+            disabled={starting}
+            isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
+            displayStep={playbackStep}
+            onScrub={setPlaybackStep}
+          />
+        </div>
 
-        <ViewModeToggle
+        <div className="flex flex-col gap-2" data-tutorial="view-mode-toggle">
+          <ViewModeToggle
           viewMode={viewMode}
           onViewMode={setViewMode}
           renderMode={renderMode}
           onRenderMode={setRenderMode}
         />
+        </div>
       </div>
 
       {/* Model architecture info */}
-      <ModelInfoCard modelConfig={session?.modelConfig ?? null} />
+      <div data-tutorial="model-info">
+        <ModelInfoCard modelConfig={session?.modelConfig ?? null} />
+      </div>
 
       {/* Layer/Head selector (Detail mode only) */}
       <AnimatePresence initial={false}>
@@ -256,12 +261,14 @@ export default function AttentionCinemaTab() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
           >
-            <LayerHeadSelector
+            <div data-tutorial="layer-head-selector">
+              <LayerHeadSelector
               layer={selectedLayer}
               head={selectedHead}
               onLayer={setSelectedLayer}
               onHead={setSelectedHead}
             />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -306,7 +313,7 @@ export default function AttentionCinemaTab() {
                 head={selectedHead}
               />
             ) : viewMode === 'grid' ? (
-              <div className="card">
+              <div className="card" data-tutorial="attention-grid">
                 <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
                   All Attention Patterns
                   {displayStep !== null && (
@@ -324,7 +331,7 @@ export default function AttentionCinemaTab() {
               </div>
             ) : (
               /* Detail mode */
-              <div className="card min-h-[260px]">
+              <div className="card min-h-[260px]" data-tutorial="heatmap-detail">
                 <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
                   Attention Detail — Layer {selectedLayer}, Head {selectedHead}
                   {displayStep !== null && (
@@ -358,16 +365,6 @@ export default function AttentionCinemaTab() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Scrub bar */}
-      {steps.length > 0 && (
-        <ScrubBar
-          steps={steps}
-          displayStep={playbackStep}
-          onDisplayStep={setPlaybackStep}
-          maxIters={maxIters}
-        />
-      )}
 
     </div>
   )

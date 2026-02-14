@@ -30,7 +30,7 @@ class TrainingManager:
             # Apply model size preset first
             model_size = hyperparameters.get('model_size', 'medium')
             model_size_configs = {
-                'small':  {'n_embd': 32, 'n_layer': 3, 'n_head': 3, 'block_size': 96},
+                'small':  {'n_embd': 32, 'n_layer': 3, 'n_head': 4, 'block_size': 96},
                 'medium': {'n_embd': 64, 'n_layer': 4, 'n_head': 4, 'block_size': 128},
                 'large':  {'n_embd': 96, 'n_layer': 6, 'n_head': 6, 'block_size': 256},
             }

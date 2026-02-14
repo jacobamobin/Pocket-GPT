@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGeneration } from '../../contexts/GenerationContext'
 import { TrainingContext } from '../../contexts/TrainingContext'
+import { useWebSocket } from '../../hooks/useWebSocket'
 import GenerationControls from './GenerationControls'
 import ProbabilityBars from './ProbabilityBars'
 
@@ -19,11 +20,35 @@ export default function GenerationDrawer() {
     currentProbabilities, highlightedIndex, error, actions,
   } = useGeneration()
 
-  const { state: training } = useContext(TrainingContext)
+  const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
   const sessionId = training?.activeSessionId ?? null
+  const { socket } = useWebSocket()
 
   const [isGenerating, setIsGenerating] = useState(false)
   const outputRef = useRef(null)
+
+  // ── Pause training when drawer opens, resume when closed ─────────────────────
+  const wasTrainingRef = useRef(false)
+
+  useEffect(() => {
+    if (!sessionId || !socket) return
+    const session = training.sessions[sessionId]
+    if (!session) return
+
+    if (isOpen) {
+      if (session.status === 'running') {
+        wasTrainingRef.current = true
+        socket.emit('pause_training', { session_id: sessionId })
+        trainingDispatch({ type: 'UPDATE_STATUS', payload: { sessionId, status: 'paused' } })
+      }
+    } else {
+      if (wasTrainingRef.current) {
+        wasTrainingRef.current = false
+        socket.emit('resume_training', { session_id: sessionId })
+        trainingDispatch({ type: 'UPDATE_STATUS', payload: { sessionId, status: 'running' } })
+      }
+    }
+  }, [isOpen])
 
   // Scroll output to bottom when new tokens arrive
   useEffect(() => {
@@ -57,6 +82,8 @@ export default function GenerationDrawer() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
+        if (res.status === 404) throw new Error('Session not found — try starting a new training run.')
+        if (res.status === 400 && data.error?.includes('not initialized')) throw new Error('Model not ready yet — wait for the first training step to complete.')
         throw new Error(data.error || `HTTP ${res.status}`)
       }
 
@@ -153,6 +180,10 @@ export default function GenerationDrawer() {
   const atMaxLength   = generatedTokens.length >= MAX_TOKENS
   const controlsDisabled = !userInput.trim() || !sessionId
 
+  const activeSession = sessionId ? training.sessions[sessionId] : null
+  const trainingPaused = wasTrainingRef.current
+  const modelNotReady = activeSession && !activeSession.currentIter
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -169,11 +200,11 @@ export default function GenerationDrawer() {
 
           {/* Drawer */}
           <motion.div
-            initial={{ x: 520 }}
+            initial={{ x: 660 }}
             animate={{ x: 0 }}
-            exit={{ x: 520 }}
+            exit={{ x: 660 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="relative w-[500px] max-w-full bg-neural-card border-l border-neural-border flex flex-col overflow-hidden"
+            className="relative w-[640px] max-w-full bg-neural-card border-l border-neural-border flex flex-col overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
@@ -201,6 +232,21 @@ export default function GenerationDrawer() {
               {!sessionId && (
                 <div className="px-4 py-3 bg-yellow-950/30 border border-yellow-500/30 rounded-lg text-sm text-yellow-200">
                   ⚠️ No model trained. Go to any tab and start training first.
+                </div>
+              )}
+
+              {/* Training paused banner */}
+              {trainingPaused && (
+                <div className="px-4 py-3 bg-blue-950/30 border border-blue-500/30 rounded-lg text-sm text-blue-200 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                  Training paused — will resume when you close this panel.
+                </div>
+              )}
+
+              {/* Model not ready yet */}
+              {sessionId && modelNotReady && (
+                <div className="px-4 py-3 bg-yellow-950/30 border border-yellow-500/30 rounded-lg text-sm text-yellow-200">
+                  ⏳ Model initializing — wait for the first training step to complete.
                 </div>
               )}
 
@@ -263,15 +309,18 @@ export default function GenerationDrawer() {
                     ref={outputRef}
                     className="px-3 py-2 bg-neural-surface border border-neural-border rounded-lg font-mono text-sm whitespace-pre-wrap break-all max-h-48 overflow-y-auto"
                   >
-                    <span className="text-slate-600">{outOfContext}</span>
-                    <span className="text-slate-300">{inContext.slice(0, inContext.length - generated.length)}</span>
-                    <span className="text-cyan-300">{generated.slice(Math.max(0, generated.length - (inContext.length - inputOnly.length)))}</span>
-                    {isPlaying && (
-                      <span className="animate-pulse text-cyan-400">█</span>
-                    )}
-                    {isGenerating && !isPlaying && (
-                      <span className="animate-pulse text-slate-500">▌</span>
-                    )}
+                    {/* Text outside context window — dimmed */}
+                    <span className="opacity-30">{outOfContext}</span>
+                    {/* User input within context window */}
+                    <span className="text-slate-300">
+                      {inContext.slice(0, Math.max(0, inContext.length - generated.length))}
+                    </span>
+                    {/* Generated tokens — cyan */}
+                    <span className="text-cyan-300">
+                      {inContext.slice(Math.max(0, inContext.length - generated.length))}
+                    </span>
+                    {isPlaying && <span className="animate-pulse text-cyan-400">█</span>}
+                    {isGenerating && !isPlaying && <span className="animate-pulse text-slate-500">▌</span>}
                   </div>
                 </div>
               )}

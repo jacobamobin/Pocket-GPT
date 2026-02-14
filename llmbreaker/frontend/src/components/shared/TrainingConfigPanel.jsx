@@ -152,7 +152,7 @@ export default function TrainingConfigPanel({
     small: {
       label: 'Small',
       description: 'Fast (~15K params)',
-      config: { n_embd: 32, n_layer: 3, n_head: 3, block_size: 96 },
+      config: { n_embd: 32, n_layer: 3, n_head: 4, block_size: 96 },
       recommendedSteps: 3000,
     },
     medium: {
