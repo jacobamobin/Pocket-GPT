@@ -24,6 +24,7 @@ export function useTrainingSession(socket, sessionId) {
     const onMetrics = (data) => {
       if (data.session_id !== sessionId) return
       trainingDispatch({ type: 'UPDATE_STATUS', payload: { sessionId, status: 'running' } })
+      trainingDispatch({ type: 'UPDATE_ITER',   payload: { sessionId, currentIter: data.step } })
       metricsDispatch({ type: 'ADD_METRICS', payload: data })
     }
     const onSample = (data) => {
