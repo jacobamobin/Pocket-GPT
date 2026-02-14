@@ -176,14 +176,8 @@ export default function AttentionCinemaTab() {
           onStep={handleStep}
           speed={speed}
           onSpeedChange={handleSpeed}
-          onMaxItersChange={setMaxItersConfig}
-          onEvalIntervalChange={setEvalIntervalConfig}
-          onModelSizeChange={setModelSizeConfig}
           disabled={starting}
           isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
-          maxItersConfig={maxItersConfig}
-          evalIntervalConfig={evalIntervalConfig}
-          modelSizeConfig={modelSizeConfig}
         />
         <ViewModeToggle
           viewMode={viewMode}

@@ -191,14 +191,8 @@ export default function StyleTransferTab() {
           onStop={handleStop}
           onStep={handleStep}
           onSpeedChange={handleSpeed}
-          onMaxItersChange={setMaxItersConfig}
-          onEvalIntervalChange={setEvalIntervalConfig}
-          onModelSizeChange={setModelSizeConfig}
           disabled={starting || !text}
           isTraining={isActive}
-          maxItersConfig={maxItersConfig}
-          evalIntervalConfig={evalIntervalConfig}
-          modelSizeConfig={modelSizeConfig}
         />
       </div>
 
