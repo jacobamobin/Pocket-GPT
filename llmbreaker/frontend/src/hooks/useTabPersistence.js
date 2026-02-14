@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { saveTabState, loadTabState, clearTabState } from '../utils/tabPersistence'
 
 /**
@@ -17,30 +17,25 @@ import { saveTabState, loadTabState, clearTabState } from '../utils/tabPersisten
  *   Call `clear()` when user wants to start fresh (e.g., after training completes)
  */
 export function useTabPersistence(tabKey, state) {
-  const isRestored = useRef(false)
+  // Load saved state once on mount
+  const [savedState] = useState(() => loadTabState(tabKey))
 
-  // Load saved state on first mount
-  useEffect(() => {
-    if (!isRestored.current) {
-      isRestored.current = true
-    }
-  }, [])
+  // Keep a ref to the latest state so the unmount cleanup always saves current values
+  const stateRef = useRef(state)
+  useEffect(() => { stateRef.current = state })
 
   // Save state when component unmounts (user navigates away)
   useEffect(() => {
     return () => {
-      if (state) {
-        saveTabState(tabKey, state)
+      if (stateRef.current) {
+        saveTabState(tabKey, stateRef.current)
       }
     }
-  }, [tabKey, state])
+  }, [tabKey])
 
-  // Return saved state and clear function
-  const savedState = loadTabState(tabKey)
-
-  const clear = () => {
+  const clear = useCallback(() => {
     clearTabState(tabKey)
-  }
+  }, [tabKey])
 
   return { savedState, clear }
 }
