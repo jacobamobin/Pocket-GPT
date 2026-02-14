@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit, join_room
 from flask_cors import CORS
+import torch
 
 from models import SessionStatus
 from training_manager import TrainingManager
@@ -441,6 +442,90 @@ def on_set_speed(data):
 
 
 # ---------------------------------------------------------------------------
+# REST: Token Generation
+# ---------------------------------------------------------------------------
+
+@app.route('/api/generate-next-token', methods=['POST'])
+def generate_next_token():
+    """Generate the next token given a context string."""
+    data = request.json
+    session_id = data.get('session_id')
+    context = data.get('context', '')
+    temperature = data.get('temperature', 1.0)
+
+    if not session_id:
+        return jsonify({'error': 'session_id required'}), 400
+
+    # Get session from manager
+    session = manager.get_session(session_id)
+    if not session:
+        return jsonify({'error': 'Session not found'}), 404
+
+    # Check if model is initialized
+    if not session.model_instance:
+        return jsonify({'error': 'Model not initialized'}), 400
+
+    try:
+        # Get vocabulary mappings
+        char_to_idx = session.char_to_idx
+        idx_to_char = session.idx_to_char
+
+        # Check for unknown characters
+        unknown_chars = [c for c in context if c not in char_to_idx]
+        if unknown_chars:
+            unique_unknown = list(set(unknown_chars))
+            return jsonify({'error': f'Unknown characters: {unique_unknown}'}), 400
+
+        # Convert to tensor
+        idx = torch.tensor([char_to_idx[c] for c in context], dtype=torch.long).unsqueeze(0)
+
+        # Generate next token
+        device = next(session.model_instance.parameters()).device
+        idx = idx.to(device)
+
+        # Get logits for next token
+        with torch.no_grad():
+            idx_result, logits = session.model_instance.generate(
+                idx,
+                max_new_tokens=1,
+                temperature=temperature,
+                return_last_logits=True
+            )
+
+        # Get next token
+        next_token_idx = idx_result[0, -1].item()
+        next_token = idx_to_char[next_token_idx]
+
+        # Compute probabilities
+        probs = torch.softmax(logits / temperature, dim=0)
+
+        # Get top 10 probabilities
+        top_probs, top_indices = torch.topk(probs, min(10, len(probs)))
+        probabilities = [
+            {
+                'token': idx_to_char[idx.item()],
+                'prob': float(prob.item())
+            }
+            for prob, idx in zip(top_probs, top_indices)
+        ]
+
+        # Get context used (last block_size chars)
+        block_size = session.model_instance.block_size
+        context_used = context[-block_size:] if len(context) > block_size else context
+
+        return jsonify({
+            'next_token': next_token,
+            'probabilities': probabilities,
+            'context_used': context_used
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Generation failed: {str(e)}'}), 500
+
+
+# ---------------------------------------------------------------------------
 # Background training loop — delegates to trainer.py
 # ---------------------------------------------------------------------------
 
@@ -457,4 +542,4 @@ def _run_training(session_id: str):
 
 if __name__ == '__main__':
     print('Starting LLMBreaker backend on http://localhost:5000')
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True, use_reloader=False)
