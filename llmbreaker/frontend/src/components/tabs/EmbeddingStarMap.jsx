@@ -53,11 +53,181 @@ function knn(idx, coords, k = 4) {
 
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) }
 
-// ── Stub component ────────────────────────────────────────────────────────────
+// ── Full Three.js component ───────────────────────────────────────────────────
 export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo }) {
+  const wrapperRef = useRef(null)
+  const canvasRef  = useRef(null)
+  const sceneRef   = useRef(null)
+  const coordsRef  = useRef(null)
+  const labelsRef  = useRef(null)
+
+  const [hoveredIdx, setHoveredIdx] = useState(null)
+  const [hoverPos,   setHoverPos]   = useState({ x: 0, y: 0 })
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  const latest = embeddingSnapshots.length > 0 ? embeddingSnapshots[embeddingSnapshots.length - 1] : null
+  const labels = latest?.labels ?? vocabInfo?.vocab ?? []
+
+  // Scene init
+  useEffect(() => {
+    if (!canvasRef.current || labels.length === 0 || sceneRef.current) return
+
+    const canvas  = canvasRef.current
+    const wrapper = wrapperRef.current
+    const W = wrapper.clientWidth || 600
+    const H = 360
+
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false })
+    renderer.setSize(W, H)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setClearColor(0x0a1628)
+
+    // Scene + lights
+    const scene = new THREE.Scene()
+    scene.add(new THREE.AmbientLight(0x1e293b, 3))
+    const centerLight = new THREE.PointLight(0x60a5fa, 2, 10)
+    centerLight.position.set(0, 0, 0)
+    scene.add(centerLight)
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 100)
+    camera.position.set(0, 0, 5)
+
+    // Star field (400 points)
+    const starPositions = new Float32Array(400 * 3)
+    for (let i = 0; i < 400; i++) {
+      starPositions[i*3]   = (Math.random() - 0.5) * 12
+      starPositions[i*3+1] = (Math.random() - 0.5) * 12
+      starPositions[i*3+2] = (Math.random() - 0.5) * 12
+    }
+    const starGeo = new THREE.BufferGeometry()
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3))
+    const starPoints = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x334155, size: 0.03 }))
+    scene.add(starPoints)
+
+    // Glow sprite texture (radial gradient)
+    const glowCanvas = document.createElement('canvas')
+    glowCanvas.width = glowCanvas.height = 64
+    const ctx = glowCanvas.getContext('2d')
+    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+    grad.addColorStop(0,   'rgba(255,255,255,1)')
+    grad.addColorStop(0.3, 'rgba(255,255,255,0.4)')
+    grad.addColorStop(1,   'rgba(255,255,255,0)')
+    ctx.fillStyle = grad
+    ctx.fillRect(0, 0, 64, 64)
+    const glowTex = new THREE.CanvasTexture(glowCanvas)
+
+    // Sphere nodes
+    const sphereGeo = new THREE.SphereGeometry(0.06, 10, 10)
+    const meshes = []
+    const glows  = []
+
+    labels.forEach((ch, i) => {
+      const group = getGroup(ch)
+      const meta  = GROUP_META[group]
+
+      const mat  = new THREE.MeshPhongMaterial({
+        color: meta.hex, emissive: meta.hex, emissiveIntensity: 0.3, shininess: 80,
+      })
+      const mesh = new THREE.Mesh(sphereGeo, mat)
+      mesh.position.set(
+        (Math.random() - 0.5) * 3,
+        (Math.random() - 0.5) * 3,
+        (Math.random() - 0.5) * 3,
+      )
+      mesh.userData = { idx: i, ch, group, meta }
+      scene.add(mesh)
+      meshes.push(mesh)
+
+      const spriteMat = new THREE.SpriteMaterial({
+        map: glowTex, color: meta.hex,
+        blending: THREE.AdditiveBlending,
+        transparent: true, opacity: 0.5, depthWrite: false,
+      })
+      const sprite = new THREE.Sprite(spriteMat)
+      sprite.scale.set(0.35, 0.35, 1)
+      sprite.position.copy(mesh.position)
+      scene.add(sprite)
+      glows.push(sprite)
+    })
+
+    // Pointer orbit (horizontal only)
+    let isDragging = false, prevX = 0
+    const onPointerDown = (e) => { isDragging = true; prevX = e.clientX; canvas.setPointerCapture(e.pointerId) }
+    const onPointerMove = (e) => { if (isDragging) { sceneRef.current.theta -= (e.clientX - prevX) * 0.006; prevX = e.clientX } }
+    const onPointerUp   = () => { isDragging = false }
+    canvas.addEventListener('pointerdown', onPointerDown)
+    canvas.addEventListener('pointermove', onPointerMove)
+    canvas.addEventListener('pointerup',   onPointerUp)
+
+    // Render loop
+    const state = { theta: 0, phi: 1.2, radius: 5, isDragging: false, animId: null }
+    const animate = () => {
+      state.animId = requestAnimationFrame(animate)
+      state.theta += 0.004
+      camera.position.x = state.radius * Math.sin(state.phi) * Math.sin(state.theta)
+      camera.position.y = state.radius * Math.cos(state.phi)
+      camera.position.z = state.radius * Math.sin(state.phi) * Math.cos(state.theta)
+      camera.lookAt(0, 0, 0)
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    sceneRef.current = {
+      renderer, scene, camera, meshes, glows, lines: [],
+      sphereGeo, glowTex, starGeo,
+      ...state,
+    }
+    labelsRef.current = labels
+
+    return () => {
+      cancelAnimationFrame(state.animId)
+      canvas.removeEventListener('pointerdown', onPointerDown)
+      canvas.removeEventListener('pointermove', onPointerMove)
+      canvas.removeEventListener('pointerup',   onPointerUp)
+      sphereGeo.dispose()
+      glowTex.dispose()
+      starGeo.dispose()
+      renderer.dispose()
+      sceneRef.current = null
+    }
+  }, [labels.length])
+
   return (
     <div className="card">
-      <p className="text-slate-500 text-xs">scaffold only — scene coming in next task</p>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Embedding Space</h3>
+          <InfoIcon topicId="watch-it-learn" />
+        </div>
+        <div className="flex items-center gap-3">
+          {latest && <span className="text-xs text-slate-500 font-mono">step {latest.step}</span>}
+        </div>
+      </div>
+
+      <div ref={wrapperRef} className="relative rounded-lg overflow-hidden">
+        <canvas
+          ref={canvasRef}
+          className="w-full cursor-grab active:cursor-grabbing"
+          style={{ height: 360, display: 'block' }}
+        />
+      </div>
+
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px]">
+        {Object.entries(GROUP_META).map(([key, { label, css }]) => (
+          <div key={key} className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: css }} />
+            <span className="text-slate-500">{label}s</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-xs text-slate-500 mt-2">
+        {!latest
+          ? 'Start training to watch embeddings form.'
+          : 'Drag to orbit · Scroll to zoom · Hover a node for details'}
+      </p>
     </div>
   )
 }
