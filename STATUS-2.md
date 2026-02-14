@@ -82,39 +82,39 @@
 **Reference:** Section 4 (LLM Architecture Deep Dive), Section 5.1 (Backend Data Models)
 
 ### Tasks
-- [ ] Create `backend/micro_gpt.py`
-- [ ] Implement `Head` class (single attention head):
-  - [ ] Query, Key, Value projections
-  - [ ] Causal mask (lower triangular)
-  - [ ] Attention score computation
-  - [ ] Softmax + dropout
-  - [ ] Attention weight extraction hook (`self.last_attention`)
-- [ ] Implement `MultiHeadAttention` class:
-  - [ ] Create multiple `Head` instances
-  - [ ] Concatenate outputs
-  - [ ] Output projection
-- [ ] Implement `FeedForward` class:
-  - [ ] Linear expansion (n_embd → 4*n_embd)
-  - [ ] ReLU activation
-  - [ ] Linear contraction (4*n_embd → n_embd)
-  - [ ] Dropout
-- [ ] Implement `TransformerBlock` class:
-  - [ ] Layer normalization before attention
-  - [ ] Multi-head attention with residual connection
-  - [ ] Layer normalization before feedforward
-  - [ ] Feedforward with residual connection
-- [ ] Implement `MicroGPT` model class:
-  - [ ] Token embedding table (vocab_size × n_embd)
-  - [ ] Positional embedding table (block_size × n_embd)
-  - [ ] Stack of `TransformerBlock` modules
-  - [ ] Final layer normalization
-  - [ ] Output head with weight tying
-  - [ ] `forward()` method with loss computation
-  - [ ] `generate()` method for autoregressive sampling
-  - [ ] `extract_attention_weights()` method
-- [ ] Verify parameter count ≈ 7,900 with `sum(p.numel() for p in model.parameters())`
-- [ ] Test forward pass with dummy input
-- [ ] Test generation with random initialization
+- [x] Create `backend/micro_gpt.py`
+- [x] Implement `Head` class (single attention head):
+  - [x] Query, Key, Value projections
+  - [x] Causal mask (lower triangular)
+  - [x] Attention score computation
+  - [x] Softmax + dropout
+  - [x] Attention weight extraction hook (`self.last_attention`)
+- [x] Implement `MultiHeadAttention` class:
+  - [x] Create multiple `Head` instances
+  - [x] Concatenate outputs
+  - [x] Output projection
+- [x] Implement `FeedForward` class:
+  - [x] Linear expansion (n_embd → 4*n_embd)
+  - [x] ReLU activation
+  - [x] Linear contraction (4*n_embd → n_embd)
+  - [x] Dropout
+- [x] Implement `TransformerBlock` class:
+  - [x] Layer normalization before attention
+  - [x] Multi-head attention with residual connection
+  - [x] Layer normalization before feedforward
+  - [x] Feedforward with residual connection
+- [x] Implement `MicroGPT` model class:
+  - [x] Token embedding table (vocab_size × n_embd)
+  - [x] Positional embedding table (block_size × n_embd)
+  - [x] Stack of `TransformerBlock` modules
+  - [x] Final layer normalization
+  - [x] Output head with weight tying
+  - [x] `forward()` method with loss computation
+  - [x] `generate()` method for autoregressive sampling
+  - [x] `extract_attention_weights()` method
+- [x] Verify parameter count ≈ 7,900 (actual: 8,368 — doc's ~7,900 excluded LN biases)
+- [x] Test forward pass with dummy input
+- [x] Test generation with random initialization
 
 ---
 
@@ -125,43 +125,43 @@
 **Reference:** Section 4.3 (Training Hyperparameters), Section 5.1 (TrainingSession), Section 7.2 (WebSocket Events)
 
 ### Tasks
-- [ ] Create `backend/training_manager.py`
-- [ ] Implement `TrainingSession` dataclass:
-  - [ ] All fields from Section 5.1
-  - [ ] Session status enum (idle, running, paused, stopped, completed, error)
-  - [ ] Metrics history storage (loss, attention, samples)
-- [ ] Implement `TrainingManager` class:
-  - [ ] `sessions: Dict[str, TrainingSession]` storage
-  - [ ] `create_session(config)` → session_id
-  - [ ] `get_session(session_id)` → TrainingSession
-  - [ ] `start_training(session_id)` - Launch background task
-  - [ ] `pause_training(session_id)` - Set status to paused
-  - [ ] `resume_training(session_id)` - Set status to running
-  - [ ] `stop_training(session_id)` - Terminate training
-  - [ ] `cleanup_session(session_id)` - Remove from memory
-- [ ] Create `backend/trainer.py`
-- [ ] Implement training loop:
-  - [ ] Get batch from dataset
-  - [ ] Forward pass
-  - [ ] Compute loss (cross-entropy)
-  - [ ] Backward pass
-  - [ ] Optimizer step (AdamW)
-  - [ ] Check for pause/stop signals (every iteration)
-  - [ ] Respect speed_multiplier (sleep accordingly)
-- [ ] Implement evaluation logic (every `eval_interval` steps):
-  - [ ] Compute train/val loss
-  - [ ] Extract attention weights from all heads
-  - [ ] Generate text sample
-  - [ ] Emit metrics via WebSocket
-- [ ] Create `backend/metrics_emitter.py`
-- [ ] Implement emission functions:
-  - [ ] `emit_training_metrics(session_id, step, train_loss, val_loss)`
-  - [ ] `emit_generated_sample(session_id, step, text, prompt)`
-  - [ ] `emit_attention_snapshot(session_id, step, layer, head, matrix, tokens)`
-  - [ ] Convert torch tensors → JSON (`.numpy().tolist()`)
-  - [ ] Throttle to max 30 updates/sec
-- [ ] Test training loop end-to-end with small dataset
-- [ ] Verify WebSocket events are emitted correctly
+- [x] Create `backend/training_manager.py` (done in Phase 2)
+- [x] Implement `TrainingSession` dataclass:
+  - [x] All fields from Section 5.1
+  - [x] Session status enum (idle, running, paused, stopped, completed, error)
+  - [x] Metrics history storage (loss, attention, samples)
+- [x] Implement `TrainingManager` class:
+  - [x] `sessions: Dict[str, TrainingSession]` storage
+  - [x] `create_session(config)` → session_id
+  - [x] `get_session(session_id)` → TrainingSession
+  - [x] `start_training(session_id)` - Launch background task
+  - [x] `pause_training(session_id)` - Set status to paused
+  - [x] `resume_training(session_id)` - Set status to running
+  - [x] `stop_training(session_id)` - Terminate training
+  - [x] `cleanup_session(session_id)` - Remove from memory
+- [x] Create `backend/trainer.py`
+- [x] Implement training loop:
+  - [x] Get batch from dataset
+  - [x] Forward pass
+  - [x] Compute loss (cross-entropy)
+  - [x] Backward pass
+  - [x] Optimizer step (AdamW)
+  - [x] Check for pause/stop signals (every iteration)
+  - [x] Respect speed_multiplier (sleep accordingly)
+- [x] Implement evaluation logic (every `eval_interval` steps):
+  - [x] Compute train/val loss
+  - [x] Extract attention weights from all heads
+  - [x] Generate text sample
+  - [x] Emit metrics via WebSocket
+- [x] Create `backend/metrics_emitter.py`
+- [x] Implement emission functions:
+  - [x] `emit_training_metrics(session_id, step, train_loss, val_loss)`
+  - [x] `emit_generated_sample(session_id, step, text, prompt)`
+  - [x] `emit_attention_snapshot(session_id, step, layer, head, matrix, tokens)`
+  - [x] Convert torch tensors → JSON (`.numpy().tolist()`)
+  - [x] Throttle to max 30 updates/sec
+- [x] Test training loop end-to-end with small dataset
+- [x] Verify WebSocket events are emitted correctly
 
 ---
 

@@ -3,7 +3,6 @@ eventlet.monkey_patch()
 
 import os
 import uuid
-import time
 from datetime import datetime, timezone
 
 from flask import Flask, request, jsonify
@@ -12,6 +11,7 @@ from flask_cors import CORS
 
 from models import SessionStatus
 from training_manager import TrainingManager
+import trainer as _trainer
 
 # ---------------------------------------------------------------------------
 # App setup
@@ -27,8 +27,11 @@ socketio = SocketIO(app, cors_allowed_origins='*', async_mode='eventlet')
 manager = TrainingManager()
 
 DATASETS_DIR = os.path.join(os.path.dirname(__file__), 'datasets')
-UPLOADS_DIR = os.path.join(os.path.dirname(__file__), 'uploads')
+UPLOADS_DIR  = os.path.join(os.path.dirname(__file__), 'uploads')
 os.makedirs(UPLOADS_DIR, exist_ok=True)
+
+# Give the trainer module its datasets path
+_trainer.DATASETS_DIR = DATASETS_DIR
 
 # In-memory store for user-uploaded dataset text keyed by dataset_id
 user_datasets: dict = {}
@@ -339,83 +342,14 @@ def on_set_speed(data):
 
 
 # ---------------------------------------------------------------------------
-# Background training loop (stub — full impl in Phase 4)
+# Background training loop — delegates to trainer.py
 # ---------------------------------------------------------------------------
 
 def _run_training(session_id: str):
-    """
-    Placeholder training loop. Emits mock metrics so the WebSocket
-    infrastructure can be validated end-to-end before the real model
-    (Phase 3/4) is wired in.
-    """
-    import math
-
     session = manager.get_session(session_id)
     if not session:
         return
-
-    max_iters = session.training_config.get('max_iters', 500)
-    eval_interval = session.training_config.get('eval_interval', 50)
-    base_sleep = 0.05  # seconds per iteration at 1x speed
-
-    for i in range(session.current_iter, max_iters):
-        # Respect pause / stop
-        while session.status == SessionStatus.PAUSED:
-            if getattr(session, '_step_once', False):
-                session._step_once = False
-                break
-            socketio.sleep(0.1)
-
-        if session.status in (SessionStatus.STOPPED, SessionStatus.ERROR):
-            return
-
-        session.current_iter = i + 1
-
-        # Emit metrics every eval_interval steps
-        if (i + 1) % eval_interval == 0 or i == 0:
-            # Placeholder loss values (real ones come from Phase 3 model)
-            train_loss = 3.5 * math.exp(-0.006 * i) + 0.3
-            val_loss = train_loss + 0.15
-
-            metrics = {
-                'session_id': session_id,
-                'step': i + 1,
-                'train_loss': round(train_loss, 4),
-                'val_loss': round(val_loss, 4),
-                'timestamp': _ts(),
-            }
-            session.loss_history.append(metrics)
-            socketio.emit('training_metrics', metrics, room=session_id)
-
-            # Placeholder generated sample
-            sample = {
-                'session_id': session_id,
-                'step': i + 1,
-                'text': f'[step {i+1}] sample text placeholder',
-                'prompt': '',
-                'timestamp': _ts(),
-            }
-            session.generated_samples.append(sample)
-            socketio.emit('generated_sample', sample, room=session_id)
-
-        # Speed-aware sleep
-        sleep_time = base_sleep / max(session.speed_multiplier, 0.1)
-        socketio.sleep(sleep_time)
-
-    # Training completed
-    session.status = SessionStatus.COMPLETED
-    session.completed_at = datetime.now()
-
-    final = session.loss_history[-1] if session.loss_history else {}
-    socketio.emit('training_completed', {
-        'session_id': session_id,
-        'final_train_loss': final.get('train_loss'),
-        'final_val_loss': final.get('val_loss'),
-        'total_time_seconds': round(
-            (session.completed_at - session.started_at).total_seconds(), 2
-        ) if session.started_at else None,
-        'timestamp': _ts(),
-    }, room=session_id)
+    _trainer.run_training(session, socketio)
 
 
 # ---------------------------------------------------------------------------
