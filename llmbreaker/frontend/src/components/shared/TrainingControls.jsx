@@ -47,6 +47,18 @@ export default function TrainingControls({
   maxItersConfig,
   evalIntervalConfig,
   modelSizeConfig,
+  learningRateConfig,
+  batchSizeConfig,
+  blockSizeConfig,
+  dropoutConfig,
+  warmupConfig,
+  temperatureConfig,
+  onLearningRateChange,
+  onBatchSizeChange,
+  onBlockSizeChange,
+  onDropoutChange,
+  onWarmupChange,
+  onTemperatureChange,
 }) {
   const isIdle      = !status || status === SESSION_STATUS.IDLE
   const isRunning   = status === SESSION_STATUS.RUNNING
@@ -211,6 +223,18 @@ export default function TrainingControls({
           onMaxItersChange={onMaxItersChange}
           onEvalIntervalChange={onEvalIntervalChange}
           onModelSizeChange={onModelSizeChange}
+          learningRate={learningRateConfig}
+          batchSize={batchSizeConfig}
+          blockSize={blockSizeConfig}
+          dropout={dropoutConfig}
+          warmup={warmupConfig}
+          temperature={temperatureConfig}
+          onLearningRateChange={onLearningRateChange}
+          onBatchSizeChange={onBatchSizeChange}
+          onBlockSizeChange={onBlockSizeChange}
+          onDropoutChange={onDropoutChange}
+          onWarmupChange={onWarmupChange}
+          onTemperatureChange={onTemperatureChange}
           disabled={disabled}
           isTraining={isTraining}
         />
