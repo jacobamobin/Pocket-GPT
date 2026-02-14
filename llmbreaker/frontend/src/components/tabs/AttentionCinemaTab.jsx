@@ -282,7 +282,7 @@ export default function AttentionCinemaTab() {
                 </h3>
                 {detailSnap ? (
                   renderMode === '3d' ? (
-                    <Heatmap3D matrix={detailSnap.matrix} />
+                    <Heatmap3D matrix={detailSnap.matrix} tokens={detailSnap.tokens} />
                   ) : (
                     <div className="flex justify-center">
                       <Heatmap2D
