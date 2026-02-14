@@ -53,6 +53,53 @@ function knn(idx, coords, k = 4) {
 
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) }
 
+function buildConnectionLines(scene, existingLines, meshes, coords, labels) {
+  // Remove old lines
+  existingLines.forEach(l => {
+    scene.remove(l)
+    l.geometry.dispose()
+    l.material.dispose()
+  })
+
+  if (coords.length === 0) return []
+
+  const newLines = []
+  const seen = new Set()
+
+  coords.forEach((_, i) => {
+    const neighbors = knn(i, coords, 4)
+    neighbors.forEach(j => {
+      const key = i < j ? `${i}-${j}` : `${j}-${i}`
+      if (seen.has(key)) return
+      seen.add(key)
+
+      const d = dist3(coords[i], coords[j])
+      const opacity = clamp(1 - d / 2.5, 0.04, 0.55)
+
+      const colorA = new THREE.Color(GROUP_META[getGroup(labels[i] || '')].hex)
+      const colorB = new THREE.Color(GROUP_META[getGroup(labels[j] || '')].hex)
+      colorA.lerp(colorB, 0.5)
+
+      const geo = new THREE.BufferGeometry().setFromPoints([
+        meshes[i].position.clone(),
+        meshes[j].position.clone(),
+      ])
+      const mat = new THREE.LineBasicMaterial({
+        color: colorA,
+        transparent: true,
+        opacity,
+        depthWrite: false,
+      })
+      const line = new THREE.Line(geo, mat)
+      line.userData = { a: i, b: j }
+      scene.add(line)
+      newLines.push(line)
+    })
+  })
+
+  return newLines
+}
+
 // ── Full Three.js component ───────────────────────────────────────────────────
 export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo }) {
   const wrapperRef = useRef(null)
@@ -197,6 +244,7 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
       glowTex.dispose()
       starGeo.dispose()
       renderer.dispose()
+      sceneRef.current?.lines?.forEach(l => { l.geometry.dispose(); l.material.dispose() })
       sceneRef.current = null
     }
   }, [labels.length])
@@ -224,7 +272,13 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
         glows[i].position.copy(meshes[i].position)
       }
       coordsRef.current = coords
-      if (t < 1) frame = requestAnimationFrame(lerp)
+      if (t < 1) {
+        frame = requestAnimationFrame(lerp)
+      } else {
+        // Rebuild connection lines once positions settle
+        const s = sceneRef.current
+        if (s) s.lines = buildConnectionLines(s.scene, s.lines, meshes, coords, labelsRef.current)
+      }
     }
     lerp()
     return () => cancelAnimationFrame(frame)
