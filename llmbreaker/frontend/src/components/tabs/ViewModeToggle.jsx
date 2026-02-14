@@ -10,16 +10,22 @@ export default function ViewModeToggle({ viewMode, onViewMode, renderMode, onRen
     <div className="card flex flex-col gap-3">
       <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">View Mode</h3>
 
-      {/* Overview / Detail */}
-      <div className="flex gap-1">
-        {['overview', 'detail'].map(mode => (
+      {/* Evolution / Grid / Detail */}
+      <div className="flex flex-wrap gap-1">
+        {['evolution', 'grid', 'detail'].map(mode => (
           <button
             key={mode}
             onClick={() => onViewMode(mode)}
             className={`${btnBase} ${viewMode === mode ? active : inactive}`}
-            title={mode === 'overview' ? 'Overview: See all layers/heads' : 'Detail: Drill into one head'}
+            title={
+              mode === 'evolution' ? 'Evolution: Watch attention learn over time' :
+              mode === 'grid' ? 'Grid: See all layers/heads at once' :
+              'Detail: Drill into one head'
+            }
           >
-            {mode.charAt(0).toUpperCase() + mode.slice(1)}
+            {mode === 'evolution' ? 'Evolution' :
+             mode === 'grid' ? 'Grid' :
+             'Detail'}
           </button>
         ))}
       </div>

@@ -11,6 +11,7 @@ import TrainingControls    from '../shared/TrainingControls'
 import ViewModeToggle      from './ViewModeToggle'
 import LayerHeadSelector   from './LayerHeadSelector'
 import AttentionHeatmapGrid from './AttentionHeatmapGrid'
+import AttentionEvolutionDisplay from './AttentionEvolutionDisplay'
 import Heatmap2D           from './Heatmap2D'
 import Heatmap3D           from './Heatmap3D'
 import PlaybackTimeline    from './PlaybackTimeline'
@@ -21,24 +22,28 @@ export default function AttentionCinemaTab() {
   const { dispatch: uiDispatch }                         = useContext(UIContext)
   const { socket }                                       = useWebSocket()
 
-  // ── Local state ────────────────────────────────────────────────────────────
-  const [sessionId,     setSessionId]     = useState(null)
-  const [starting,      setStarting]      = useState(false)
-  const [viewMode,      setViewMode]      = useState('overview')   // 'overview' | 'detail'
-  const [renderMode,    setRenderMode]    = useState('2d')          // '2d' | '3d'
-  const [selectedLayer, setSelectedLayer] = useState(0)
-  const [selectedHead,  setSelectedHead]  = useState(0)
-  const [playbackStep,  setPlaybackStep]  = useState(null)          // null = follow latest
-  const [isPlaying,     setIsPlaying]     = useState(false)
+  // ── Local state ────────────────────────────────────────────────────
+  const [sessionId,         setSessionId]     = useState(null)
+  const [starting,          setStarting]      = useState(false)
+  const [viewMode,          setViewMode]      = useState('evolution') // 'evolution' | 'grid' | 'detail'
+  const [renderMode,        setRenderMode]    = useState('2d')          // '2d' | '3d'
+  const [selectedLayer,     setSelectedLayer] = useState(0)
+  const [selectedHead,      setSelectedHead]  = useState(0)
+  const [playbackStep,      setPlaybackStep]  = useState(null)          // null = follow latest
+  const [isPlaying,         setIsPlaying]     = useState(false)
+  const [maxItersConfig,    setMaxItersConfig] = useState(5000)
+  const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
+  const [modelSizeConfig,   setModelSizeConfig] = useState('medium')
 
   const controls = useTrainingSession(socket, sessionId)
 
-  // ── Derived data ───────────────────────────────────────────────────────────
+  // ── Derived data ───────────────────────────────────────────────────
   const session    = sessionId ? training.sessions[sessionId] : null
   const snapshots  = sessionId ? (metrics[sessionId]?.attentionSnapshots ?? []) : []
   const status     = session?.status ?? null
   const currentIter = session?.currentIter ?? 0
-  const maxIters   = session?.maxIters ?? 500
+  const maxIters    = session?.maxIters ?? 5000
+  const modelConfig = session?.modelConfig ?? { n_layer: 4, n_head: 4 }
 
   // Sorted unique steps with snapshot data
   const steps = [...new Set(snapshots.map(s => s.step))].sort((a, b) => a - b)
@@ -85,9 +90,13 @@ export default function AttentionCinemaTab() {
     setStarting(true)
     try {
       const data = await createSession({
-        feature_type:    'attention_cinema',
-        dataset_id:      'shakespeare',
-        hyperparameters: { max_iters: 500, eval_interval: 50 },
+        feature_type: 'attention_cinema',
+        dataset_id:   'shakespeare',
+        hyperparameters: {
+          max_iters: maxItersConfig,
+          eval_interval: evalIntervalConfig,
+          model_size: modelSizeConfig,
+        },
       })
 
       const sid = data.session_id
@@ -117,10 +126,10 @@ export default function AttentionCinemaTab() {
     }
   }
 
-  const handlePause  = () => controls.pause()
-  const handleStop   = () => controls.stop()
-  const handleStep   = () => controls.step()
-  const handleSpeed  = useCallback((v) => controls.setSpeed(v), [controls])
+  const handlePause     = () => controls.pause()
+  const handleStop      = () => controls.stop()
+  const handleStep      = () => controls.step()
+  const handleSpeed     = useCallback((v) => controls.setSpeed(v), [controls])
 
   function handleSelectCell(layer, head) {
     setSelectedLayer(layer)
@@ -129,7 +138,7 @@ export default function AttentionCinemaTab() {
   }
 
   return (
-    <div className="p-6 flex flex-col gap-6 max-w-5xl mx-auto">
+    <div className="p-6 flex flex-col gap-6 max-w-6xl mx-auto">
 
       {/* Top row: controls + view toggle */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -142,7 +151,14 @@ export default function AttentionCinemaTab() {
           onStop={handleStop}
           onStep={handleStep}
           onSpeedChange={handleSpeed}
+          onMaxItersChange={setMaxItersConfig}
+          onEvalIntervalChange={setEvalIntervalConfig}
+          onModelSizeChange={setModelSizeConfig}
           disabled={starting}
+          isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
+          maxItersConfig={maxItersConfig}
+          evalIntervalConfig={evalIntervalConfig}
+          modelSizeConfig={modelSizeConfig}
         />
         <ViewModeToggle
           viewMode={viewMode}
@@ -173,77 +189,109 @@ export default function AttentionCinemaTab() {
       </AnimatePresence>
 
       {/* Visualization */}
-      <div className="card min-h-[260px]">
-        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
-          Attention Visualization
-          {displayStep !== null && (
-            <span className="ml-3 text-xs text-slate-500 font-normal normal-case">
-              — step {displayStep}
-            </span>
-          )}
-        </h3>
-
+      <AnimatePresence mode="wait">
         {snapshots.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-40 gap-3 text-slate-600 text-sm">
-            {!session ? (
-              <>
-                <p>Start training to watch attention patterns form.</p>
-                <button
-                  onClick={handlePlay}
-                  disabled={starting}
-                  className="px-4 py-2 rounded-lg border border-blue-600 bg-blue-600 text-white text-sm
-                             hover:bg-blue-500 transition-colors disabled:opacity-40"
-                >
-                  {starting ? 'Starting…' : '▶ Start Training (Shakespeare)'}
-                </button>
-              </>
-            ) : (
-              <p>Training started — attention snapshots will appear every 50 steps…</p>
-            )}
+          <div key="empty" className="card min-h-[260px]">
+            <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
+              Attention Visualization
+            </h3>
+            <div className="flex flex-col items-center justify-center h-40 gap-3 text-slate-600 text-sm">
+              {!session ? (
+                <>
+                  <p>Start training to watch attention patterns form.</p>
+                  <button
+                    onClick={handlePlay}
+                    disabled={starting}
+                    className="px-4 py-2 rounded-lg border border-blue-600 bg-blue-600 text-white text-sm
+                               hover:bg-blue-500 transition-colors disabled:opacity-40"
+                  >
+                    {starting ? 'Starting…' : '▶ Start Training (Shakespeare)'}
+                  </button>
+                </>
+              ) : (
+                <p>Training started — attention snapshots will appear every {evalIntervalConfig} steps…</p>
+              )}
+            </div>
           </div>
         ) : (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={viewMode}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
+          <motion.div
+            key={viewMode}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.2 }}
             >
-              {viewMode === 'overview' ? (
+            {viewMode === 'evolution' ? (
+              <AttentionEvolutionDisplay
+                snapshots={snapshots}
+                layer={selectedLayer}
+                head={selectedHead}
+              />
+            ) : viewMode === 'grid' ? (
+              <div className="card">
+                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
+                  All Attention Patterns
+                  {displayStep !== null && (
+                    <span className="ml-3 text-xs text-slate-500 font-normal normal-case">
+                      — step {displayStep}
+                    </span>
+                  )}
+                </h3>
                 <AttentionHeatmapGrid
                   snapshots={snapshots}
                   currentStep={displayStep}
                   onSelectCell={handleSelectCell}
+                  modelConfig={modelConfig}
                 />
-              ) : (
-                /* Detail mode */
-                renderMode === '3d' ? (
-                  <Heatmap3D matrix={detailSnap?.matrix} />
+              </div>
+            ) : (
+              /* Detail mode */
+              <div className="card min-h-[260px]">
+                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
+                  Attention Detail — Layer {selectedLayer}, Head {selectedHead}
+                  {displayStep !== null && (
+                    <span className="ml-3 text-xs text-slate-500 font-normal normal-case">
+                      — step {displayStep}
+                    </span>
+                  )}
+                </h3>
+                {detailSnap ? (
+                  renderMode === '3d' ? (
+                    <Heatmap3D matrix={detailSnap.matrix} />
+                  ) : (
+                    <div className="flex justify-center">
+                      <Heatmap2D
+                        matrix={detailSnap.matrix}
+                        tokens={detailSnap.tokens}
+                        size="large"
+                      />
+                    </div>
+                  )
                 ) : (
-                  <div className="flex justify-center">
-                    <Heatmap2D
-                      matrix={detailSnap?.matrix}
-                      tokens={detailSnap?.tokens}
-                      size="large"
-                    />
+                  <div className="flex flex-col items-center justify-center h-40 text-slate-600 text-sm">
+                    <p>No snapshot available for this layer/head</p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Wait for next checkpoint or select a different layer/head
+                    </p>
                   </div>
-                )
-              )}
-            </motion.div>
-          </AnimatePresence>
+                )}
+              </div>
+            )}
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
 
       {/* Playback timeline */}
-      <PlaybackTimeline
-        steps={steps}
-        currentStep={playbackStep}
-        onStepChange={(s) => { setPlaybackStep(s); setIsPlaying(false) }}
-        isPlaying={isPlaying}
-        onPlayToggle={() => setIsPlaying(v => !v)}
-        maxIters={maxIters}
-      />
+      {steps.length > 0 && (
+        <PlaybackTimeline
+          steps={steps}
+          currentStep={playbackStep}
+          onStepChange={(s) => { setPlaybackStep(s); setIsPlaying(false) }}
+          isPlaying={isPlaying}
+          onPlayToggle={() => setIsPlaying(v => !v)}
+          maxIters={maxIters}
+        />
+      )}
 
     </div>
   )
