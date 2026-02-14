@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect, useMemo } from 'react'
 import { SPEED_OPTIONS, SESSION_STATUS } from '../../types/index.js'
-import TrainingConfigPanel from './TrainingConfigPanel.jsx'
 import InfoIcon from './InfoIcon'
 
 function IconButton({ onClick, disabled, title, children, variant = 'default' }) {
@@ -39,26 +38,9 @@ export default function TrainingControls({
   onStop,
   onStep,
   onSpeedChange,
-  onMaxItersChange,
-  onEvalIntervalChange,
-  onModelSizeChange,
+  onOpenConfig,
   disabled,
   isTraining,
-  maxItersConfig,
-  evalIntervalConfig,
-  modelSizeConfig,
-  learningRateConfig,
-  batchSizeConfig,
-  blockSizeConfig,
-  dropoutConfig,
-  warmupConfig,
-  temperatureConfig,
-  onLearningRateChange,
-  onBatchSizeChange,
-  onBlockSizeChange,
-  onDropoutChange,
-  onWarmupChange,
-  onTemperatureChange,
 }) {
   const isIdle      = !status || status === SESSION_STATUS.IDLE
   const isRunning   = status === SESSION_STATUS.RUNNING
@@ -170,6 +152,18 @@ export default function TrainingControls({
           </svg>
         </IconButton>
 
+        {/* Config */}
+        <IconButton
+          onClick={onOpenConfig}
+          disabled={isTraining}
+          title="Training configuration"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </IconButton>
+
         {/* Spacer */}
         <div className="flex-1" />
 
@@ -212,32 +206,6 @@ export default function TrainingControls({
             />
           </div>
         </div>
-      )}
-
-      {/* Training Configuration Panel */}
-      {onMaxItersChange && onEvalIntervalChange && (
-        <TrainingConfigPanel
-          maxIters={maxItersConfig}
-          evalInterval={evalIntervalConfig}
-          modelSize={modelSizeConfig}
-          onMaxItersChange={onMaxItersChange}
-          onEvalIntervalChange={onEvalIntervalChange}
-          onModelSizeChange={onModelSizeChange}
-          learningRate={learningRateConfig}
-          batchSize={batchSizeConfig}
-          blockSize={blockSizeConfig}
-          dropout={dropoutConfig}
-          warmup={warmupConfig}
-          temperature={temperatureConfig}
-          onLearningRateChange={onLearningRateChange}
-          onBatchSizeChange={onBatchSizeChange}
-          onBlockSizeChange={onBlockSizeChange}
-          onDropoutChange={onDropoutChange}
-          onWarmupChange={onWarmupChange}
-          onTemperatureChange={onTemperatureChange}
-          disabled={disabled}
-          isTraining={isTraining}
-        />
       )}
 
       {/* Status badge */}

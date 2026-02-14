@@ -142,6 +142,7 @@ export default function TrainingConfigPanel({
   onDropoutChange,
   onWarmupChange,
   onTemperatureChange,
+  drawerMode = false,
 }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [openGroups, setOpenGroups] = useState({ brain: true, learn: true, generate: true })
@@ -183,49 +184,8 @@ export default function TrainingConfigPanel({
 
   const isLocked = disabled || isTraining
 
-  return (
-    <div className="border border-neural-border rounded-lg overflow-hidden">
-      {/* Header */}
-      <div
-        onClick={() => !isTraining && setIsExpanded(!isExpanded)}
-        role="button"
-        tabIndex={isTraining ? -1 : 0}
-        onKeyDown={(e) => e.key === 'Enter' && !isTraining && setIsExpanded(!isExpanded)}
-        className={`
-          w-full px-4 py-3 flex items-center justify-between
-          bg-neural-surface hover:bg-neural-border/50
-          transition-colors duration-150 cursor-pointer
-          ${isTraining ? 'opacity-50 cursor-not-allowed' : ''}
-        `}
-      >
-        <div className="flex items-center gap-2">
-          <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span className="text-sm font-medium text-slate-300">Training Configuration</span>
-        </div>
-        <motion.svg
-          animate={{ rotate: isExpanded ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-          className="w-4 h-4 text-slate-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </motion.svg>
-      </div>
-
-      {/* Collapsible content */}
-      {isExpanded && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 'auto', opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="px-4 py-4 border-t border-neural-border bg-neural-surface/50"
-        >
+  const content = (
+    <div className={drawerMode ? 'space-y-0' : 'px-4 py-4 border-t border-neural-border bg-neural-surface/50'}>
           {/* ── Group 1: Model Brain ── */}
           <GroupSection
             title="Model Brain"
@@ -234,8 +194,8 @@ export default function TrainingConfigPanel({
             onToggle={() => toggleGroup('brain')}
           >
             <ConfigRow
-              label="Brain Size"
-              sublabel="More neurons = smarter but slower to train"
+              label="Architecture (n_embd / n_layer / n_head)"
+              sublabel="Sets embedding dim, depth, and attention heads. More params → lower loss ceiling, slower wall-clock per step."
             >
               <PillGroup
                 options={Object.entries(modelSizes).map(([k, v]) => ({ value: k, label: v.label, desc: v.description }))}
@@ -249,8 +209,8 @@ export default function TrainingConfigPanel({
             </ConfigRow>
 
             <ConfigRow
-              label="Memory Span"
-              sublabel="How many characters the model can see at once when predicting the next one"
+              label="Context Window (block_size)"
+              sublabel="Max sequence length for causal self-attention. Quadratic memory cost — doubling block_size 4× the attention matrix."
             >
               <PillGroup
                 options={blockSizeOptions}
@@ -261,8 +221,8 @@ export default function TrainingConfigPanel({
             </ConfigRow>
 
             <ConfigRow
-              label="Dropout"
-              sublabel="Randomly ignores neurons during training — prevents memorizing, improves generalizing"
+              label="Dropout (p)"
+              sublabel="Bernoulli noise applied to activations during forward pass. Regularises the network — reduces co-adaptation of neurons. Not used at inference."
             >
               <SliderWithValue
                 min={0} max={0.5} step={0.05}
@@ -285,8 +245,8 @@ export default function TrainingConfigPanel({
             onToggle={() => toggleGroup('learn')}
           >
             <ConfigRow
-              label="Learning Rate"
-              sublabel="How big each update step is — too fast = unstable, too slow = takes forever"
+              label="Peak Learning Rate (η)"
+              sublabel="Step size for AdamW gradient descent. Too high → loss spikes / divergence. Too low → underfitting within budget. Cosine-decays to η/10 over training."
             >
               <PillGroup
                 options={[
@@ -301,8 +261,8 @@ export default function TrainingConfigPanel({
             </ConfigRow>
 
             <ConfigRow
-              label="Batch Size"
-              sublabel="How many text chunks it learns from at once — bigger = more stable but uses more memory"
+              label="Batch Size (B)"
+              sublabel="Number of sequences per gradient update. Larger B → lower gradient variance, but linear memory cost. Effective LR often scales with B."
             >
               <PillGroup
                 options={[
@@ -317,8 +277,8 @@ export default function TrainingConfigPanel({
             </ConfigRow>
 
             <ConfigRow
-              label="Training Steps"
-              sublabel="More steps = better model, but takes longer"
+              label="Training Steps (T)"
+              sublabel="Total gradient updates. Loss typically follows a power-law decay — early steps compress the most information, diminishing returns after convergence."
             >
               <SliderWithValue
                 min={500} max={15000} step={500}
@@ -336,8 +296,8 @@ export default function TrainingConfigPanel({
             </ConfigRow>
 
             <ConfigRow
-              label="Learning Rate Warmup"
-              sublabel="Starts with tiny steps to stabilize early training, then ramps up"
+              label="LR Warmup (100 steps)"
+              sublabel="Linear ramp from 0 → η over the first 100 steps. Prevents large gradient updates before embeddings are initialised, stabilises early loss."
             >
               <Toggle value={warmup} onChange={onWarmupChange} disabled={isLocked} />
             </ConfigRow>
@@ -351,8 +311,8 @@ export default function TrainingConfigPanel({
             onToggle={() => toggleGroup('generate')}
           >
             <ConfigRow
-              label="Temperature"
-              sublabel="Lower = predictable and repetitive. Higher = creative and chaotic."
+              label="Sampling Temperature (τ)"
+              sublabel="Scales logits before softmax: p(x) ∝ exp(logit/τ). τ&lt;1 sharpens the distribution (greedy-ish), τ&gt;1 flattens it (high entropy)."
             >
               <SliderWithValue
                 min={0.3} max={1.5} step={0.1}
@@ -367,8 +327,8 @@ export default function TrainingConfigPanel({
             </ConfigRow>
 
             <ConfigRow
-              label="Update Frequency"
-              sublabel="How often to refresh charts and generate text samples (in steps)"
+              label="Eval Interval (steps)"
+              sublabel="How often to run the validation loop and emit metrics. More frequent = smoother loss curve but adds ~2% overhead per eval."
             >
               <SliderWithValue
                 min={25} max={200} step={25}
@@ -382,8 +342,34 @@ export default function TrainingConfigPanel({
               </div>
             </ConfigRow>
           </GroupSection>
-        </motion.div>
-      )}
+    </div>
+  )
+
+  return drawerMode ? content : (
+    <div className="border border-neural-border rounded-lg overflow-hidden">
+      <div
+        onClick={() => !isTraining && setIsExpanded(!isExpanded)}
+        role="button"
+        tabIndex={isTraining ? -1 : 0}
+        onKeyDown={(e) => e.key === 'Enter' && !isTraining && setIsExpanded(!isExpanded)}
+        className={`
+          w-full px-4 py-3 flex items-center justify-between
+          bg-neural-surface hover:bg-neural-border/50
+          transition-colors duration-150 cursor-pointer
+          ${isTraining ? 'opacity-50 cursor-not-allowed' : ''}
+        `}
+      >
+        <span className="text-sm font-medium text-slate-300">Training Configuration</span>
+        <motion.svg
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="w-4 h-4 text-slate-400"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </motion.svg>
+      </div>
+      {isExpanded && content}
     </div>
   )
 }

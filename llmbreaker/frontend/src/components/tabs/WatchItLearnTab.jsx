@@ -16,6 +16,7 @@ import EmbeddingStarMap    from './EmbeddingStarMap'
 import ProbabilityTower    from './ProbabilityTower'
 import PhaseLabel          from './PhaseLabel'
 import InfoIcon            from '../shared/InfoIcon'
+import TrainingConfigPanel from '../shared/TrainingConfigPanel'
 
 export default function WatchItLearnTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
@@ -28,6 +29,7 @@ export default function WatchItLearnTab() {
   const [speed,         setSpeedLocal]    = useState(1)
   const [hoverStep,     setHoverStep]     = useState(null)
   const [starting,      setStarting]      = useState(false)
+  const [configOpen,    setConfigOpen]    = useState(false)
   const [maxItersConfig, setMaxItersConfig] = useState(5000)
   const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
   const [modelSizeConfig, setModelSizeConfig] = useState('medium')
@@ -174,26 +176,9 @@ export default function WatchItLearnTab() {
           onStop={handleStop}
           onStep={handleStep}
           onSpeedChange={handleSpeedChange}
-          onMaxItersChange={setMaxItersConfig}
-          onEvalIntervalChange={setEvalIntervalConfig}
-          onModelSizeChange={setModelSizeConfig}
+          onOpenConfig={() => setConfigOpen(true)}
           disabled={starting || !datasetId}
           isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
-          maxItersConfig={maxItersConfig}
-          evalIntervalConfig={evalIntervalConfig}
-          modelSizeConfig={modelSizeConfig}
-          learningRateConfig={learningRateConfig}
-          batchSizeConfig={batchSizeConfig}
-          blockSizeConfig={blockSizeConfig}
-          dropoutConfig={dropoutConfig}
-          warmupConfig={warmupConfig}
-          temperatureConfig={temperatureConfig}
-          onLearningRateChange={setLearningRateConfig}
-          onBatchSizeChange={setBatchSizeConfig}
-          onBlockSizeChange={setBlockSizeConfig}
-          onDropoutChange={setDropoutConfig}
-          onWarmupChange={setWarmupConfig}
-          onTemperatureChange={setTemperatureConfig}
         />
       </div>
 
@@ -244,6 +229,63 @@ export default function WatchItLearnTab() {
             </span>
           </p>
         </div>
+      )}
+
+      {/* ── Config Drawer ── */}
+      {configOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/40 z-40"
+            onClick={() => setConfigOpen(false)}
+          />
+          {/* Drawer */}
+          <div className="fixed top-0 right-0 h-full w-[380px] z-50 bg-neural-bg border-l border-neural-border shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-neural-border">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h3 className="text-sm font-semibold text-slate-200">Training Configuration</h3>
+              </div>
+              <button
+                onClick={() => setConfigOpen(false)}
+                className="text-slate-500 hover:text-slate-300 transition-colors"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <TrainingConfigPanel
+                maxIters={maxItersConfig}
+                evalInterval={evalIntervalConfig}
+                modelSize={modelSizeConfig}
+                onMaxItersChange={setMaxItersConfig}
+                onEvalIntervalChange={setEvalIntervalConfig}
+                onModelSizeChange={setModelSizeConfig}
+                learningRate={learningRateConfig}
+                batchSize={batchSizeConfig}
+                blockSize={blockSizeConfig}
+                dropout={dropoutConfig}
+                warmup={warmupConfig}
+                temperature={temperatureConfig}
+                onLearningRateChange={setLearningRateConfig}
+                onBatchSizeChange={setBatchSizeConfig}
+                onBlockSizeChange={setBlockSizeConfig}
+                onDropoutChange={setDropoutConfig}
+                onWarmupChange={setWarmupConfig}
+                onTemperatureChange={setTemperatureConfig}
+                disabled={false}
+                isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
+                drawerMode
+              />
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
