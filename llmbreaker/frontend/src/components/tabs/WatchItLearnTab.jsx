@@ -8,6 +8,7 @@ import { createSession }   from '../../utils/apiClient'
 import { SESSION_STATUS }  from '../../types/index.js'
 import DatasetSelector     from '../shared/DatasetSelector'
 import TrainingControls    from '../shared/TrainingControls'
+import TrainingConfigPanel from '../shared/TrainingConfigPanel'
 import LossCurveChart      from '../shared/LossCurveChart'
 import TextProgressionDisplay from './TextProgressionDisplay'
 
@@ -17,11 +18,14 @@ export default function WatchItLearnTab() {
   const { dispatch: uiDispatch }                         = useContext(UIContext)
   const { socket }                                       = useWebSocket()
 
-  const [datasetId,   setDatasetId]   = useState('shakespeare')
-  const [sessionId,   setSessionId]   = useState(null)
-  const [speed,       setSpeedLocal]  = useState(1)
-  const [hoverStep,   setHoverStep]   = useState(null)
-  const [starting,    setStarting]    = useState(false)
+  const [datasetId,     setDatasetId]     = useState('shakespeare')
+  const [sessionId,     setSessionId]     = useState(null)
+  const [speed,         setSpeedLocal]    = useState(1)
+  const [hoverStep,     setHoverStep]     = useState(null)
+  const [starting,      setStarting]      = useState(false)
+  const [maxItersConfig, setMaxItersConfig] = useState(5000)
+  const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
+  const [modelSizeConfig, setModelSizeConfig] = useState('medium')
 
   // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
@@ -46,7 +50,11 @@ export default function WatchItLearnTab() {
       const data = await createSession({
         feature_type: 'watch_learn',
         dataset_id:   datasetId,
-        hyperparameters: { max_iters: 500, eval_interval: 50 },
+        hyperparameters: {
+          max_iters: maxItersConfig,
+          eval_interval: evalIntervalConfig,
+          model_size: modelSizeConfig,
+        },
       })
 
       const sid = data.session_id
@@ -108,7 +116,14 @@ export default function WatchItLearnTab() {
           onStop={handleStop}
           onStep={handleStep}
           onSpeedChange={handleSpeedChange}
+          onMaxItersChange={setMaxItersConfig}
+          onEvalIntervalChange={setEvalIntervalConfig}
+          onModelSizeChange={setModelSizeConfig}
           disabled={starting || !datasetId}
+          isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
+          maxItersConfig={maxItersConfig}
+          evalIntervalConfig={evalIntervalConfig}
+          modelSizeConfig={modelSizeConfig}
         />
       </div>
 

@@ -27,6 +27,10 @@ export function useTrainingSession(socket, sessionId) {
       trainingDispatch({ type: 'UPDATE_ITER',   payload: { sessionId, currentIter: data.step } })
       metricsDispatch({ type: 'ADD_METRICS', payload: data })
     }
+    const onStepProgress = (data) => {
+      if (data.session_id !== sessionId) return
+      trainingDispatch({ type: 'UPDATE_ITER', payload: { sessionId, currentIter: data.step } })
+    }
     const onSample = (data) => {
       if (data.session_id !== sessionId) return
       metricsDispatch({ type: 'ADD_SAMPLE', payload: data })
@@ -59,6 +63,7 @@ export function useTrainingSession(socket, sessionId) {
 
     socket.on('training_started',   onStarted)
     socket.on('training_metrics',   onMetrics)
+    socket.on('step_progress',      onStepProgress)
     socket.on('generated_sample',   onSample)
     socket.on('attention_snapshot', onAttention)
     socket.on('training_paused',    onPaused)
@@ -70,6 +75,7 @@ export function useTrainingSession(socket, sessionId) {
     return () => {
       socket.off('training_started',   onStarted)
       socket.off('training_metrics',   onMetrics)
+      socket.off('step_progress',      onStepProgress)
       socket.off('generated_sample',   onSample)
       socket.off('attention_snapshot', onAttention)
       socket.off('training_paused',    onPaused)

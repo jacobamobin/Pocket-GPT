@@ -118,3 +118,22 @@ def emit_error(
         'timestamp':  _ts(),
     }
     socketio.emit('error', payload, room=session_id)
+
+
+def emit_step_progress(
+    socketio: Any,
+    session_id: str,
+    step: int,
+) -> None:
+    """
+    Emit a lightweight step progress update.
+
+    This is separate from full metrics emission to allow more frequent
+    updates without the overhead of loss estimation and text generation.
+    """
+    payload = {
+        'session_id': session_id,
+        'step':       step,
+        'timestamp':  _ts(),
+    }
+    socketio.emit('step_progress', payload, room=session_id)

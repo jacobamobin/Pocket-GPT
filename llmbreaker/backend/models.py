@@ -28,27 +28,28 @@ class TrainingSession:
     feature_type: FeatureType
     status: SessionStatus = SessionStatus.IDLE
 
-    # Model configuration
+    # Model configuration - larger defaults for better learning
     model_config: Dict = field(default_factory=lambda: {
         'vocab_size': 65,
-        'n_embd': 16,
-        'n_layer': 2,
-        'n_head': 2,
-        'block_size': 64,
+        'n_embd': 64,         # Increased from 16
+        'n_layer': 4,          # Increased from 2
+        'n_head': 4,           # Increased from 2
+        'block_size': 128,      # Increased from 64
         'dropout': 0.0,
         'bias': False,
         'weight_tying': True,
     })
 
-    # Training configuration
+    # Training configuration - more iterations for actual learning
     training_config: Dict = field(default_factory=lambda: {
-        'batch_size': 32,
-        'max_iters': 500,
+        'batch_size': 64,       # Increased from 32
+        'max_iters': 5000,      # Increased from 500
         'learning_rate': 1e-3,
-        'eval_interval': 50,
-        'warmup_steps': 50,
+        'eval_interval': 100,    # Increased for efficiency
+        'warmup_steps': 100,     # Increased
         'lr_decay': 'cosine',
         'grad_clip': 1.0,
+        'temperature': 0.8,      # New: control generation randomness
     })
 
     # Dataset

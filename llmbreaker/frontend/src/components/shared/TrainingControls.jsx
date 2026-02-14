@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
+import { useState, useEffect, useMemo } from 'react'
 import { SPEED_OPTIONS, SESSION_STATUS } from '../../types/index.js'
+import TrainingConfigPanel from './TrainingConfigPanel.jsx'
 
 function IconButton({ onClick, disabled, title, children, variant = 'default' }) {
   const base = `
@@ -36,7 +38,14 @@ export default function TrainingControls({
   onStop,
   onStep,
   onSpeedChange,
+  onMaxItersChange,
+  onEvalIntervalChange,
+  onModelSizeChange,
   disabled,
+  isTraining,
+  maxItersConfig,
+  evalIntervalConfig,
+  modelSizeConfig,
 }) {
   const isIdle      = !status || status === SESSION_STATUS.IDLE
   const isRunning   = status === SESSION_STATUS.RUNNING
@@ -46,6 +55,50 @@ export default function TrainingControls({
   const isActive    = isRunning || isPaused
 
   const progress = maxIters > 0 ? Math.round((currentIter / maxIters) * 100) : 0
+
+  // ETA calculation
+  const [startTime, setStartTime] = useState(null)
+  const [elapsed, setElapsed] = useState(0)
+
+  useEffect(() => {
+    if (isRunning && !startTime) {
+      setStartTime(Date.now())
+    } else if (!isRunning && startTime) {
+      setStartTime(null)
+    }
+  }, [isRunning, startTime])
+
+  useEffect(() => {
+    let interval
+    if (isRunning && startTime && currentIter > 0) {
+      interval = setInterval(() => {
+        setElapsed(Date.now() - startTime)
+      }, 100)
+    } else {
+      setElapsed(0)
+    }
+    return () => clearInterval(interval)
+  }, [isRunning, startTime, currentIter])
+
+  const eta = useMemo(() => {
+    if (!isRunning || currentIter === 0 || elapsed === 0) return null
+    const timePerStep = elapsed / currentIter
+    const remainingSteps = maxIters - currentIter
+    const remainingTimeMs = timePerStep * remainingSteps
+    const remainingTimeSec = Math.round(remainingTimeMs / 1000)
+
+    if (remainingTimeSec < 60) {
+      return `${remainingTimeSec}s`
+    } else if (remainingTimeSec < 3600) {
+      const mins = Math.floor(remainingTimeSec / 60)
+      const secs = remainingTimeSec % 60
+      return `${mins}m ${secs}s`
+    } else {
+      const hours = Math.floor(remainingTimeSec / 3600)
+      const mins = Math.floor((remainingTimeSec % 3600) / 60)
+      return `${hours}h ${mins}m`
+    }
+  }, [isRunning, currentIter, elapsed, maxIters])
 
   return (
     <div className="card flex flex-col gap-4">
@@ -127,7 +180,12 @@ export default function TrainingControls({
         <div className="flex flex-col gap-1.5">
           <div className="flex justify-between text-xs text-slate-500">
             <span>Step {currentIter.toLocaleString()} / {maxIters.toLocaleString()}</span>
-            <span>{progress}%</span>
+            <span className="flex items-center gap-2">
+              {progress}%
+              {eta && isRunning && (
+                <span className="text-cyan-400 font-medium">ETA: {eta}</span>
+              )}
+            </span>
           </div>
           <div className="h-1.5 rounded-full bg-neural-border overflow-hidden">
             <motion.div
@@ -138,6 +196,20 @@ export default function TrainingControls({
             />
           </div>
         </div>
+      )}
+
+      {/* Training Configuration Panel */}
+      {onMaxItersChange && onEvalIntervalChange && (
+        <TrainingConfigPanel
+          maxIters={maxItersConfig}
+          evalInterval={evalIntervalConfig}
+          modelSize={modelSizeConfig}
+          onMaxItersChange={onMaxItersChange}
+          onEvalIntervalChange={onEvalIntervalChange}
+          onModelSizeChange={onModelSizeChange}
+          disabled={disabled}
+          isTraining={isTraining}
+        />
       )}
 
       {/* Status badge */}

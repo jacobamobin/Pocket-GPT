@@ -23,6 +23,7 @@ from metrics_emitter import (
     emit_generated_sample,
     emit_attention_snapshot,
     emit_error,
+    emit_step_progress,
 )
 
 # Path to pre-bundled datasets directory (set by app.py before first use)
@@ -140,6 +141,7 @@ def run_training(session: TrainingSession, socketio) -> None:
     lr            = tc.get('learning_rate', 1e-3)
     warmup_steps  = tc.get('warmup_steps',   50)
     grad_clip     = tc.get('grad_clip',      1.0)
+    temperature   = tc.get('temperature',    0.8)
     eval_iters    = 20   # how many batches to average when estimating loss
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.0)
@@ -161,6 +163,10 @@ def run_training(session: TrainingSession, socketio) -> None:
             return
 
         session.current_iter = step + 1
+
+        # ── lightweight step progress every 5 steps ──
+        if (step + 1) % 5 == 0:
+            emit_step_progress(socketio, session_id, step + 1)
 
         # ── learning-rate update ──
         current_lr = _get_lr(step, warmup_steps, max_iters, lr)
@@ -201,7 +207,7 @@ def run_training(session: TrainingSession, socketio) -> None:
             )
 
             # Generate a text sample
-            sample_text = _generate_sample(model, ds['idx_to_char'], device)
+            sample_text = _generate_sample(model, ds['idx_to_char'], device, temperature=temperature)
             sample_record = {
                 'step':   step + 1,
                 'text':   sample_text,
@@ -221,10 +227,10 @@ def run_training(session: TrainingSession, socketio) -> None:
 
         # ── speed-aware sleep ──
         speed = max(session.speed_multiplier, 0.1)
-        # At 1× we yield briefly so the event loop can breathe.
+        # At 1× we yield briefly so the event loop can breathe (0.05s = 50ms).
         # At 10× we skip the yield entirely (max throughput).
         if speed < 10.0:
-            socketio.sleep(0.01 / speed)
+            socketio.sleep(0.05 / speed)
         else:
             socketio.sleep(0)
 
@@ -260,10 +266,14 @@ def _generate_sample(
     model: MicroGPT,
     idx_to_char: dict,
     device: torch.device,
-    max_new_tokens: int = 80,
+    max_new_tokens: int = 100,
     temperature: float = 0.8,
 ) -> str:
-    """Generate a short text sample from the current model weights."""
+    """Generate a short text sample from the current model weights.
+
+    Lower temperature = more deterministic output
+    Higher temperature = more random/creative output
+    """
     model.eval()
     seed = torch.zeros((1, 1), dtype=torch.long, device=device)
     with torch.no_grad():

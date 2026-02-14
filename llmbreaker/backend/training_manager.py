@@ -27,6 +27,18 @@ class TrainingManager:
         )
 
         if hyperparameters:
+            # Apply model size configuration
+            model_size = hyperparameters.get('model_size', 'medium')
+            model_size_configs = {
+                'small': {'n_embd': 32, 'n_layer': 3, 'n_head': 3, 'block_size': 96},
+                'medium': {'n_embd': 64, 'n_layer': 4, 'n_head': 4, 'block_size': 128},
+                'large': {'n_embd': 96, 'n_layer': 6, 'n_head': 6, 'block_size': 256},
+            }
+            if model_size in model_size_configs:
+                for key, value in model_size_configs[model_size].items():
+                    session.model_config[key] = value
+
+            # Apply training hyperparameters
             for key in ('batch_size', 'max_iters', 'learning_rate', 'eval_interval'):
                 if key in hyperparameters:
                     session.training_config[key] = hyperparameters[key]

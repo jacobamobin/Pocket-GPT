@@ -9,9 +9,9 @@ import { localPoint } from '@visx/event'
 const MARGIN = { top: 16, right: 24, bottom: 40, left: 52 }
 
 const ANNOTATIONS = [
-  { step: 50,  label: 'Random noise' },
-  { step: 200, label: 'Learning bigrams' },
-  { step: 400, label: 'Picking up patterns' },
+  { step: 500, label: 'Learning patterns' },
+  { step: 2000, label: 'Improving' },
+  { step: 5000, label: 'Converging' },
 ]
 
 export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHoverStep }) {
@@ -20,7 +20,10 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
 
   const W = 680, H = 240
   const innerW = W - MARGIN.left - MARGIN.right
-  const innerH = H - MARGIN.top  - MARGIN.bottom
+  const innerH = H - MARGIN.top - MARGIN.bottom
+
+  // Calculate perplexity (exp of loss) - more intuitive than raw loss
+  const getPerplexity = (loss) => Math.exp(loss).toFixed(1)
 
   const xScale = useMemo(() => scaleLinear({
     domain: [0, maxIters],
@@ -59,7 +62,7 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
   return (
     <div className="card">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Loss Curve</h3>
+        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Learning Progress</h3>
         <div className="flex items-center gap-4 text-xs text-slate-500">
           <span className="flex items-center gap-1.5">
             <span className="w-6 h-0.5 bg-blue-500 inline-block" />Train
@@ -69,6 +72,27 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
           </span>
         </div>
       </div>
+
+      {/* Learning quality indicator */}
+      {lossHistory.length > 0 && (
+        <div className="mb-3 px-3 py-2 rounded-md bg-slate-800/50 border border-slate-700">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-400">Latest perplexity:</span>
+            <span className="font-mono text-cyan-400">
+              {getPerplexity(lossHistory[lossHistory.length - 1]?.train_loss || 0)}
+            </span>
+          </div>
+          <div className="text-xs text-slate-500 mt-1">
+            {(() => {
+              const ppl = parseFloat(getPerplexity(lossHistory[lossHistory.length - 1]?.train_loss || 999))
+              if (ppl < 5) return 'Excellent - model is learning well!'
+              if (ppl < 15) return 'Good - model is picking up patterns'
+              if (ppl < 30) return 'Fair - model needs more training'
+              return 'Keep training - model is still learning'
+            })()}
+          </div>
+        </div>
+      )}
 
       {lossHistory.length === 0 ? (
         <div className="flex items-center justify-center h-40 text-slate-600 text-sm">
@@ -184,7 +208,7 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
                           Step {tooltip.step}
                         </text>
                         <text x={8} y={28} fill="#60a5fa" fontSize={10} fontFamily="monospace">
-                          Loss {tooltip.train_loss?.toFixed(4)}
+                          PPL {getPerplexity(tooltip.train_loss || 0)}
                         </text>
                       </g>
                     )
