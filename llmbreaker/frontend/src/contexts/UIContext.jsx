@@ -16,8 +16,9 @@ import { FEATURE_TYPE } from '../types/index.js'
 const initialState = {
   activeTab:  FEATURE_TYPE.WATCH_LEARN,
   tooltipId:  null,
-  errorToast: null,
-  isLoading:  false,
+  errorToast:   null,
+  successToast: null,
+  isLoading:    false,
   infoDrawerTopic: null,
 }
 
@@ -33,6 +34,10 @@ function reducer(state, action) {
       return { ...state, errorToast: action.payload }
     case 'CLEAR_ERROR':
       return { ...state, errorToast: null }
+    case 'SHOW_SUCCESS':
+      return { ...state, successToast: action.payload }
+    case 'CLEAR_SUCCESS':
+      return { ...state, successToast: null }
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload }
     case 'OPEN_INFO_DRAWER':

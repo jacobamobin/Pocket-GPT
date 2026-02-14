@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { UIContext }      from '../../contexts/UIContext'
 import { FEATURE_TYPE }   from '../../types/index.js'
@@ -20,6 +20,12 @@ function TabContent({ activeTab }) {
 export default function Dashboard() {
   const { state: ui, dispatch: uiDispatch } = useContext(UIContext)
   const { connected }                       = useWebSocket()
+
+  useEffect(() => {
+    if (!ui.successToast) return
+    const t = setTimeout(() => uiDispatch({ type: 'CLEAR_SUCCESS' }), 3000)
+    return () => clearTimeout(t)
+  }, [ui.successToast, uiDispatch])
 
   return (
     <motion.div
@@ -47,6 +53,30 @@ export default function Dashboard() {
             <button
               onClick={() => uiDispatch({ type: 'CLEAR_ERROR' })}
               className="ml-4 text-blue-400 hover:text-white transition-colors text-lg leading-none"
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Success toast */}
+      <AnimatePresence>
+        {ui.successToast && (
+          <motion.div
+            key="success-toast"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="mx-4 mt-2 px-4 py-2.5 rounded-lg bg-green-950/70 border border-green-500/40
+                       text-green-200 text-sm flex items-center justify-between"
+          >
+            <span>{ui.successToast}</span>
+            <button
+              onClick={() => uiDispatch({ type: 'CLEAR_SUCCESS' })}
+              className="ml-4 text-green-400 hover:text-white transition-colors text-lg leading-none"
               aria-label="Dismiss"
             >
               ×
