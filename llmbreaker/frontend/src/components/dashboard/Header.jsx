@@ -1,9 +1,12 @@
 import { useContext } from 'react'
 import { TrainingContext } from '../../contexts/TrainingContext'
+import { useGeneration } from '../../contexts/GenerationContext'
 import ModelDropdown from './ModelDropdown'
+import TutorialButton from '../tutorial/TutorialButton'
 
 export default function Header({ connected }) {
   const { state } = useContext(TrainingContext)
+  const { actions: genActions } = useGeneration()
 
   const activeSessions = Object.values(state.sessions).filter(
     s => s.status === 'running' || s.status === 'paused'
@@ -15,6 +18,7 @@ export default function Header({ connected }) {
       <span
         className="text-xl font-bold text-transparent bg-clip-text select-none"
         style={{ backgroundImage: 'linear-gradient(135deg, #60A5FA 0%, #06B6D4 100%)' }}
+        data-tutorial="logo"
       >
         LLMBreaker
       </span>
@@ -37,6 +41,19 @@ export default function Header({ connected }) {
 
         {/* Model library dropdown */}
         <ModelDropdown />
+
+        {/* Playground button */}
+        <button
+          onClick={genActions.open}
+          className="px-3 py-1.5 text-sm text-slate-400 hover:text-white border border-slate-700 hover:border-cyan-500/60 rounded-lg transition-colors flex items-center gap-1.5"
+          aria-label="Open Token Playground"
+        >
+          <span>💬</span>
+          <span className="hidden md:inline">Playground</span>
+        </button>
+
+        {/* Tutorial button */}
+        <TutorialButton />
 
         {/* WebSocket status */}
         <div className="flex items-center gap-1.5 text-slate-500">

@@ -1,11 +1,16 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { UIContext }      from '../../contexts/UIContext'
+import { useTutorial }    from '../../contexts/TutorialContext'
 import { FEATURE_TYPE }   from '../../types/index.js'
 import { useWebSocket }   from '../../hooks/useWebSocket'
 import Header             from './Header'
 import TabBar             from './TabBar'
 import InfoDrawer         from '../shared/InfoDrawer'
+import TutorialSpotlight from '../tutorial/TutorialSpotlight'
+import TutorialWelcome   from '../tutorial/TutorialWelcome'
+import TutorialSwitchPrompt from '../tutorial/TutorialSwitchPrompt'
+import GenerationDrawer from '../generation/GenerationDrawer'
 import WatchItLearnTab    from '../tabs/WatchItLearnTab'
 import AttentionCinemaTab from '../tabs/AttentionCinemaTab'
 import StyleTransferTab   from '../tabs/StyleTransferTab'
@@ -19,13 +24,81 @@ function TabContent({ activeTab }) {
 
 export default function Dashboard() {
   const { state: ui, dispatch: uiDispatch } = useContext(UIContext)
+  const { state: tutorial, actions: tutorialActions } = useTutorial()
   const { connected }                       = useWebSocket()
+  const [previousTab, setPreviousTab]       = useState(ui.activeTab)
+  const [showSwitchPrompt, setShowSwitchPrompt] = useState(false)
+  const [pendingTab, setPendingTab]         = useState(null)
 
   useEffect(() => {
     if (!ui.successToast) return
     const t = setTimeout(() => uiDispatch({ type: 'CLEAR_SUCCESS' }), 3000)
     return () => clearTimeout(t)
   }, [ui.successToast, uiDispatch])
+
+  // Auto-switch to correct tab when tutorial chapter starts
+  useEffect(() => {
+    if (!tutorial.active || tutorial.chapterId === 'welcome') return
+
+    const chapterToTab = {
+      'watch_learn': FEATURE_TYPE.WATCH_LEARN,
+      'attention_cinema': FEATURE_TYPE.ATTENTION_CINEMA,
+      'style_transfer': FEATURE_TYPE.STYLE_TRANSFER,
+    }
+
+    const requiredTab = chapterToTab[tutorial.chapterId]
+    if (requiredTab && ui.activeTab !== requiredTab) {
+      uiDispatch({ type: 'SET_TAB', payload: requiredTab })
+    }
+  }, [tutorial.active, tutorial.chapterId, ui.activeTab, uiDispatch])
+
+  // Tutorial chapter tab switch detection
+  useEffect(() => {
+    if (!tutorial.active || tutorial.chapterId === 'welcome') {
+      setPreviousTab(ui.activeTab)
+      return
+    }
+
+    // Map tabs to their expected chapter IDs
+    const tabToChapter = {
+      [FEATURE_TYPE.WATCH_LEARN]: 'watch_learn',
+      [FEATURE_TYPE.ATTENTION_CINEMA]: 'attention_cinema',
+      [FEATURE_TYPE.STYLE_TRANSFER]: 'style_transfer',
+    }
+
+    const expectedChapter = tabToChapter[ui.activeTab]
+
+    // If user switched to a tab that doesn't match current tutorial chapter
+    if (expectedChapter && expectedChapter !== tutorial.chapterId && ui.activeTab !== previousTab) {
+      setPendingTab(ui.activeTab)
+      setShowSwitchPrompt(true)
+      // Switch back to previous tab until user decides
+      setTimeout(() => {
+        uiDispatch({ type: 'SET_TAB', payload: previousTab })
+      }, 0)
+    } else {
+      setPreviousTab(ui.activeTab)
+    }
+  }, [ui.activeTab, tutorial.active, tutorial.chapterId, previousTab, uiDispatch])
+
+  const handleSwitchStay = () => {
+    setShowSwitchPrompt(false)
+    setPendingTab(null)
+  }
+
+  const handleSwitchChapter = () => {
+    setShowSwitchPrompt(false)
+    if (pendingTab) {
+      const tabToChapter = {
+        [FEATURE_TYPE.WATCH_LEARN]: 'watch_learn',
+        [FEATURE_TYPE.ATTENTION_CINEMA]: 'attention_cinema',
+        [FEATURE_TYPE.STYLE_TRANSFER]: 'style_transfer',
+      }
+      tutorialActions.setChapter(tabToChapter[pendingTab])
+      uiDispatch({ type: 'SET_TAB', payload: pendingTab })
+      setPendingTab(null)
+    }
+  }
 
   return (
     <motion.div
@@ -101,6 +174,20 @@ export default function Dashboard() {
         </AnimatePresence>
       </main>
       <InfoDrawer />
+      <TutorialSpotlight />
+      <TutorialWelcome />
+      <GenerationDrawer />
+
+      {/* Chapter switch prompt */}
+      <AnimatePresence>
+        {showSwitchPrompt && (
+          <TutorialSwitchPrompt
+            currentChapter={tutorial.chapterId}
+            onStay={handleSwitchStay}
+            onSwitch={handleSwitchChapter}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
