@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-neural-bg text-white;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #050a14;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg
+           transition-all duration-200 hover:-translate-y-0.5
+           hover:shadow-lg hover:shadow-blue-500/25 font-medium;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-neural-card hover:bg-neural-border text-blue-300
+           border border-neural-border hover:border-blue-500 rounded-lg
+           transition-all duration-200 font-medium;
+  }
+
+  .card {
+    @apply bg-neural-card border border-neural-border rounded-xl p-4;
+  }
+}
