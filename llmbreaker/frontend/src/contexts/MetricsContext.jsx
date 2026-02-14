@@ -64,16 +64,13 @@ function reducer(state, action) {
     case 'ADD_ATTENTION': {
       const { session_id, step, layer, head, matrix, tokens, timestamp } = action.payload
       const prev = state[session_id] ?? makeEmpty()
-      // Keep only the latest snapshot per (layer, head) to bound memory
-      const filtered = prev.attentionSnapshots.filter(
-        s => !(s.layer === layer && s.head === head)
-      )
+      // Keep all snapshots for timeline playback (max ~40 total: 10 steps × 4 heads)
       return {
         ...state,
         [session_id]: {
           ...prev,
           attentionSnapshots: [
-            ...filtered,
+            ...prev.attentionSnapshots,
             { step, layer, head, matrix, tokens, timestamp },
           ],
         },

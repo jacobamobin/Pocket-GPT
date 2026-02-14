@@ -1,44 +1,43 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { io } from 'socket.io-client'
 
 const WS_URL = 'http://localhost:5000'
 
-/**
- * Manages a single Socket.IO connection shared across the app.
- *
- * Returns { socket, connected }
- * The socket instance is stable (same ref) across re-renders.
- */
-export function useWebSocket() {
-  const socketRef = useRef(null)
-  const [connected, setConnected] = useState(false)
+// Module-level singleton — one socket shared across all hook callers
+let _socket = null
+const _listeners = new Set()
 
-  useEffect(() => {
-    const socket = io(WS_URL, {
+function getSocket() {
+  if (!_socket) {
+    _socket = io(WS_URL, {
       transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
     })
+    _socket.on('connect',    () => _listeners.forEach(fn => fn(true)))
+    _socket.on('disconnect', () => _listeners.forEach(fn => fn(false)))
+    _socket.on('connect_error', err => console.warn('[WS] connect error:', err.message))
+  }
+  return _socket
+}
 
-    socketRef.current = socket
+/**
+ * Returns { socket, connected }.
+ * All callers share the same Socket.IO connection.
+ */
+export function useWebSocket() {
+  const [connected, setConnected] = useState(_socket?.connected ?? false)
+  const socketRef = useRef(getSocket())
 
-    socket.on('connect', () => {
-      setConnected(true)
-    })
-
-    socket.on('disconnect', () => {
-      setConnected(false)
-    })
-
-    socket.on('connect_error', (err) => {
-      console.warn('[WS] connect error:', err.message)
-    })
-
-    return () => {
-      socket.disconnect()
-    }
+  useEffect(() => {
+    const socket = socketRef.current
+    const onStatus = (v) => setConnected(v)
+    _listeners.add(onStatus)
+    // Sync current state
+    setConnected(socket.connected)
+    return () => { _listeners.delete(onStatus) }
   }, [])
 
   return { socket: socketRef.current, connected }
