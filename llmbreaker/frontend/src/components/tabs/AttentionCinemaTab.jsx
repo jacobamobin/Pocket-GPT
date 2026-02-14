@@ -19,6 +19,7 @@ import ScrubBar            from '../shared/ScrubBar'
 import InfoIcon            from '../shared/InfoIcon'
 import DatasetSelector     from '../shared/DatasetSelector'
 import TextInputPanel      from './TextInputPanel'
+import ModelInfoCard       from '../shared/ModelInfoCard'
 
 export default function AttentionCinemaTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
@@ -241,6 +242,9 @@ export default function AttentionCinemaTab() {
           onRenderMode={setRenderMode}
         />
       </div>
+
+      {/* Model architecture info */}
+      <ModelInfoCard modelConfig={session?.modelConfig ?? null} />
 
       {/* Layer/Head selector (Detail mode only) */}
       <AnimatePresence initial={false}>
