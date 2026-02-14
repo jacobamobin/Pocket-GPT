@@ -161,7 +161,7 @@ export default function StyleTransferTab() {
   const handlePause     = () => controls.pause()
   const handleStop      = () => controls.stop()
   const handleStep      = () => controls.step()
-  const handleSpeed     = useCallback((v) => controls.setSpeed(v), [controls])
+  const handleSpeed     = useCallback((v) => { setSpeedLocal(v); controls.setSpeed(v) }, [controls])
 
   return (
     <div className="p-6 flex flex-col gap-6 max-w-6xl mx-auto">

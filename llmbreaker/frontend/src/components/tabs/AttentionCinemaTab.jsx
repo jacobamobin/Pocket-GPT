@@ -146,7 +146,8 @@ export default function AttentionCinemaTab() {
   const handlePause     = () => controls.pause()
   const handleStop      = () => controls.stop()
   const handleStep      = () => controls.step()
-  const handleSpeed     = useCallback((v) => controls.setSpeed(v), [controls])
+  const [speed, setSpeedLocal] = useState(1)
+  const handleSpeed     = useCallback((v) => { setSpeedLocal(v); controls.setSpeed(v) }, [controls])
 
   function handleSelectCell(layer, head) {
     setSelectedLayer(layer)
@@ -173,6 +174,7 @@ export default function AttentionCinemaTab() {
           onPause={handlePause}
           onStop={handleStop}
           onStep={handleStep}
+          speed={speed}
           onSpeedChange={handleSpeed}
           onMaxItersChange={setMaxItersConfig}
           onEvalIntervalChange={setEvalIntervalConfig}
