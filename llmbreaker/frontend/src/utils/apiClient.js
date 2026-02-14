@@ -87,4 +87,31 @@ export async function deleteSession(sessionId) {
   return data
 }
 
+// ── Models ────────────────────────────────────────────────────────────────────
+
+export async function listModels() {
+  const { data } = await api.get('/api/models')
+  return data.models
+}
+
+export async function saveModel(sessionId, name) {
+  const { data } = await api.post(`/api/models/${sessionId}/save`, { name })
+  return data
+}
+
+export async function renameModel(recordId, name) {
+  const { data } = await api.patch(`/api/models/${recordId}/rename`, { name })
+  return data
+}
+
+export async function deleteModel(recordId) {
+  const { data } = await api.delete(`/api/models/${recordId}`)
+  return data
+}
+
+export async function loadModelAsSession(recordId) {
+  const { data } = await api.post(`/api/models/${recordId}/load`)
+  return data
+}
+
 export default api
