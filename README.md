@@ -81,7 +81,7 @@ Runs on `http://localhost:5173`.
 ## Project Structure
 
 ```
-Pocket GPT/
+llmbreaker/ (old name)
 ├── backend/
 │   ├── app.py                  # Flask + SocketIO entry point
 │   ├── micro_gpt.py            # Transformer model (from scratch)
