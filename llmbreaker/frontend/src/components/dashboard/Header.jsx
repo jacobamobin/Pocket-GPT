@@ -24,7 +24,7 @@ export default function Header({ connected }) {
         data-tutorial="logo"
         aria-label="Go to home page"
       >
-        LLMBreaker
+        Pocket GPT
       </button>
 
       {/* Right side */}

@@ -72,7 +72,7 @@ export default function InfoDrawer() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => dispatch({ type: 'CLOSE_INFO_DRAWER' })}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm"
           />
 
           {/* Drawer panel */}
@@ -82,7 +82,7 @@ export default function InfoDrawer() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-            className="fixed top-0 right-0 z-50 h-full w-[400px] max-w-[90vw]
+            className="fixed top-0 right-0 z-[70] h-full w-[400px] max-w-[90vw]
                        bg-neural-card border-l border-neural-border shadow-2xl
                        flex flex-col"
           >

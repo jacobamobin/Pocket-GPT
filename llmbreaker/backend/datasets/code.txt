@@ -1,0 +1,1987 @@
+"""
+This is a pure Python implementation of the merge sort algorithm.
+
+For doctests run following command:
+python -m doctest -v merge_sort.py
+or
+python3 -m doctest -v merge_sort.py
+For manual testing run:
+python merge_sort.py
+"""
+
+
+def merge_sort(collection: list) -> list:
+    """
+    Sorts a list using the merge sort algorithm.
+
+    :param collection: A mutable ordered collection with comparable items.
+    :return: The same collection ordered in ascending order.
+
+    Time Complexity: O(n log n)
+    Space Complexity: O(n)
+
+    Examples:
+    >>> merge_sort([0, 5, 3, 2, 2])
+    [0, 2, 2, 3, 5]
+    >>> merge_sort([])
+    []
+    >>> merge_sort([-2, -5, -45])
+    [-45, -5, -2]
+    """
+
+    def merge(left: list, right: list) -> list:
+        """
+        Merge two sorted lists into a single sorted list.
+
+        :param left: Left collection
+        :param right: Right collection
+        :return: Merged result
+        """
+        result = []
+        while left and right:
+            result.append(left.pop(0) if left[0] <= right[0] else right.pop(0))
+        result.extend(left)
+        result.extend(right)
+        return result
+
+    if len(collection) <= 1:
+        return collection
+    mid_index = len(collection) // 2
+    return merge(merge_sort(collection[:mid_index]), merge_sort(collection[mid_index:]))
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()
+
+    try:
+        user_input = input("Enter numbers separated by a comma:\n").strip()
+        unsorted = [int(item) for item in user_input.split(",")]
+        sorted_list = merge_sort(unsorted)
+        print(*sorted_list, sep=",")
+    except ValueError:
+        print("Invalid input. Please enter valid integers separated by commas.")
+"""
+A pure Python implementation of the quick sort algorithm
+
+For doctests run following command:
+python3 -m doctest -v quick_sort.py
+
+For manual testing run:
+python3 quick_sort.py
+"""
+
+from __future__ import annotations
+
+from random import randrange
+
+
+def quick_sort(collection: list) -> list:
+    """A pure Python implementation of quicksort algorithm.
+
+    :param collection: a mutable collection of comparable items
+    :return: the same collection ordered in ascending order
+
+    Examples:
+    >>> quick_sort([0, 5, 3, 2, 2])
+    [0, 2, 2, 3, 5]
+    >>> quick_sort([])
+    []
+    >>> quick_sort([-2, 5, 0, -45])
+    [-45, -2, 0, 5]
+    """
+    # Base case: if the collection has 0 or 1 elements, it is already sorted
+    if len(collection) < 2:
+        return collection
+
+    # Randomly select a pivot index and remove the pivot element from the collection
+    pivot_index = randrange(len(collection))
+    pivot = collection.pop(pivot_index)
+
+    # Partition the remaining elements into two groups: lesser or equal, and greater
+    lesser = [item for item in collection if item <= pivot]
+    greater = [item for item in collection if item > pivot]
+
+    # Recursively sort the lesser and greater groups, and combine with the pivot
+    return [*quick_sort(lesser), pivot, *quick_sort(greater)]
+
+
+if __name__ == "__main__":
+    # Get user input and convert it into a list of integers
+    user_input = input("Enter numbers separated by a comma:\n").strip()
+    unsorted = [int(item) for item in user_input.split(",")]
+
+    # Print the result of sorting the user-provided list
+    print(quick_sort(unsorted))
+"""
+A pure Python implementation of the heap sort algorithm.
+"""
+
+
+def heapify(unsorted: list[int], index: int, heap_size: int) -> None:
+    """
+    :param unsorted: unsorted list containing integers numbers
+    :param index: index
+    :param heap_size: size of the heap
+    :return: None
+    >>> unsorted = [1, 4, 3, 5, 2]
+    >>> heapify(unsorted, 0, len(unsorted))
+    >>> unsorted
+    [4, 5, 3, 1, 2]
+    >>> heapify(unsorted, 0, len(unsorted))
+    >>> unsorted
+    [5, 4, 3, 1, 2]
+    """
+    largest = index
+    left_index = 2 * index + 1
+    right_index = 2 * index + 2
+    if left_index < heap_size and unsorted[left_index] > unsorted[largest]:
+        largest = left_index
+
+    if right_index < heap_size and unsorted[right_index] > unsorted[largest]:
+        largest = right_index
+
+    if largest != index:
+        unsorted[largest], unsorted[index] = (unsorted[index], unsorted[largest])
+        heapify(unsorted, largest, heap_size)
+
+
+def heap_sort(unsorted: list[int]) -> list[int]:
+    """
+    A pure Python implementation of the heap sort algorithm
+
+    :param collection: a mutable ordered collection of heterogeneous comparable items
+    :return: the same collection ordered by ascending
+
+    Examples:
+    >>> heap_sort([0, 5, 3, 2, 2])
+    [0, 2, 2, 3, 5]
+    >>> heap_sort([])
+    []
+    >>> heap_sort([-2, -5, -45])
+    [-45, -5, -2]
+    >>> heap_sort([3, 7, 9, 28, 123, -5, 8, -30, -200, 0, 4])
+    [-200, -30, -5, 0, 3, 4, 7, 8, 9, 28, 123]
+    """
+    n = len(unsorted)
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(unsorted, i, n)
+    for i in range(n - 1, 0, -1):
+        unsorted[0], unsorted[i] = unsorted[i], unsorted[0]
+        heapify(unsorted, 0, i)
+    return unsorted
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()
+    user_input = input("Enter numbers separated by a comma:\n").strip()
+    if user_input:
+        unsorted = [int(item) for item in user_input.split(",")]
+        print(f"{heap_sort(unsorted) = }")
+from __future__ import annotations
+
+from collections.abc import Iterator
+from dataclasses import dataclass
+from typing import Any
+
+
+@dataclass
+class Node:
+    """
+    Create and initialize Node class instance.
+    >>> Node(20)
+    Node(20)
+    >>> Node("Hello, world!")
+    Node(Hello, world!)
+    >>> Node(None)
+    Node(None)
+    >>> Node(True)
+    Node(True)
+    """
+
+    data: Any
+    next_node: Node | None = None
+
+    def __repr__(self) -> str:
+        """
+        Get the string representation of this node.
+        >>> Node(10).__repr__()
+        'Node(10)'
+        >>> repr(Node(10))
+        'Node(10)'
+        >>> str(Node(10))
+        'Node(10)'
+        >>> Node(10)
+        Node(10)
+        """
+        return f"Node({self.data})"
+
+
+class LinkedList:
+    def __init__(self):
+        """
+        Create and initialize LinkedList class instance.
+        >>> linked_list = LinkedList()
+        >>> linked_list.head is None
+        True
+        """
+        self.head = None
+
+    def __iter__(self) -> Iterator[Any]:
+        """
+        This function is intended for iterators to access
+        and iterate through data inside linked list.
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_tail("tail")
+        >>> linked_list.insert_tail("tail_1")
+        >>> linked_list.insert_tail("tail_2")
+        >>> for node in linked_list: # __iter__ used here.
+        ...     node
+        'tail'
+        'tail_1'
+        'tail_2'
+        """
+        node = self.head
+        while node:
+            yield node.data
+            node = node.next_node
+
+    def __len__(self) -> int:
+        """
+        Return length of linked list i.e. number of nodes
+        >>> linked_list = LinkedList()
+        >>> len(linked_list)
+        0
+        >>> linked_list.insert_tail("tail")
+        >>> len(linked_list)
+        1
+        >>> linked_list.insert_head("head")
+        >>> len(linked_list)
+        2
+        >>> _ = linked_list.delete_tail()
+        >>> len(linked_list)
+        1
+        >>> _ = linked_list.delete_head()
+        >>> len(linked_list)
+        0
+        """
+        return sum(1 for _ in self)
+
+    def __repr__(self) -> str:
+        """
+        String representation/visualization of a Linked Lists
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_tail(1)
+        >>> linked_list.insert_tail(3)
+        >>> linked_list.__repr__()
+        '1 -> 3'
+        >>> repr(linked_list)
+        '1 -> 3'
+        >>> str(linked_list)
+        '1 -> 3'
+        >>> linked_list.insert_tail(5)
+        >>> f"{linked_list}"
+        '1 -> 3 -> 5'
+        """
+        return " -> ".join([str(item) for item in self])
+
+    def __getitem__(self, index: int) -> Any:
+        """
+        Indexing Support. Used to get a node at particular position
+        >>> linked_list = LinkedList()
+        >>> for i in range(0, 10):
+        ...     linked_list.insert_nth(i, i)
+        >>> all(str(linked_list[i]) == str(i) for i in range(0, 10))
+        True
+        >>> linked_list[-10]
+        Traceback (most recent call last):
+            ...
+        ValueError: list index out of range.
+        >>> linked_list[len(linked_list)]
+        Traceback (most recent call last):
+            ...
+        ValueError: list index out of range.
+        """
+        if not 0 <= index < len(self):
+            raise ValueError("list index out of range.")
+        for i, node in enumerate(self):
+            if i == index:
+                return node
+        return None
+
+    # Used to change the data of a particular node
+    def __setitem__(self, index: int, data: Any) -> None:
+        """
+        >>> linked_list = LinkedList()
+        >>> for i in range(0, 10):
+        ...     linked_list.insert_nth(i, i)
+        >>> linked_list[0] = 666
+        >>> linked_list[0]
+        666
+        >>> linked_list[5] = -666
+        >>> linked_list[5]
+        -666
+        >>> linked_list[-10] = 666
+        Traceback (most recent call last):
+            ...
+        ValueError: list index out of range.
+        >>> linked_list[len(linked_list)] = 666
+        Traceback (most recent call last):
+            ...
+        ValueError: list index out of range.
+        """
+        if not 0 <= index < len(self):
+            raise ValueError("list index out of range.")
+        current = self.head
+        for _ in range(index):
+            current = current.next_node
+        current.data = data
+
+    def insert_tail(self, data: Any) -> None:
+        """
+        Insert data to the end of linked list.
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_tail("tail")
+        >>> linked_list
+        tail
+        >>> linked_list.insert_tail("tail_2")
+        >>> linked_list
+        tail -> tail_2
+        >>> linked_list.insert_tail("tail_3")
+        >>> linked_list
+        tail -> tail_2 -> tail_3
+        """
+        self.insert_nth(len(self), data)
+
+    def insert_head(self, data: Any) -> None:
+        """
+        Insert data to the beginning of linked list.
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_head("head")
+        >>> linked_list
+        head
+        >>> linked_list.insert_head("head_2")
+        >>> linked_list
+        head_2 -> head
+        >>> linked_list.insert_head("head_3")
+        >>> linked_list
+        head_3 -> head_2 -> head
+        """
+        self.insert_nth(0, data)
+
+    def insert_nth(self, index: int, data: Any) -> None:
+        """
+        Insert data at given index.
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_tail("first")
+        >>> linked_list.insert_tail("second")
+        >>> linked_list.insert_tail("third")
+        >>> linked_list
+        first -> second -> third
+        >>> linked_list.insert_nth(1, "fourth")
+        >>> linked_list
+        first -> fourth -> second -> third
+        >>> linked_list.insert_nth(3, "fifth")
+        >>> linked_list
+        first -> fourth -> second -> fifth -> third
+        """
+        if not 0 <= index <= len(self):
+            raise IndexError("list index out of range")
+        new_node = Node(data)
+        if self.head is None:
+            self.head = new_node
+        elif index == 0:
+            new_node.next_node = self.head  # link new_node to head
+            self.head = new_node
+        else:
+            temp = self.head
+            for _ in range(index - 1):
+                temp = temp.next_node
+            new_node.next_node = temp.next_node
+            temp.next_node = new_node
+
+    def print_list(self) -> None:  # print every node data
+        """
+        This method prints every node data.
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_tail("first")
+        >>> linked_list.insert_tail("second")
+        >>> linked_list.insert_tail("third")
+        >>> linked_list
+        first -> second -> third
+        """
+        print(self)
+
+    def delete_head(self) -> Any:
+        """
+        Delete the first node and return the
+        node's data.
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_tail("first")
+        >>> linked_list.insert_tail("second")
+        >>> linked_list.insert_tail("third")
+        >>> linked_list
+        first -> second -> third
+        >>> linked_list.delete_head()
+        'first'
+        >>> linked_list
+        second -> third
+        >>> linked_list.delete_head()
+        'second'
+        >>> linked_list
+        third
+        >>> linked_list.delete_head()
+        'third'
+        >>> linked_list.delete_head()
+        Traceback (most recent call last):
+            ...
+        IndexError: List index out of range.
+        """
+        return self.delete_nth(0)
+
+    def delete_tail(self) -> Any:  # delete from tail
+        """
+        Delete the tail end node and return the
+        node's data.
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_tail("first")
+        >>> linked_list.insert_tail("second")
+        >>> linked_list.insert_tail("third")
+        >>> linked_list
+        first -> second -> third
+        >>> linked_list.delete_tail()
+        'third'
+        >>> linked_list
+        first -> second
+        >>> linked_list.delete_tail()
+        'second'
+        >>> linked_list
+        first
+        >>> linked_list.delete_tail()
+        'first'
+        >>> linked_list.delete_tail()
+        Traceback (most recent call last):
+            ...
+        IndexError: List index out of range.
+        """
+        return self.delete_nth(len(self) - 1)
+
+    def delete_nth(self, index: int = 0) -> Any:
+        """
+        Delete node at given index and return the
+        node's data.
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_tail("first")
+        >>> linked_list.insert_tail("second")
+        >>> linked_list.insert_tail("third")
+        >>> linked_list
+        first -> second -> third
+        >>> linked_list.delete_nth(1) # delete middle
+        'second'
+        >>> linked_list
+        first -> third
+        >>> linked_list.delete_nth(5) # this raises error
+        Traceback (most recent call last):
+            ...
+        IndexError: List index out of range.
+        >>> linked_list.delete_nth(-1) # this also raises error
+        Traceback (most recent call last):
+            ...
+        IndexError: List index out of range.
+        """
+        if not 0 <= index <= len(self) - 1:  # test if index is valid
+            raise IndexError("List index out of range.")
+        delete_node = self.head  # default first node
+        if index == 0:
+            self.head = self.head.next_node
+        else:
+            temp = self.head
+            for _ in range(index - 1):
+                temp = temp.next_node
+            delete_node = temp.next_node
+            temp.next_node = temp.next_node.next_node
+        return delete_node.data
+
+    def is_empty(self) -> bool:
+        """
+        Check if linked list is empty.
+        >>> linked_list = LinkedList()
+        >>> linked_list.is_empty()
+        True
+        >>> linked_list.insert_head("first")
+        >>> linked_list.is_empty()
+        False
+        """
+        return self.head is None
+
+    def reverse(self) -> None:
+        """
+        This reverses the linked list order.
+        >>> linked_list = LinkedList()
+        >>> linked_list.insert_tail("first")
+        >>> linked_list.insert_tail("second")
+        >>> linked_list.insert_tail("third")
+        >>> linked_list
+        first -> second -> third
+        >>> linked_list.reverse()
+        >>> linked_list
+        third -> second -> first
+        """
+        prev = None
+        current = self.head
+
+        while current:
+            # Store the current node's next node.
+            next_node = current.next_node
+            # Make the current node's next_node point backwards
+            current.next_node = prev
+            # Make the previous node be the current node
+            prev = current
+            # Make the current node the next_node node (to progress iteration)
+            current = next_node
+        # Return prev in order to put the head at the end
+        self.head = prev
+
+
+def test_singly_linked_list() -> None:
+    """
+    >>> test_singly_linked_list()
+    """
+    linked_list = LinkedList()
+    assert linked_list.is_empty() is True
+    assert str(linked_list) == ""
+
+    try:
+        linked_list.delete_head()
+        raise AssertionError  # This should not happen.
+    except IndexError:
+        assert True  # This should happen.
+
+    try:
+        linked_list.delete_tail()
+        raise AssertionError  # This should not happen.
+    except IndexError:
+        assert True  # This should happen.
+
+    for i in range(10):
+        assert len(linked_list) == i
+        linked_list.insert_nth(i, i + 1)
+    assert str(linked_list) == " -> ".join(str(i) for i in range(1, 11))
+
+    linked_list.insert_head(0)
+    linked_list.insert_tail(11)
+    assert str(linked_list) == " -> ".join(str(i) for i in range(12))
+
+    assert linked_list.delete_head() == 0
+    assert linked_list.delete_nth(9) == 10
+    assert linked_list.delete_tail() == 11
+    assert len(linked_list) == 9
+    assert str(linked_list) == " -> ".join(str(i) for i in range(1, 10))
+
+    assert all(linked_list[i] == i + 1 for i in range(9)) is True
+
+    for i in range(9):
+        linked_list[i] = -i
+    assert all(linked_list[i] == -i for i in range(9)) is True
+
+    linked_list.reverse()
+    assert str(linked_list) == " -> ".join(str(i) for i in range(-8, 1))
+
+
+def test_singly_linked_list_2() -> None:
+    """
+    This section of the test used varying data types for input.
+    >>> test_singly_linked_list_2()
+    """
+    test_input = [
+        -9,
+        100,
+        Node(77345112),
+        "dlrow olleH",
+        7,
+        5555,
+        0,
+        -192.55555,
+        "Hello, world!",
+        77.9,
+        Node(10),
+        None,
+        None,
+        12.20,
+    ]
+    linked_list = LinkedList()
+
+    for i in test_input:
+        linked_list.insert_tail(i)
+
+    # Check if it's empty or not
+    assert linked_list.is_empty() is False
+    assert (
+        str(linked_list)
+        == "-9 -> 100 -> Node(77345112) -> dlrow olleH -> 7 -> 5555 -> "
+        "0 -> -192.55555 -> Hello, world! -> 77.9 -> Node(10) -> None -> None -> 12.2"
+    )
+
+    # Delete the head
+    result = linked_list.delete_head()
+    assert result == -9
+    assert (
+        str(linked_list) == "100 -> Node(77345112) -> dlrow olleH -> 7 -> 5555 -> 0 -> "
+        "-192.55555 -> Hello, world! -> 77.9 -> Node(10) -> None -> None -> 12.2"
+    )
+
+    # Delete the tail
+    result = linked_list.delete_tail()
+    assert result == 12.2
+    assert (
+        str(linked_list) == "100 -> Node(77345112) -> dlrow olleH -> 7 -> 5555 -> 0 -> "
+        "-192.55555 -> Hello, world! -> 77.9 -> Node(10) -> None -> None"
+    )
+
+    # Delete a node in specific location in linked list
+    result = linked_list.delete_nth(10)
+    assert result is None
+    assert (
+        str(linked_list) == "100 -> Node(77345112) -> dlrow olleH -> 7 -> 5555 -> 0 -> "
+        "-192.55555 -> Hello, world! -> 77.9 -> Node(10) -> None"
+    )
+
+    # Add a Node instance to its head
+    linked_list.insert_head(Node("Hello again, world!"))
+    assert (
+        str(linked_list)
+        == "Node(Hello again, world!) -> 100 -> Node(77345112) -> dlrow olleH -> "
+        "7 -> 5555 -> 0 -> -192.55555 -> Hello, world! -> 77.9 -> Node(10) -> None"
+    )
+
+    # Add None to its tail
+    linked_list.insert_tail(None)
+    assert (
+        str(linked_list)
+        == "Node(Hello again, world!) -> 100 -> Node(77345112) -> dlrow olleH -> 7 -> "
+        "5555 -> 0 -> -192.55555 -> Hello, world! -> 77.9 -> Node(10) -> None -> None"
+    )
+
+    # Reverse the linked list
+    linked_list.reverse()
+    assert (
+        str(linked_list)
+        == "None -> None -> Node(10) -> 77.9 -> Hello, world! -> -192.55555 -> 0 -> "
+        "5555 -> 7 -> dlrow olleH -> Node(77345112) -> 100 -> Node(Hello again, world!)"
+    )
+
+
+def main():
+    from doctest import testmod
+
+    testmod()
+
+    linked_list = LinkedList()
+    linked_list.insert_head(input("Inserting 1st at head ").strip())
+    linked_list.insert_head(input("Inserting 2nd at head ").strip())
+    print("\nPrint list:")
+    linked_list.print_list()
+    linked_list.insert_tail(input("\nInserting 1st at tail ").strip())
+    linked_list.insert_tail(input("Inserting 2nd at tail ").strip())
+    print("\nPrint list:")
+    linked_list.print_list()
+    print("\nDelete head")
+    linked_list.delete_head()
+    print("Delete tail")
+    linked_list.delete_tail()
+    print("\nPrint list:")
+    linked_list.print_list()
+    print("\nReverse linked list")
+    linked_list.reverse()
+    print("\nPrint list:")
+    linked_list.print_list()
+    print("\nString representation of linked list:")
+    print(linked_list)
+    print("\nReading/changing Node data using indexing:")
+    print(f"Element at Position 1: {linked_list[1]}")
+    linked_list[1] = input("Enter New Value: ").strip()
+    print("New list:")
+    print(linked_list)
+    print(f"length of linked_list is : {len(linked_list)}")
+
+
+if __name__ == "__main__":
+    main()
+r"""
+A binary search Tree
+
+Example
+              8
+             / \
+            3   10
+           / \    \
+          1   6    14
+             / \   /
+            4   7 13
+
+>>> t = BinarySearchTree().insert(8, 3, 6, 1, 10, 14, 13, 4, 7)
+>>> print(" ".join(repr(i.value) for i in t.traversal_tree()))
+8 3 1 6 4 7 10 14 13
+
+>>> tuple(i.value for i in t.traversal_tree(inorder))
+(1, 3, 4, 6, 7, 8, 10, 13, 14)
+>>> tuple(t)
+(1, 3, 4, 6, 7, 8, 10, 13, 14)
+>>> t.find_kth_smallest(3, t.root)
+4
+>>> tuple(t)[3-1]
+4
+
+>>> print(" ".join(repr(i.value) for i in t.traversal_tree(postorder)))
+1 4 7 6 3 13 14 10 8
+>>> t.remove(20)
+Traceback (most recent call last):
+    ...
+ValueError: Value 20 not found
+>>> BinarySearchTree().search(6)
+Traceback (most recent call last):
+    ...
+IndexError: Warning: Tree is empty! please use another.
+
+Other example:
+
+>>> testlist = (8, 3, 6, 1, 10, 14, 13, 4, 7)
+>>> t = BinarySearchTree()
+>>> for i in testlist:
+...     t.insert(i)  # doctest: +ELLIPSIS
+BinarySearchTree(root=8)
+BinarySearchTree(root={'8': (3, None)})
+BinarySearchTree(root={'8': ({'3': (None, 6)}, None)})
+BinarySearchTree(root={'8': ({'3': (1, 6)}, None)})
+BinarySearchTree(root={'8': ({'3': (1, 6)}, 10)})
+BinarySearchTree(root={'8': ({'3': (1, 6)}, {'10': (None, 14)})})
+BinarySearchTree(root={'8': ({'3': (1, 6)}, {'10': (None, {'14': (13, None)})})})
+BinarySearchTree(root={'8': ({'3': (1, {'6': (4, None)})}, {'10': (None, {'14': ...
+BinarySearchTree(root={'8': ({'3': (1, {'6': (4, 7)})}, {'10': (None, {'14': (13, ...
+
+Prints all the elements of the list in order traversal
+>>> print(t)
+{'8': ({'3': (1, {'6': (4, 7)})}, {'10': (None, {'14': (13, None)})})}
+
+Test existence
+>>> t.search(6) is not None
+True
+>>> 6 in t
+True
+>>> t.search(-1) is not None
+False
+>>> -1 in t
+False
+
+>>> t.search(6).is_right
+True
+>>> t.search(1).is_right
+False
+
+>>> t.get_max().value
+14
+>>> max(t)
+14
+>>> t.get_min().value
+1
+>>> min(t)
+1
+>>> t.empty()
+False
+>>> not t
+False
+>>> for i in testlist:
+...     t.remove(i)
+>>> t.empty()
+True
+>>> not t
+True
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterable, Iterator
+from dataclasses import dataclass
+from typing import Any, Self
+
+
+@dataclass
+class Node:
+    value: int
+    left: Node | None = None
+    right: Node | None = None
+    parent: Node | None = None  # Added in order to delete a node easier
+
+    def __iter__(self) -> Iterator[int]:
+        """
+        >>> list(Node(0))
+        [0]
+        >>> list(Node(0, Node(-1), Node(1), None))
+        [-1, 0, 1]
+        """
+        yield from self.left or []
+        yield self.value
+        yield from self.right or []
+
+    def __repr__(self) -> str:
+        from pprint import pformat
+
+        if self.left is None and self.right is None:
+            return str(self.value)
+        return pformat({f"{self.value}": (self.left, self.right)}, indent=1)
+
+    @property
+    def is_right(self) -> bool:
+        return bool(self.parent and self is self.parent.right)
+
+
+@dataclass
+class BinarySearchTree:
+    root: Node | None = None
+
+    def __bool__(self) -> bool:
+        return bool(self.root)
+
+    def __iter__(self) -> Iterator[int]:
+        yield from self.root or []
+
+    def __str__(self) -> str:
+        """
+        Return a string of all the Nodes using in order traversal
+        """
+        return str(self.root)
+
+    def __reassign_nodes(self, node: Node, new_children: Node | None) -> None:
+        if new_children is not None:  # reset its kids
+            new_children.parent = node.parent
+        if node.parent is not None:  # reset its parent
+            if node.is_right:  # If it is the right child
+                node.parent.right = new_children
+            else:
+                node.parent.left = new_children
+        else:
+            self.root = new_children
+
+    def empty(self) -> bool:
+        """
+        Returns True if the tree does not have any element(s).
+        False if the tree has element(s).
+
+        >>> BinarySearchTree().empty()
+        True
+        >>> BinarySearchTree().insert(1).empty()
+        False
+        >>> BinarySearchTree().insert(8, 3, 6, 1, 10, 14, 13, 4, 7).empty()
+        False
+        """
+        return not self.root
+
+    def __insert(self, value) -> None:
+        """
+        Insert a new node in Binary Search Tree with value label
+        """
+        new_node = Node(value)  # create a new Node
+        if self.empty():  # if Tree is empty
+            self.root = new_node  # set its root
+        else:  # Tree is not empty
+            parent_node = self.root  # from root
+            if parent_node is None:
+                return
+            while True:  # While we don't get to a leaf
+                if value < parent_node.value:  # We go left
+                    if parent_node.left is None:
+                        parent_node.left = new_node  # We insert the new node in a leaf
+                        break
+                    else:
+                        parent_node = parent_node.left
+                elif parent_node.right is None:
+                    parent_node.right = new_node
+                    break
+                else:
+                    parent_node = parent_node.right
+            new_node.parent = parent_node
+
+    def insert(self, *values) -> Self:
+        for value in values:
+            self.__insert(value)
+        return self
+
+    def search(self, value) -> Node | None:
+        """
+        >>> tree = BinarySearchTree().insert(10, 20, 30, 40, 50)
+        >>> tree.search(10)
+        {'10': (None, {'20': (None, {'30': (None, {'40': (None, 50)})})})}
+        >>> tree.search(20)
+        {'20': (None, {'30': (None, {'40': (None, 50)})})}
+        >>> tree.search(30)
+        {'30': (None, {'40': (None, 50)})}
+        >>> tree.search(40)
+        {'40': (None, 50)}
+        >>> tree.search(50)
+        50
+        >>> tree.search(5) is None  # element not present
+        True
+        >>> tree.search(0) is None  # element not present
+        True
+        >>> tree.search(-5) is None  # element not present
+        True
+        >>> BinarySearchTree().search(10)
+        Traceback (most recent call last):
+            ...
+        IndexError: Warning: Tree is empty! please use another.
+        """
+
+        if self.empty():
+            raise IndexError("Warning: Tree is empty! please use another.")
+        else:
+            node = self.root
+            # use lazy evaluation here to avoid NoneType Attribute error
+            while node is not None and node.value is not value:
+                node = node.left if value < node.value else node.right
+            return node
+
+    def get_max(self, node: Node | None = None) -> Node | None:
+        """
+        We go deep on the right branch
+
+        >>> BinarySearchTree().insert(10, 20, 30, 40, 50).get_max()
+        50
+        >>> BinarySearchTree().insert(-5, -1, 0.1, -0.3, -4.5).get_max()
+        {'0.1': (-0.3, None)}
+        >>> BinarySearchTree().insert(1, 78.3, 30, 74.0, 1).get_max()
+        {'78.3': ({'30': (1, 74.0)}, None)}
+        >>> BinarySearchTree().insert(1, 783, 30, 740, 1).get_max()
+        {'783': ({'30': (1, 740)}, None)}
+        """
+        if node is None:
+            if self.root is None:
+                return None
+            node = self.root
+
+        if not self.empty():
+            while node.right is not None:
+                node = node.right
+        return node
+
+    def get_min(self, node: Node | None = None) -> Node | None:
+        """
+        We go deep on the left branch
+
+        >>> BinarySearchTree().insert(10, 20, 30, 40, 50).get_min()
+        {'10': (None, {'20': (None, {'30': (None, {'40': (None, 50)})})})}
+        >>> BinarySearchTree().insert(-5, -1, 0, -0.3, -4.5).get_min()
+        {'-5': (None, {'-1': (-4.5, {'0': (-0.3, None)})})}
+        >>> BinarySearchTree().insert(1, 78.3, 30, 74.0, 1).get_min()
+        {'1': (None, {'78.3': ({'30': (1, 74.0)}, None)})}
+        >>> BinarySearchTree().insert(1, 783, 30, 740, 1).get_min()
+        {'1': (None, {'783': ({'30': (1, 740)}, None)})}
+        """
+        if node is None:
+            node = self.root
+        if self.root is None:
+            return None
+        if not self.empty():
+            node = self.root
+            while node.left is not None:
+                node = node.left
+        return node
+
+    def remove(self, value: int) -> None:
+        # Look for the node with that label
+        node = self.search(value)
+        if node is None:
+            msg = f"Value {value} not found"
+            raise ValueError(msg)
+
+        if node.left is None and node.right is None:  # If it has no children
+            self.__reassign_nodes(node, None)
+        elif node.left is None:  # Has only right children
+            self.__reassign_nodes(node, node.right)
+        elif node.right is None:  # Has only left children
+            self.__reassign_nodes(node, node.left)
+        else:
+            predecessor = self.get_max(
+                node.left
+            )  # Gets the max value of the left branch
+            self.remove(predecessor.value)  # type: ignore[union-attr]
+            node.value = (
+                predecessor.value  # type: ignore[union-attr]
+            )  # Assigns the value to the node to delete and keep tree structure
+
+    def preorder_traverse(self, node: Node | None) -> Iterable:
+        if node is not None:
+            yield node  # Preorder Traversal
+            yield from self.preorder_traverse(node.left)
+            yield from self.preorder_traverse(node.right)
+
+    def traversal_tree(self, traversal_function=None) -> Any:
+        """
+        This function traversal the tree.
+        You can pass a function to traversal the tree as needed by client code
+        """
+        if traversal_function is None:
+            return self.preorder_traverse(self.root)
+        else:
+            return traversal_function(self.root)
+
+    def inorder(self, arr: list, node: Node | None) -> None:
+        """Perform an inorder traversal and append values of the nodes to
+        a list named arr"""
+        if node:
+            self.inorder(arr, node.left)
+            arr.append(node.value)
+            self.inorder(arr, node.right)
+
+    def find_kth_smallest(self, k: int, node: Node) -> int:
+        """Return the kth smallest element in a binary search tree"""
+        arr: list[int] = []
+        self.inorder(arr, node)  # append all values to list using inorder traversal
+        return arr[k - 1]
+
+
+def inorder(curr_node: Node | None) -> list[Node]:
+    """
+    inorder (left, self, right)
+    """
+    node_list = []
+    if curr_node is not None:
+        node_list = [*inorder(curr_node.left), curr_node, *inorder(curr_node.right)]
+    return node_list
+
+
+def postorder(curr_node: Node | None) -> list[Node]:
+    """
+    postOrder (left, right, self)
+    """
+    node_list = []
+    if curr_node is not None:
+        node_list = postorder(curr_node.left) + postorder(curr_node.right) + [curr_node]
+    return node_list
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(verbose=True)
+#!/usr/bin/env python3
+
+"""
+Pure Python implementations of binary search algorithms
+
+For doctests run the following command:
+python3 -m doctest -v binary_search.py
+
+For manual testing run:
+python3 binary_search.py
+"""
+
+from __future__ import annotations
+
+import bisect
+
+
+def bisect_left(
+    sorted_collection: list[int], item: int, lo: int = 0, hi: int = -1
+) -> int:
+    """
+    Locates the first element in a sorted array that is larger or equal to a given
+    value.
+
+    It has the same interface as
+    https://docs.python.org/3/library/bisect.html#bisect.bisect_left .
+
+    :param sorted_collection: some ascending sorted collection with comparable items
+    :param item: item to bisect
+    :param lo: lowest index to consider (as in sorted_collection[lo:hi])
+    :param hi: past the highest index to consider (as in sorted_collection[lo:hi])
+    :return: index i such that all values in sorted_collection[lo:i] are < item and all
+        values in sorted_collection[i:hi] are >= item.
+
+    Examples:
+    >>> bisect_left([0, 5, 7, 10, 15], 0)
+    0
+    >>> bisect_left([0, 5, 7, 10, 15], 6)
+    2
+    >>> bisect_left([0, 5, 7, 10, 15], 20)
+    5
+    >>> bisect_left([0, 5, 7, 10, 15], 15, 1, 3)
+    3
+    >>> bisect_left([0, 5, 7, 10, 15], 6, 2)
+    2
+    """
+    if hi < 0:
+        hi = len(sorted_collection)
+
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if sorted_collection[mid] < item:
+            lo = mid + 1
+        else:
+            hi = mid
+
+    return lo
+
+
+def bisect_right(
+    sorted_collection: list[int], item: int, lo: int = 0, hi: int = -1
+) -> int:
+    """
+    Locates the first element in a sorted array that is larger than a given value.
+
+    It has the same interface as
+    https://docs.python.org/3/library/bisect.html#bisect.bisect_right .
+
+    :param sorted_collection: some ascending sorted collection with comparable items
+    :param item: item to bisect
+    :param lo: lowest index to consider (as in sorted_collection[lo:hi])
+    :param hi: past the highest index to consider (as in sorted_collection[lo:hi])
+    :return: index i such that all values in sorted_collection[lo:i] are <= item and
+        all values in sorted_collection[i:hi] are > item.
+
+    Examples:
+    >>> bisect_right([0, 5, 7, 10, 15], 0)
+    1
+    >>> bisect_right([0, 5, 7, 10, 15], 15)
+    5
+    >>> bisect_right([0, 5, 7, 10, 15], 6)
+    2
+    >>> bisect_right([0, 5, 7, 10, 15], 15, 1, 3)
+    3
+    >>> bisect_right([0, 5, 7, 10, 15], 6, 2)
+    2
+    """
+    if hi < 0:
+        hi = len(sorted_collection)
+
+    while lo < hi:
+        mid = lo + (hi - lo) // 2
+        if sorted_collection[mid] <= item:
+            lo = mid + 1
+        else:
+            hi = mid
+
+    return lo
+
+
+def insort_left(
+    sorted_collection: list[int], item: int, lo: int = 0, hi: int = -1
+) -> None:
+    """
+    Inserts a given value into a sorted array before other values with the same value.
+
+    It has the same interface as
+    https://docs.python.org/3/library/bisect.html#bisect.insort_left .
+
+    :param sorted_collection: some ascending sorted collection with comparable items
+    :param item: item to insert
+    :param lo: lowest index to consider (as in sorted_collection[lo:hi])
+    :param hi: past the highest index to consider (as in sorted_collection[lo:hi])
+
+    Examples:
+    >>> sorted_collection = [0, 5, 7, 10, 15]
+    >>> insort_left(sorted_collection, 6)
+    >>> sorted_collection
+    [0, 5, 6, 7, 10, 15]
+    >>> sorted_collection = [(0, 0), (5, 5), (7, 7), (10, 10), (15, 15)]
+    >>> item = (5, 5)
+    >>> insort_left(sorted_collection, item)
+    >>> sorted_collection
+    [(0, 0), (5, 5), (5, 5), (7, 7), (10, 10), (15, 15)]
+    >>> item is sorted_collection[1]
+    True
+    >>> item is sorted_collection[2]
+    False
+    >>> sorted_collection = [0, 5, 7, 10, 15]
+    >>> insort_left(sorted_collection, 20)
+    >>> sorted_collection
+    [0, 5, 7, 10, 15, 20]
+    >>> sorted_collection = [0, 5, 7, 10, 15]
+    >>> insort_left(sorted_collection, 15, 1, 3)
+    >>> sorted_collection
+    [0, 5, 7, 15, 10, 15]
+    """
+    sorted_collection.insert(bisect_left(sorted_collection, item, lo, hi), item)
+
+
+def insort_right(
+    sorted_collection: list[int], item: int, lo: int = 0, hi: int = -1
+) -> None:
+    """
+    Inserts a given value into a sorted array after other values with the same value.
+
+    It has the same interface as
+    https://docs.python.org/3/library/bisect.html#bisect.insort_right .
+
+    :param sorted_collection: some ascending sorted collection with comparable items
+    :param item: item to insert
+    :param lo: lowest index to consider (as in sorted_collection[lo:hi])
+    :param hi: past the highest index to consider (as in sorted_collection[lo:hi])
+
+    Examples:
+    >>> sorted_collection = [0, 5, 7, 10, 15]
+    >>> insort_right(sorted_collection, 6)
+    >>> sorted_collection
+    [0, 5, 6, 7, 10, 15]
+    >>> sorted_collection = [(0, 0), (5, 5), (7, 7), (10, 10), (15, 15)]
+    >>> item = (5, 5)
+    >>> insort_right(sorted_collection, item)
+    >>> sorted_collection
+    [(0, 0), (5, 5), (5, 5), (7, 7), (10, 10), (15, 15)]
+    >>> item is sorted_collection[1]
+    False
+    >>> item is sorted_collection[2]
+    True
+    >>> sorted_collection = [0, 5, 7, 10, 15]
+    >>> insort_right(sorted_collection, 20)
+    >>> sorted_collection
+    [0, 5, 7, 10, 15, 20]
+    >>> sorted_collection = [0, 5, 7, 10, 15]
+    >>> insort_right(sorted_collection, 15, 1, 3)
+    >>> sorted_collection
+    [0, 5, 7, 15, 10, 15]
+    """
+    sorted_collection.insert(bisect_right(sorted_collection, item, lo, hi), item)
+
+
+def binary_search(sorted_collection: list[int], item: int) -> int:
+    """Pure implementation of a binary search algorithm in Python
+
+    Be careful collection must be ascending sorted otherwise, the result will be
+    unpredictable
+
+    :param sorted_collection: some ascending sorted collection with comparable items
+    :param item: item value to search
+    :return: index of the found item or -1 if the item is not found
+
+    Examples:
+    >>> binary_search([0, 5, 7, 10, 15], 0)
+    0
+    >>> binary_search([0, 5, 7, 10, 15], 15)
+    4
+    >>> binary_search([0, 5, 7, 10, 15], 5)
+    1
+    >>> binary_search([0, 5, 7, 10, 15], 6)
+    -1
+    """
+    if list(sorted_collection) != sorted(sorted_collection):
+        raise ValueError("sorted_collection must be sorted in ascending order")
+    left = 0
+    right = len(sorted_collection) - 1
+
+    while left <= right:
+        midpoint = left + (right - left) // 2
+        current_item = sorted_collection[midpoint]
+        if current_item == item:
+            return midpoint
+        elif item < current_item:
+            right = midpoint - 1
+        else:
+            left = midpoint + 1
+    return -1
+
+
+def binary_search_std_lib(sorted_collection: list[int], item: int) -> int:
+    """Pure implementation of a binary search algorithm in Python using stdlib
+
+    Be careful collection must be ascending sorted otherwise, the result will be
+    unpredictable
+
+    :param sorted_collection: some ascending sorted collection with comparable items
+    :param item: item value to search
+    :return: index of the found item or -1 if the item is not found
+
+    Examples:
+    >>> binary_search_std_lib([0, 5, 7, 10, 15], 0)
+    0
+    >>> binary_search_std_lib([0, 5, 7, 10, 15], 15)
+    4
+    >>> binary_search_std_lib([0, 5, 7, 10, 15], 5)
+    1
+    >>> binary_search_std_lib([0, 5, 7, 10, 15], 6)
+    -1
+    """
+    if list(sorted_collection) != sorted(sorted_collection):
+        raise ValueError("sorted_collection must be sorted in ascending order")
+    index = bisect.bisect_left(sorted_collection, item)
+    if index != len(sorted_collection) and sorted_collection[index] == item:
+        return index
+    return -1
+
+
+def binary_search_with_duplicates(sorted_collection: list[int], item: int) -> list[int]:
+    """Pure implementation of a binary search algorithm in Python that supports
+    duplicates.
+
+    Resources used:
+    https://stackoverflow.com/questions/13197552/using-binary-search-with-sorted-array-with-duplicates
+
+    The collection must be sorted in ascending order; otherwise the result will be
+    unpredictable. If the target appears multiple times, this function returns a
+    list of all indexes where the target occurs. If the target is not found,
+    this function returns an empty list.
+
+    :param sorted_collection: some ascending sorted collection with comparable items
+    :param item: item value to search for
+    :return: a list of indexes where the item is found (empty list if not found)
+
+    Examples:
+    >>> binary_search_with_duplicates([0, 5, 7, 10, 15], 0)
+    [0]
+    >>> binary_search_with_duplicates([0, 5, 7, 10, 15], 15)
+    [4]
+    >>> binary_search_with_duplicates([1, 2, 2, 2, 3], 2)
+    [1, 2, 3]
+    >>> binary_search_with_duplicates([1, 2, 2, 2, 3], 4)
+    []
+    """
+    if list(sorted_collection) != sorted(sorted_collection):
+        raise ValueError("sorted_collection must be sorted in ascending order")
+
+    def lower_bound(sorted_collection: list[int], item: int) -> int:
+        """
+        Returns the index of the first element greater than or equal to the item.
+
+        :param sorted_collection: The sorted list to search.
+        :param item: The item to find the lower bound for.
+        :return: The index where the item can be inserted while maintaining order.
+        """
+        left = 0
+        right = len(sorted_collection)
+        while left < right:
+            midpoint = left + (right - left) // 2
+            current_item = sorted_collection[midpoint]
+            if current_item < item:
+                left = midpoint + 1
+            else:
+                right = midpoint
+        return left
+
+    def upper_bound(sorted_collection: list[int], item: int) -> int:
+        """
+        Returns the index of the first element strictly greater than the item.
+
+        :param sorted_collection: The sorted list to search.
+        :param item: The item to find the upper bound for.
+        :return: The index where the item can be inserted after all existing instances.
+        """
+        left = 0
+        right = len(sorted_collection)
+        while left < right:
+            midpoint = left + (right - left) // 2
+            current_item = sorted_collection[midpoint]
+            if current_item <= item:
+                left = midpoint + 1
+            else:
+                right = midpoint
+        return left
+
+    left = lower_bound(sorted_collection, item)
+    right = upper_bound(sorted_collection, item)
+
+    if left == len(sorted_collection) or sorted_collection[left] != item:
+        return []
+    return list(range(left, right))
+
+
+def binary_search_by_recursion(
+    sorted_collection: list[int], item: int, left: int = 0, right: int = -1
+) -> int:
+    """Pure implementation of a binary search algorithm in Python by recursion
+
+    Be careful collection must be ascending sorted otherwise, the result will be
+    unpredictable
+    First recursion should be started with left=0 and right=(len(sorted_collection)-1)
+
+    :param sorted_collection: some ascending sorted collection with comparable items
+    :param item: item value to search
+    :return: index of the found item or -1 if the item is not found
+
+    Examples:
+    >>> binary_search_by_recursion([0, 5, 7, 10, 15], 0, 0, 4)
+    0
+    >>> binary_search_by_recursion([0, 5, 7, 10, 15], 15, 0, 4)
+    4
+    >>> binary_search_by_recursion([0, 5, 7, 10, 15], 5, 0, 4)
+    1
+    >>> binary_search_by_recursion([0, 5, 7, 10, 15], 6, 0, 4)
+    -1
+    """
+    if right < 0:
+        right = len(sorted_collection) - 1
+    if list(sorted_collection) != sorted(sorted_collection):
+        raise ValueError("sorted_collection must be sorted in ascending order")
+    if right < left:
+        return -1
+
+    midpoint = left + (right - left) // 2
+
+    if sorted_collection[midpoint] == item:
+        return midpoint
+    elif sorted_collection[midpoint] > item:
+        return binary_search_by_recursion(sorted_collection, item, left, midpoint - 1)
+    else:
+        return binary_search_by_recursion(sorted_collection, item, midpoint + 1, right)
+
+
+def exponential_search(sorted_collection: list[int], item: int) -> int:
+    """Pure implementation of an exponential search algorithm in Python
+    Resources used:
+    https://en.wikipedia.org/wiki/Exponential_search
+
+    Be careful collection must be ascending sorted otherwise, result will be
+    unpredictable
+
+    :param sorted_collection: some ascending sorted collection with comparable items
+    :param item: item value to search
+    :return: index of the found item or -1 if the item is not found
+
+    the order of this algorithm is O(lg I) where I is index position of item if exist
+
+    Examples:
+    >>> exponential_search([0, 5, 7, 10, 15], 0)
+    0
+    >>> exponential_search([0, 5, 7, 10, 15], 15)
+    4
+    >>> exponential_search([0, 5, 7, 10, 15], 5)
+    1
+    >>> exponential_search([0, 5, 7, 10, 15], 6)
+    -1
+    """
+    if list(sorted_collection) != sorted(sorted_collection):
+        raise ValueError("sorted_collection must be sorted in ascending order")
+    bound = 1
+    while bound < len(sorted_collection) and sorted_collection[bound] < item:
+        bound *= 2
+    left = bound // 2
+    right = min(bound, len(sorted_collection) - 1)
+    last_result = binary_search_by_recursion(
+        sorted_collection=sorted_collection, item=item, left=left, right=right
+    )
+    if last_result is None:
+        return -1
+    return last_result
+
+
+searches = (  # Fastest to slowest...
+    binary_search_std_lib,
+    binary_search,
+    exponential_search,
+    binary_search_by_recursion,
+)
+
+
+if __name__ == "__main__":
+    import doctest
+    import timeit
+
+    doctest.testmod()
+    for search in searches:
+        name = f"{search.__name__:>26}"
+        print(f"{name}: {search([0, 5, 7, 10, 15], 10) = }")  # type: ignore[operator]
+
+    print("\nBenchmarks...")
+    setup = "collection = range(1000)"
+    for search in searches:
+        name = search.__name__
+        print(
+            f"{name:>26}:",
+            timeit.timeit(
+                f"{name}(collection, 500)", setup=setup, number=5_000, globals=globals()
+            ),
+        )
+
+    user_input = input("\nEnter numbers separated by comma: ").strip()
+    collection = sorted(int(item) for item in user_input.split(","))
+    target = int(input("Enter a single number to be found in the list: "))
+    result = binary_search(sorted_collection=collection, item=target)
+    if result == -1:
+        print(f"{target} was not found in {collection}.")
+    else:
+        print(f"{target} was found at position {result} of {collection}.")
+# Title: Dijkstra's Algorithm for finding single source shortest path from scratch
+# Author: Shubham Malik
+# References: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+
+import math
+import sys
+
+# For storing the vertex set to retrieve node with the lowest distance
+
+
+class PriorityQueue:
+    # Based on Min Heap
+    def __init__(self):
+        """
+        Priority queue class constructor method.
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.cur_size
+        0
+        >>> priority_queue_test.array
+        []
+        >>> priority_queue_test.pos
+        {}
+        """
+        self.cur_size = 0
+        self.array = []
+        self.pos = {}  # To store the pos of node in array
+
+    def is_empty(self):
+        """
+        Conditional boolean method to determine if the priority queue is empty or not.
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.is_empty()
+        True
+        >>> priority_queue_test.insert((2, 'A'))
+        >>> priority_queue_test.is_empty()
+        False
+        """
+        return self.cur_size == 0
+
+    def min_heapify(self, idx):
+        """
+        Sorts the queue array so that the minimum element is root.
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.cur_size = 3
+        >>> priority_queue_test.pos = {'A': 0, 'B': 1, 'C': 2}
+
+        >>> priority_queue_test.array = [(5, 'A'), (10, 'B'), (15, 'C')]
+        >>> priority_queue_test.min_heapify(0)
+        >>> priority_queue_test.array
+        [(5, 'A'), (10, 'B'), (15, 'C')]
+
+        >>> priority_queue_test.array = [(10, 'A'), (5, 'B'), (15, 'C')]
+        >>> priority_queue_test.min_heapify(0)
+        >>> priority_queue_test.array
+        [(5, 'B'), (10, 'A'), (15, 'C')]
+
+        >>> priority_queue_test.array = [(10, 'A'), (15, 'B'), (5, 'C')]
+        >>> priority_queue_test.min_heapify(0)
+        >>> priority_queue_test.array
+        [(5, 'C'), (15, 'B'), (10, 'A')]
+
+        >>> priority_queue_test.array = [(10, 'A'), (5, 'B')]
+        >>> priority_queue_test.cur_size = len(priority_queue_test.array)
+        >>> priority_queue_test.pos = {'A': 0, 'B': 1}
+        >>> priority_queue_test.min_heapify(0)
+        >>> priority_queue_test.array
+        [(5, 'B'), (10, 'A')]
+        """
+        lc = self.left(idx)
+        rc = self.right(idx)
+        if lc < self.cur_size and self.array[lc][0] < self.array[idx][0]:
+            smallest = lc
+        else:
+            smallest = idx
+        if rc < self.cur_size and self.array[rc][0] < self.array[smallest][0]:
+            smallest = rc
+        if smallest != idx:
+            self.swap(idx, smallest)
+            self.min_heapify(smallest)
+
+    def insert(self, tup):
+        """
+        Inserts a node into the Priority Queue.
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.insert((10, 'A'))
+        >>> priority_queue_test.array
+        [(10, 'A')]
+        >>> priority_queue_test.insert((15, 'B'))
+        >>> priority_queue_test.array
+        [(10, 'A'), (15, 'B')]
+        >>> priority_queue_test.insert((5, 'C'))
+        >>> priority_queue_test.array
+        [(5, 'C'), (10, 'A'), (15, 'B')]
+        """
+        self.pos[tup[1]] = self.cur_size
+        self.cur_size += 1
+        self.array.append((sys.maxsize, tup[1]))
+        self.decrease_key((sys.maxsize, tup[1]), tup[0])
+
+    def extract_min(self):
+        """
+        Removes and returns the min element at top of priority queue.
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.array = [(10, 'A'), (15, 'B')]
+        >>> priority_queue_test.cur_size = len(priority_queue_test.array)
+        >>> priority_queue_test.pos = {'A': 0, 'B': 1}
+        >>> priority_queue_test.insert((5, 'C'))
+        >>> priority_queue_test.extract_min()
+        'C'
+        >>> priority_queue_test.array[0]
+        (10, 'A')
+        """
+        min_node = self.array[0][1]
+        self.array[0] = self.array[self.cur_size - 1]
+        self.cur_size -= 1
+        self.min_heapify(0)
+        del self.pos[min_node]
+        return min_node
+
+    def left(self, i):
+        """
+        Returns the index of left child
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.left(0)
+        1
+        >>> priority_queue_test.left(1)
+        3
+        """
+        return 2 * i + 1
+
+    def right(self, i):
+        """
+        Returns the index of right child
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.right(0)
+        2
+        >>> priority_queue_test.right(1)
+        4
+        """
+        return 2 * i + 2
+
+    def par(self, i):
+        """
+        Returns the index of parent
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.par(1)
+        0
+        >>> priority_queue_test.par(2)
+        1
+        >>> priority_queue_test.par(4)
+        2
+        """
+        return math.floor(i / 2)
+
+    def swap(self, i, j):
+        """
+        Swaps array elements at indices i and j, update the pos{}
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.array = [(10, 'A'), (15, 'B')]
+        >>> priority_queue_test.cur_size = len(priority_queue_test.array)
+        >>> priority_queue_test.pos = {'A': 0, 'B': 1}
+        >>> priority_queue_test.swap(0, 1)
+        >>> priority_queue_test.array
+        [(15, 'B'), (10, 'A')]
+        >>> priority_queue_test.pos
+        {'A': 1, 'B': 0}
+        """
+        self.pos[self.array[i][1]] = j
+        self.pos[self.array[j][1]] = i
+        temp = self.array[i]
+        self.array[i] = self.array[j]
+        self.array[j] = temp
+
+    def decrease_key(self, tup, new_d):
+        """
+        Decrease the key value for a given tuple, assuming the new_d is at most old_d.
+
+        Examples:
+        >>> priority_queue_test = PriorityQueue()
+        >>> priority_queue_test.array = [(10, 'A'), (15, 'B')]
+        >>> priority_queue_test.cur_size = len(priority_queue_test.array)
+        >>> priority_queue_test.pos = {'A': 0, 'B': 1}
+        >>> priority_queue_test.decrease_key((10, 'A'), 5)
+        >>> priority_queue_test.array
+        [(5, 'A'), (15, 'B')]
+        """
+        idx = self.pos[tup[1]]
+        # assuming the new_d is at most old_d
+        self.array[idx] = (new_d, tup[1])
+        while idx > 0 and self.array[self.par(idx)][0] > self.array[idx][0]:
+            self.swap(idx, self.par(idx))
+            idx = self.par(idx)
+
+
+class Graph:
+    def __init__(self, num):
+        """
+        Graph class constructor
+
+        Examples:
+        >>> graph_test = Graph(1)
+        >>> graph_test.num_nodes
+        1
+        >>> graph_test.dist
+        [0]
+        >>> graph_test.par
+        [-1]
+        >>> graph_test.adjList
+        {}
+        """
+        self.adjList = {}  # To store graph: u -> (v,w)
+        self.num_nodes = num  # Number of nodes in graph
+        # To store the distance from source vertex
+        self.dist = [0] * self.num_nodes
+        self.par = [-1] * self.num_nodes  # To store the path
+
+    def add_edge(self, u, v, w):
+        """
+        Add edge going from node u to v and v to u with weight w: u (w)-> v, v (w) -> u
+
+        Examples:
+        >>> graph_test = Graph(1)
+        >>> graph_test.add_edge(1, 2, 1)
+        >>> graph_test.add_edge(2, 3, 2)
+        >>> graph_test.adjList
+        {1: [(2, 1)], 2: [(1, 1), (3, 2)], 3: [(2, 2)]}
+        """
+        # Check if u already in graph
+        if u in self.adjList:
+            self.adjList[u].append((v, w))
+        else:
+            self.adjList[u] = [(v, w)]
+
+        # Assuming undirected graph
+        if v in self.adjList:
+            self.adjList[v].append((u, w))
+        else:
+            self.adjList[v] = [(u, w)]
+
+    def show_graph(self):
+        """
+        Show the graph: u -> v(w)
+
+        Examples:
+        >>> graph_test = Graph(1)
+        >>> graph_test.add_edge(1, 2, 1)
+        >>> graph_test.show_graph()
+        1 -> 2(1)
+        2 -> 1(1)
+        >>> graph_test.add_edge(2, 3, 2)
+        >>> graph_test.show_graph()
+        1 -> 2(1)
+        2 -> 1(1) -> 3(2)
+        3 -> 2(2)
+        """
+        for u in self.adjList:
+            print(u, "->", " -> ".join(str(f"{v}({w})") for v, w in self.adjList[u]))
+
+    def dijkstra(self, src):
+        """
+        Dijkstra algorithm
+
+        Examples:
+        >>> graph_test = Graph(3)
+        >>> graph_test.add_edge(0, 1, 2)
+        >>> graph_test.add_edge(1, 2, 2)
+        >>> graph_test.dijkstra(0)
+        Distance from node: 0
+        Node 0 has distance: 0
+        Node 1 has distance: 2
+        Node 2 has distance: 4
+        >>> graph_test.dist
+        [0, 2, 4]
+
+        >>> graph_test = Graph(2)
+        >>> graph_test.add_edge(0, 1, 2)
+        >>> graph_test.dijkstra(0)
+        Distance from node: 0
+        Node 0 has distance: 0
+        Node 1 has distance: 2
+        >>> graph_test.dist
+        [0, 2]
+
+        >>> graph_test = Graph(3)
+        >>> graph_test.add_edge(0, 1, 2)
+        >>> graph_test.dijkstra(0)
+        Distance from node: 0
+        Node 0 has distance: 0
+        Node 1 has distance: 2
+        Node 2 has distance: 0
+        >>> graph_test.dist
+        [0, 2, 0]
+
+        >>> graph_test = Graph(3)
+        >>> graph_test.add_edge(0, 1, 2)
+        >>> graph_test.add_edge(1, 2, 2)
+        >>> graph_test.add_edge(0, 2, 1)
+        >>> graph_test.dijkstra(0)
+        Distance from node: 0
+        Node 0 has distance: 0
+        Node 1 has distance: 2
+        Node 2 has distance: 1
+        >>> graph_test.dist
+        [0, 2, 1]
+
+        >>> graph_test = Graph(4)
+        >>> graph_test.add_edge(0, 1, 4)
+        >>> graph_test.add_edge(1, 2, 2)
+        >>> graph_test.add_edge(2, 3, 1)
+        >>> graph_test.add_edge(0, 2, 3)
+        >>> graph_test.dijkstra(0)
+        Distance from node: 0
+        Node 0 has distance: 0
+        Node 1 has distance: 4
+        Node 2 has distance: 3
+        Node 3 has distance: 4
+        >>> graph_test.dist
+        [0, 4, 3, 4]
+
+        >>> graph_test = Graph(4)
+        >>> graph_test.add_edge(0, 1, 4)
+        >>> graph_test.add_edge(1, 2, 2)
+        >>> graph_test.add_edge(2, 3, 1)
+        >>> graph_test.add_edge(0, 2, 7)
+        >>> graph_test.dijkstra(0)
+        Distance from node: 0
+        Node 0 has distance: 0
+        Node 1 has distance: 4
+        Node 2 has distance: 6
+        Node 3 has distance: 7
+        >>> graph_test.dist
+        [0, 4, 6, 7]
+        """
+        # Flush old junk values in par[]
+        self.par = [-1] * self.num_nodes
+        # src is the source node
+        self.dist[src] = 0
+        q = PriorityQueue()
+        q.insert((0, src))  # (dist from src, node)
+        for u in self.adjList:
+            if u != src:
+                self.dist[u] = sys.maxsize  # Infinity
+                self.par[u] = -1
+
+        while not q.is_empty():
+            u = q.extract_min()  # Returns node with the min dist from source
+            # Update the distance of all the neighbours of u and
+            # if their prev dist was INFINITY then push them in Q
+            for v, w in self.adjList[u]:
+                new_dist = self.dist[u] + w
+                if self.dist[v] > new_dist:
+                    if self.dist[v] == sys.maxsize:
+                        q.insert((new_dist, v))
+                    else:
+                        q.decrease_key((self.dist[v], v), new_dist)
+                    self.dist[v] = new_dist
+                    self.par[v] = u
+
+        # Show the shortest distances from src
+        self.show_distances(src)
+
+    def show_distances(self, src):
+        """
+        Show the distances from src to all other nodes in a graph
+
+        Examples:
+        >>> graph_test = Graph(1)
+        >>> graph_test.show_distances(0)
+        Distance from node: 0
+        Node 0 has distance: 0
+        """
+        print(f"Distance from node: {src}")
+        for u in range(self.num_nodes):
+            print(f"Node {u} has distance: {self.dist[u]}")
+
+    def show_path(self, src, dest):
+        """
+        Shows the shortest path from src to dest.
+        WARNING: Use it *after* calling dijkstra.
+
+        Examples:
+        >>> graph_test = Graph(4)
+        >>> graph_test.add_edge(0, 1, 1)
+        >>> graph_test.add_edge(1, 2, 2)
+        >>> graph_test.add_edge(2, 3, 3)
+        >>> graph_test.dijkstra(0)
+        Distance from node: 0
+        Node 0 has distance: 0
+        Node 1 has distance: 1
+        Node 2 has distance: 3
+        Node 3 has distance: 6
+        >>> graph_test.show_path(0, 3)  # doctest: +NORMALIZE_WHITESPACE
+        ----Path to reach 3 from 0----
+        0 -> 1 -> 2 -> 3
+        Total cost of path:  6
+        """
+        path = []
+        cost = 0
+        temp = dest
+        # Backtracking from dest to src
+        while self.par[temp] != -1:
+            path.append(temp)
+            if temp != src:
+                for v, w in self.adjList[temp]:
+                    if v == self.par[temp]:
+                        cost += w
+                        break
+            temp = self.par[temp]
+        path.append(src)
+        path.reverse()
+
+        print(f"----Path to reach {dest} from {src}----")
+        for u in path:
+            print(f"{u}", end=" ")
+            if u != dest:
+                print("-> ", end="")
+
+        print("\nTotal cost of path: ", cost)
+
+
+if __name__ == "__main__":
+    from doctest import testmod
+
+    testmod()
+    graph = Graph(9)
+    graph.add_edge(0, 1, 4)
+    graph.add_edge(0, 7, 8)
+    graph.add_edge(1, 2, 8)
+    graph.add_edge(1, 7, 11)
+    graph.add_edge(2, 3, 7)
+    graph.add_edge(2, 8, 2)
+    graph.add_edge(2, 5, 4)
+    graph.add_edge(3, 4, 9)
+    graph.add_edge(3, 5, 14)
+    graph.add_edge(4, 5, 10)
+    graph.add_edge(5, 6, 2)
+    graph.add_edge(6, 7, 1)
+    graph.add_edge(6, 8, 6)
+    graph.add_edge(7, 8, 7)
+    graph.show_graph()
+    graph.dijkstra(0)
+    graph.show_path(0, 4)
+
+# OUTPUT
+# 0 -> 1(4) -> 7(8)
+# 1 -> 0(4) -> 2(8) -> 7(11)
+# 7 -> 0(8) -> 1(11) -> 6(1) -> 8(7)
+# 2 -> 1(8) -> 3(7) -> 8(2) -> 5(4)
+# 3 -> 2(7) -> 4(9) -> 5(14)
+# 8 -> 2(2) -> 6(6) -> 7(7)
+# 5 -> 2(4) -> 3(14) -> 4(10) -> 6(2)
+# 4 -> 3(9) -> 5(10)
+# 6 -> 5(2) -> 7(1) -> 8(6)
+# Distance from node: 0
+# Node 0 has distance: 0
+# Node 1 has distance: 4
+# Node 2 has distance: 12
+# Node 3 has distance: 19
+# Node 4 has distance: 21
+# Node 5 has distance: 11
+# Node 6 has distance: 9
+# Node 7 has distance: 8
+# Node 8 has distance: 14
+# ----Path to reach 4 from 0----
+# 0 -> 7 -> 6 -> 5 -> 4
+# Total cost of path:  21

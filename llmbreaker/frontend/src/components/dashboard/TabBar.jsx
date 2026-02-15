@@ -15,7 +15,7 @@ export default function TabBar() {
 
   return (
     <nav
-      className="flex border-b border-white/10 bg-neural-bg shrink-0 px-2"
+      className="flex justify-center border-b border-white/10 bg-neural-bg shrink-0 px-2"
       role="tablist"
     >
       {TABS.map(tab => {

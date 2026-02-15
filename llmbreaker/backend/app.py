@@ -90,6 +90,10 @@ BUNDLED_DATASETS = [
     ('shakespeare', 'Shakespeare Complete Works', 'shakespeare.txt'),
     ('poems',       'Classic Poetry Collection',  'poems.txt'),
     ('childrens',   "Children's Books",            'childrens.txt'),
+    ('bible',       'King James Bible',            'bible.txt'),
+    ('scifi',       'Classic Sci-Fi',              'scifi.txt'),
+    ('philosophy',  'Philosophy Texts',            'philosophy.txt'),
+    ('code',        'Programming Code',            'code.txt'),
 ]
 
 

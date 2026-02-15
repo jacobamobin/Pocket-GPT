@@ -79,6 +79,10 @@ def load_dataset(
         'shakespeare': 'shakespeare.txt',
         'poems':       'poems.txt',
         'childrens':   'childrens.txt',
+        'bible':       'bible.txt',
+        'scifi':       'scifi.txt',
+        'philosophy':  'philosophy.txt',
+        'code':        'code.txt',
     }
     filename = filename_map.get(name)
     if filename is None:
