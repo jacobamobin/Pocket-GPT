@@ -323,7 +323,7 @@ export default function LandingPage() {
             style={{ background: 'rgba(167,139,113,0.03)' }}
           >
             <div className="flex items-center gap-2 mb-6">
-              <span className="w-2 h-2 rounded-full bg-gold-light" style={{ animation: 'pulse 2s infinite' }} />
+              <span className="w-2 h-2 rounded-full bg-gold-light animate-pulse" />
               <span className="text-xs font-semibold uppercase tracking-widest text-gold-light">Tutorial — Welcome</span>
             </div>
             <h3 className="text-lg font-serif italic font-bold text-white mb-3">
