@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import InfoIcon from '../shared/InfoIcon'
 
 /**
  * Colour-codes each character based on its position in the training timeline.
@@ -29,6 +30,7 @@ export default function TextProgressionDisplay({ samples = [], highlightStep = n
           <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">
             Generated Text Progression
           </h3>
+          <InfoIcon topicId="text-progression" />
         </div>
         <div className="flex items-center justify-center h-28 text-white/20 text-sm">
           Text samples will appear here every {50} steps
@@ -39,9 +41,12 @@ export default function TextProgressionDisplay({ samples = [], highlightStep = n
 
   return (
     <div className={`card flex flex-col ${className}`}>
-      <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">
-        Generated Text Progression
-      </h3>
+      <div className="flex items-center gap-2 mb-3">
+        <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">
+          Generated Text Progression
+        </h3>
+        <InfoIcon topicId="text-progression" />
+      </div>
 
       <div
         className="flex flex-col gap-1.5 overflow-y-auto pr-1 flex-1 min-h-0"

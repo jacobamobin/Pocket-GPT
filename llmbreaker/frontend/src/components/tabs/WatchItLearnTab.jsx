@@ -16,6 +16,7 @@ import EmbeddingStarMap from './EmbeddingStarMap'
 import ProbabilityTower from './ProbabilityTower'
 import PhaseLabel from './PhaseLabel'
 import TrainingConfigPanel from '../shared/TrainingConfigPanel'
+import InfoIcon from '../shared/InfoIcon'
 
 export default function WatchItLearnTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
@@ -164,6 +165,7 @@ export default function WatchItLearnTab() {
       {/* Tab heading */}
       <div className="flex items-center gap-2">
         <h2 className="text-lg font-semibold text-white">Watch It Learn</h2>
+        <InfoIcon topicId="watch-it-learn" />
       </div>
 
       {/* Phase label */}

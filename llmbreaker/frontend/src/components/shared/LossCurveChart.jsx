@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import InfoIcon from './InfoIcon'
 import { LinePath } from '@visx/shape'
 import { scaleLinear } from '@visx/scale'
 import { AxisBottom, AxisLeft } from '@visx/axis'
@@ -80,6 +81,7 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <h3 className="section-title">Learning Progress</h3>
+          <InfoIcon topicId="loss-curve" />
         </div>
         <div className="flex items-center gap-4 text-xs text-white/30">
           <span className="flex items-center gap-1.5">

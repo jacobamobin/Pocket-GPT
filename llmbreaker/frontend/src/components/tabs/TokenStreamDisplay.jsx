@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import InfoIcon from '../shared/InfoIcon'
 
 /**
  * Token Stream Live-View
@@ -80,6 +81,7 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
           <h3 className="section-title">
             Token Stream
           </h3>
+          <InfoIcon topicId="token-stream" />
         </div>
         <div className="flex items-center justify-center h-28 text-white/30 text-sm">
           Start training to see the token stream
@@ -95,6 +97,7 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
           <h3 className="section-title">
             Token Stream
           </h3>
+          <InfoIcon topicId="token-stream" />
           <span className="text-xs text-white/30 font-mono">
             vocab: {vocab.length} chars
           </span>

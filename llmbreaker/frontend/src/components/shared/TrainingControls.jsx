@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { FiPlay, FiPause, FiSquare, FiSkipForward, FiSettings } from 'react-icons/fi'
 import { SESSION_STATUS } from '../../types/index.js'
+import InfoIcon from './InfoIcon'
 
 function IconButton({ onClick, disabled, title, children, variant = 'default' }) {
   const variants = {
@@ -119,8 +120,9 @@ export default function TrainingControls({
 
   return (
     <div className={`control-card flex flex-col gap-4 ${className}`}>
-      <div className="section-header">
+      <div className="section-header flex items-center gap-2">
         <span>Controls</span>
+        <InfoIcon topicId="training-controls" />
       </div>
 
       {/* Main control row */}

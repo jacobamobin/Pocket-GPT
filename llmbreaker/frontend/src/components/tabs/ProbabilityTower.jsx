@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import InfoIcon from '../shared/InfoIcon'
 
 function softmax(logits, temperature) {
   const t = Math.max(temperature, 0.01)
@@ -65,6 +66,7 @@ export default function ProbabilityTower({ tokenProbabilities = [], samples = []
           <h3 className="section-title">
             Next-Token Prediction
           </h3>
+          <InfoIcon topicId="probability-tower" />
         </div>
         <div className="flex items-center justify-center h-28 text-white/30 text-sm">
           Predictions will appear during training
@@ -80,6 +82,7 @@ export default function ProbabilityTower({ tokenProbabilities = [], samples = []
           <h3 className="section-title">
             Next-Token Prediction
           </h3>
+          <InfoIcon topicId="probability-tower" />
         </div>
         <span className="text-xs text-white/30 font-mono">step {latest.step}</span>
       </div>

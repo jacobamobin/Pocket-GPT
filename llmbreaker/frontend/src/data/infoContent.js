@@ -207,6 +207,80 @@ const infoContent = {
   },
 
   // ── Tab-specific sub-components ──────────────────────────────
+  'token-stream': {
+    title: 'Token Stream',
+    description:
+      'The token stream shows how the model breaks raw text into individual characters (tokens), each mapped to a numeric ID. ' +
+      'This is the first step in how a language model "reads" text.',
+    concepts: [
+      'Character-level tokenisation assigns a unique integer ID to every distinct character in the dataset.',
+      'The vocabulary is the full set of characters the model knows — anything outside it is unknown.',
+      'Token IDs are what the model actually processes — it never sees raw text directly.',
+    ],
+    faq: [
+      {
+        q: 'Why characters instead of words?',
+        a: 'Character-level models have a tiny vocabulary (typically < 100 tokens) which makes them fast to train and easy to visualise. ' +
+           'Production LLMs use sub-word tokenisation (BPE) with thousands of tokens, but the principle is the same.',
+      },
+      {
+        q: 'What does "Tokenize Me" do?',
+        a: 'It lets you type any text and instantly see how the model would encode it into token IDs. ' +
+           'Red tokens mean the character isn\'t in the training vocabulary.',
+      },
+    ],
+  },
+
+  'probability-tower': {
+    title: 'Next-Token Prediction',
+    description:
+      'The probability tower shows the model\'s top predictions for the next token at each step. ' +
+      'It reveals how confident the model is and which candidates it considers.',
+    concepts: [
+      'The model outputs a probability distribution over every token in the vocabulary.',
+      'The top-5 candidates are shown as horizontal bars — longer bars mean higher probability.',
+      'Temperature controls how "peaked" or "flat" the distribution is before sampling.',
+      'The "sampled" label shows which token was actually chosen by the sampling process.',
+    ],
+    faq: [
+      {
+        q: 'What is temperature?',
+        a: 'Temperature scales the logits before softmax. Low temperature (< 0.5) makes the model very confident in its top pick. ' +
+           'High temperature (> 1.5) flattens the distribution, making unlikely tokens more probable.',
+      },
+      {
+        q: 'Why doesn\'t it always pick the top token?',
+        a: 'The model samples from the distribution rather than always choosing the argmax. ' +
+           'This randomness (controlled by temperature) produces more diverse and interesting text.',
+      },
+    ],
+  },
+
+  'embedding-space': {
+    title: 'Embedding Space',
+    description:
+      'The embedding star map visualises how the model represents each character as a point in 3D space. ' +
+      'Characters that the model treats as similar end up closer together.',
+    concepts: [
+      'Each node is a character from the vocabulary, positioned by its learned embedding vector (reduced to 3D via PCA).',
+      'Nearby nodes mean the model considers those characters interchangeable or similar in context.',
+      'Lines connect nearest neighbours — clusters often form around character types (vowels, consonants, digits).',
+      'The map updates as training progresses, so you can watch clusters form in real time.',
+    ],
+    faq: [
+      {
+        q: 'Why do vowels cluster together?',
+        a: 'Vowels appear in similar contexts (between consonants, in common words), so the model learns similar embeddings for them. ' +
+           'The same logic applies to digits, punctuation, and other character groups.',
+      },
+      {
+        q: 'What is PCA?',
+        a: 'Principal Component Analysis reduces the high-dimensional embedding vectors (e.g. 64D) down to 3 dimensions for visualisation. ' +
+           'It preserves the most important variance, so relative distances are approximately maintained.',
+      },
+    ],
+  },
+
   'text-progression': {
     title: 'Text Progression',
     description:

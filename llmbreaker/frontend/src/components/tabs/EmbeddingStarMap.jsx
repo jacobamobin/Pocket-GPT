@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
+import InfoIcon from '../shared/InfoIcon'
 
 // ── Char group classification ─────────────────────────────────────────────────
 const CHAR_GROUPS = {
@@ -429,6 +430,7 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">Embedding Space</h3>
+          <InfoIcon topicId="embedding-space" />
         </div>
         <div className="flex items-center gap-3">
           {latest && <span className="text-xs text-white/30 font-mono">step {latest.step}</span>}
