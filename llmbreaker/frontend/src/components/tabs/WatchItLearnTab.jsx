@@ -201,7 +201,6 @@ export default function WatchItLearnTab() {
             isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
             displayStep={displayStep}
             onScrub={setDisplayStep}
-            className="h-full"
           />
         </div>
       </div>

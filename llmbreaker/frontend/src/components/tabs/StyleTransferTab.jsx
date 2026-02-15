@@ -194,7 +194,6 @@ export default function StyleTransferTab() {
             onStep={handleStep}
             disabled={starting || !text}
             isTraining={isActive}
-            className="h-full"
           />
         </div>
       </div>
