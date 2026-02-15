@@ -59,6 +59,16 @@ export default function WatchItLearnTab() {
     }
   }, [savedState, sessionId])
 
+  // Sync when a model is loaded from the model library (CREATE_SESSION dispatched externally)
+  useEffect(() => {
+    const activeId = training.activeSessionId
+    if (!activeId || activeId === sessionId) return
+    const s = training.sessions[activeId]
+    if (!s || s.featureType !== 'watch_learn' || s.status !== 'idle') return
+    setSessionId(activeId)
+    metricsDispatch({ type: 'INIT_SESSION', payload: { sessionId: activeId } })
+  }, [training.activeSessionId]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
 
@@ -158,16 +168,26 @@ export default function WatchItLearnTab() {
       </div>
 
       {/* Top row: dataset + controls */}
+<<<<<<< Updated upstream
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div data-tutorial="dataset-selector">
+=======
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <div data-tutorial="dataset-selector" className="flex flex-col">
+>>>>>>> Stashed changes
           <DatasetSelector
             value={datasetId}
             onChange={setDatasetId}
             onError={handleDatasetError}
             disabled={status === SESSION_STATUS.RUNNING || starting}
+            className="h-full"
           />
         </div>
+<<<<<<< Updated upstream
         <div data-tutorial="training-controls">
+=======
+        <div data-tutorial="training-controls" className="flex flex-col">
+>>>>>>> Stashed changes
           <TrainingControls
             className="h-full"
             status={status}
@@ -182,6 +202,7 @@ export default function WatchItLearnTab() {
             isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
             displayStep={displayStep}
             onScrub={setDisplayStep}
+            className="h-full"
           />
         </div>
       </div>
@@ -205,21 +226,25 @@ export default function WatchItLearnTab() {
       </div>
 
       {/* Text progression + Probability tower side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <div className="lg:col-span-2 flex flex-col">
           <TextProgressionDisplay
             samples={sessionMetrics?.samples ?? []}
             highlightStep={displayStep ?? hoverStep}
+            className="h-full"
           />
         </div>
-        <ProbabilityTower
-          tokenProbabilities={
-            displayStep != null
-              ? (sessionMetrics?.tokenProbabilities ?? []).filter(p => p.step <= displayStep)
-              : (sessionMetrics?.tokenProbabilities ?? [])
-          }
-          samples={sessionMetrics?.samples ?? []}
-        />
+        <div className="flex flex-col">
+          <ProbabilityTower
+            tokenProbabilities={
+              displayStep != null
+                ? (sessionMetrics?.tokenProbabilities ?? []).filter(p => p.step <= displayStep)
+                : (sessionMetrics?.tokenProbabilities ?? [])
+            }
+            samples={sessionMetrics?.samples ?? []}
+            className="h-full"
+          />
+        </div>
       </div>
 
       {/* Embedding star map */}

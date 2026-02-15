@@ -4,7 +4,7 @@ import { FiChevronDown, FiEdit2, FiTrash2 } from 'react-icons/fi'
 import { ModelContext } from '../../contexts/ModelContext'
 import { TrainingContext } from '../../contexts/TrainingContext'
 import { UIContext } from '../../contexts/UIContext'
-import { saveModel, renameModel, deleteModel } from '../../utils/apiClient'
+import { saveModel, renameModel, deleteModel, loadModelAsSession } from '../../utils/apiClient'
 
 export default function ModelDropdown() {
   const { state: modelState, dispatch: modelDispatch } = useContext(ModelContext)
@@ -60,6 +60,26 @@ export default function ModelDropdown() {
       uiDispatch({ type: 'SHOW_ERROR', payload: err.message })
     } finally {
       setRenamingId(null)
+    }
+  }
+
+  async function handleLoad(m) {
+    try {
+      const result = await loadModelAsSession(m.id)
+      trainingDispatch({
+        type: 'CREATE_SESSION',
+        payload: {
+          sessionId:      result.session_id,
+          featureType:    m.feature_type,
+          status:         'idle',
+          modelConfig:    result.model_config,
+          trainingConfig: result.training_config,
+        },
+      })
+      setOpen(false)
+      uiDispatch({ type: 'SHOW_SUCCESS', payload: `Loaded "${m.name}" — press Play to continue training` })
+    } catch (err) {
+      uiDispatch({ type: 'SHOW_ERROR', payload: err.message })
     }
   }
 
@@ -130,7 +150,8 @@ export default function ModelDropdown() {
                 models.slice().reverse().map(m => (
                   <div
                     key={m.id}
-                    className="flex items-center gap-2 px-3 py-2.5 hover:bg-white/[0.05] group"
+                    className="flex items-center gap-2 px-3 py-2.5 hover:bg-white/[0.05] group cursor-pointer"
+                    onClick={() => !renamingId && !confirmDeleteId && handleLoad(m)}
                   >
                     {renamingId === m.id ? (
                       <input
@@ -158,6 +179,7 @@ export default function ModelDropdown() {
                         <p className="text-[10px] text-white/40">
                           step {m.step?.toLocaleString()}
                           {m.train_loss != null && ` · loss ${m.train_loss.toFixed(3)}`}
+                          <span className="ml-2 text-gold-light/50 opacity-0 group-hover:opacity-100 transition-opacity">· click to load</span>
                         </p>
                       </div>
                     )}

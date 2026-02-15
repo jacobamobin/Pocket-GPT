@@ -14,7 +14,7 @@ function colorForProgress(sampleIndex, totalSamples) {
   return '#e8d5b7'                           // warm cream (well-learned)
 }
 
-export default function TextProgressionDisplay({ samples = [], highlightStep = null }) {
+export default function TextProgressionDisplay({ samples = [], highlightStep = null, className = '' }) {
   const bottomRef = useRef(null)
 
   // Auto-scroll to latest sample
@@ -24,7 +24,7 @@ export default function TextProgressionDisplay({ samples = [], highlightStep = n
 
   if (samples.length === 0) {
     return (
-      <div className="card">
+      <div className={`card ${className}`}>
         <div className="flex items-center gap-2 mb-3">
           <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">
             Generated Text Progression
@@ -38,14 +38,13 @@ export default function TextProgressionDisplay({ samples = [], highlightStep = n
   }
 
   return (
-    <div className="card">
+    <div className={`card flex flex-col ${className}`}>
       <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">
         Generated Text Progression
       </h3>
 
       <div
-        className="flex flex-col gap-1.5 overflow-y-auto pr-1"
-        style={{ maxHeight: 320 }}
+        className="flex flex-col gap-1.5 overflow-y-auto pr-1 flex-1 min-h-0"
       >
         <AnimatePresence initial={false}>
           {samples.map((s, idx) => {

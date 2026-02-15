@@ -11,7 +11,7 @@ function countVocab(text) {
   return new Set(text).size
 }
 
-export default function TextInputPanel({ text, onChange, onUploadFile, disabled }) {
+export default function TextInputPanel({ text, onChange, onUploadFile, disabled, className = '' }) {
   const textareaRef = useRef(null)
 
   // Auto-resize
@@ -29,7 +29,7 @@ export default function TextInputPanel({ text, onChange, onUploadFile, disabled 
   const warning = text.length > 0 && wordCount < 300 && wordCount >= 50
 
   return (
-    <div className="card flex flex-col gap-4">
+    <div className={`card flex flex-col gap-4 ${className}`}>
       <h3 className="section-title">
         Your Text
       </h3>

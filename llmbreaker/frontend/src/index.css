@@ -156,3 +156,26 @@
     box-shadow: 0 0 30px rgba(167, 139, 113, 0.8), inset 0 0 30px rgba(167, 139, 113, 0.4);
   }
 }
+
+/* ── Custom scrollbars (Chrome/Edge — Safari uses overlay scrollbars natively) ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 113, 0.25);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 139, 113, 0.45);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

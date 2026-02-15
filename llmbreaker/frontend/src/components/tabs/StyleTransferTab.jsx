@@ -171,17 +171,18 @@ export default function StyleTransferTab() {
       </div>
 
       {/* Top row: text input + controls */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div data-tutorial="style-input">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <div data-tutorial="style-input" className="flex flex-col">
           <TextInputPanel
             text={text}
             onChange={(v) => { setText(v); setUploadedId(null) }}
             onUploadFile={handleUploadFile}
             disabled={isActive || starting}
             placeholder="Paste your writing sample here (at least 10 words)..."
+            className="h-full"
           />
         </div>
-        <div data-tutorial="style-controls">
+        <div data-tutorial="style-controls" className="flex flex-col">
           <TrainingControls
             className="h-full"
             status={status}
@@ -193,6 +194,7 @@ export default function StyleTransferTab() {
             onStep={handleStep}
             disabled={starting || !text}
             isTraining={isActive}
+            className="h-full"
           />
         </div>
       </div>
