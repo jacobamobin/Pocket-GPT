@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FiArrowRight, FiChevronDown } from 'react-icons/fi'
+import { FiArrowRight, FiZap, FiEye, FiEdit3 } from 'react-icons/fi'
 import AnimatedBackground from './AnimatedBackground'
 
 export default function LandingPage() {
@@ -72,22 +72,17 @@ export default function LandingPage() {
             <FiArrowRight className="w-5 h-5" />
           </motion.button>
 
-          {/* Scroll indicator */}
-          <motion.div
-            className="mt-16 flex flex-col items-center gap-2 text-white/30"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.0, duration: 0.6 }}
-          >
-            <span className="text-xs tracking-widest uppercase">Scroll to explore</span>
-            <motion.div
-              animate={{ y: [0, 6, 0] }}
-              transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
-            >
-              <FiChevronDown className="w-5 h-5" />
-            </motion.div>
-          </motion.div>
         </motion.div>
+
+      {/* Hero footer credit */}
+      <motion.p
+        className="absolute bottom-5 text-white/30 text-xs tracking-wide select-none text-center px-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.6 }}
+      >
+        Built at CTRL HACK DEL 2.0 by Jacob Mobin &amp; Ethan Cha
+      </motion.p>
       </div>
 
       {/* ── Section 1: The Problem ─────────────────────────────── */}
@@ -109,8 +104,8 @@ export default function LandingPage() {
           </h2>
           <p className="text-white/50 max-w-2xl mx-auto text-lg leading-relaxed">
             Every day, millions of developers send text to GPT-4, Claude, and Gemini and get answers back.
-            But what&apos;s happening inside? Tokens, attention heads, embeddings, backpropagation — invisible
-            behind a single API call. <strong className="text-white/70">Pocket GPT changes that.</strong>
+            But what&apos;s happening inside? Tokens, attention heads, embeddings, backpropagation, invisible
+            behind a single API call.<br /><strong className="text-white/70">Pocket GPT changes that.</strong>
           </p>
         </motion.div>
 
@@ -209,7 +204,7 @@ export default function LandingPage() {
               title: 'Watch It Learn',
               description: 'Train a GPT-style transformer from scratch and watch it learn in real time. Live loss curve, character-by-character token stream, 3D embedding star map, and emergent phase detection — from random noise to coherent text.',
               bullets: ['Live loss curve', '3D embedding star map', 'Token stream', 'Emergent phase labels'],
-              icon: '⚡',
+              icon: FiZap,
               delay: 0.1,
             },
             {
@@ -217,7 +212,7 @@ export default function LandingPage() {
               title: 'Attention Cinema',
               description: 'Visualize the breakthrough mechanism behind every modern LLM: self-attention. See exactly which tokens attend to which across every layer and head, in 2D heatmaps or immersive 3D views.',
               bullets: ['2D & 3D heatmaps', 'All layers & heads', 'Evolution over training', 'Causal mask visible'],
-              icon: '👁',
+              icon: FiEye,
               delay: 0.2,
             },
             {
@@ -225,7 +220,7 @@ export default function LandingPage() {
               title: 'Style Transfer',
               description: 'Paste your own writing and watch the model learn your voice. Fine-tune on your text and compare outputs step by step — word choice, sentence rhythm, tone — all captured and visualized.',
               bullets: ['Paste your own text', 'Side-by-side comparison', 'Style evolution timeline', 'Overfitting detection'],
-              icon: '✍️',
+              icon: FiEdit3,
               delay: 0.3,
             },
           ].map((feature, i) => (
@@ -237,7 +232,7 @@ export default function LandingPage() {
               viewport={{ once: true, margin: '-80px' }}
               transition={{ duration: 0.5, delay: feature.delay }}
             >
-              <div className="text-3xl mb-4">{feature.icon}</div>
+              <feature.icon className="w-7 h-7 text-gold-light mb-4" />
               <span className="text-xs font-semibold uppercase tracking-widest text-gold-light mb-2">{feature.chapter}</span>
               <h3 className="text-xl font-serif italic font-bold text-white mb-3">{feature.title}</h3>
               <p className="text-white/50 text-sm leading-relaxed mb-6 flex-1">{feature.description}</p>
@@ -273,9 +268,9 @@ export default function LandingPage() {
               A guided tutorial that actually teaches you how LLMs work
             </h2>
             <p className="text-white/50 text-base leading-relaxed mb-8">
-              Most LLM &quot;explainers&quot; stop at analogies. Pocket GPT goes further — a 3-chapter,
-              20+ step interactive tutorial built into the app. Every concept is tied to a live
-              visualization you&apos;re looking at right now. Spotlight-guided, no setup required.
+              Most LLM explainers stop at analogies. Pocket GPT goes further. It&apos;s a 3-chapter,
+              20+ step interactive tutorial built into the app, where every concept is tied to a live
+              visualization. Spotlight-guided, no setup required.
             </p>
 
             <div className="space-y-6">
