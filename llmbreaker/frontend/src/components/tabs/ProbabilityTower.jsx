@@ -74,7 +74,7 @@ export default function ProbabilityTower({ tokenProbabilities = [], samples = []
   }
 
   return (
-    <div className="card">
+    <div className={`card ${className}`}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h3 className="section-title">
