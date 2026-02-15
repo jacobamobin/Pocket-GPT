@@ -183,6 +183,7 @@ export default function StyleTransferTab() {
         </div>
         <div data-tutorial="style-controls">
           <TrainingControls
+            className="h-full"
             status={status}
             currentIter={currentIter}
             maxIters={maxIters}

@@ -159,7 +159,7 @@ export default function WatchItLearnTab() {
 
       {/* Top row: dataset + controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div data-tutorial="dataset-selector" className="h-fit">
+        <div data-tutorial="dataset-selector">
           <DatasetSelector
             value={datasetId}
             onChange={setDatasetId}
@@ -167,8 +167,9 @@ export default function WatchItLearnTab() {
             disabled={status === SESSION_STATUS.RUNNING || starting}
           />
         </div>
-        <div data-tutorial="training-controls" className="h-fit">
+        <div data-tutorial="training-controls">
           <TrainingControls
+            className="h-full"
             status={status}
             currentIter={currentIter}
             maxIters={maxIters}
