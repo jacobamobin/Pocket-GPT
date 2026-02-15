@@ -13,7 +13,7 @@ import { createContext, useContext, useReducer, useEffect, useCallback } from 'r
  * }
  */
 
-const STORAGE_KEY = 'llmbreaker_tutorial'
+const STORAGE_KEY = 'pocketgpt_tutorial'
 
 // Load from localStorage
 function loadState() {

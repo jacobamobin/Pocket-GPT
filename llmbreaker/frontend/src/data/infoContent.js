@@ -1,5 +1,5 @@
 /**
- * Educational content for every major component in LLMBreaker.
+ * Educational content for every major component in Pocket GPT.
  * Keyed by topicId — referenced by <InfoIcon topicId="..." />.
  */
 

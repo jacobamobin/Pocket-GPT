@@ -51,7 +51,7 @@ export default function TutorialWelcome() {
 
           {/* Title */}
           <h1 className="text-3xl font-serif italic font-bold text-center mb-2 text-white">
-            Welcome to LLMBreaker
+            Welcome to Pocket GPT
           </h1>
 
           {/* Subtitle */}

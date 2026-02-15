@@ -81,7 +81,7 @@ export default function TutorialButton() {
             {/* Header */}
             <div className="px-4 py-3 border-b border-white/10 bg-white/[0.02]">
               <h3 className="text-sm font-semibold text-white">Tutorial Chapters</h3>
-              <p className="text-xs text-white/40 mt-0.5">Learn how LLMBreaker works</p>
+              <p className="text-xs text-white/40 mt-0.5">Learn how Pocket GPT works</p>
             </div>
 
             {/* Chapter list */}

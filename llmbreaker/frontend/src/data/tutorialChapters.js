@@ -17,7 +17,7 @@ const CHAPTERS = {
   welcome: {
     id: 'welcome',
     tabId: null,
-    title: 'Welcome to LLMBreaker',
+    title: 'Welcome to Pocket GPT',
     steps: [
       {
         target: null,
@@ -26,7 +26,7 @@ const CHAPTERS = {
         content: `
           Large Language Models like GPT-4, Claude, and Gemini feel like magic. They answer questions, write code, and hold conversations. But <strong>how do they actually work?</strong><br><br>
 
-          LLMBreaker lets you <strong>build, train, and dissect</strong> a real transformer model-the same architecture powering modern LLMs. It's tiny (15K-250K parameters vs GPT-4's ~1.8 trillion), but the principles are identical.<br><br>
+          Pocket GPT lets you <strong>build, train, and dissect</strong> a real transformer model-the same architecture powering modern LLMs. It's tiny (15K-250K parameters vs GPT-4's ~1.8 trillion), but the principles are identical.<br><br>
 
           This isn't a dumbed-down simulation. You'll see real embeddings, real attention weights, real backpropagation. Everything scales from this tiny model to the giants.
         `.trim(),
@@ -449,7 +449,7 @@ const CHAPTERS = {
         position: 'center',
         title: 'Tutorial Complete!',
         content: `
-          You've completed the full LLMBreaker tutorial and learned:<br><br>
+          You've completed the full Pocket GPT tutorial and learned:<br><br>
 
           <strong>Chapter 1:</strong> Tokens, embeddings, next-token prediction, emergent learning<br>
           <strong>Chapter 2:</strong> Self-attention, multi-head attention, transformer architecture<br>

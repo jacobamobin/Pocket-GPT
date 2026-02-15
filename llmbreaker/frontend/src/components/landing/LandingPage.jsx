@@ -325,7 +325,7 @@ export default function LandingPage() {
               Ever wondered what&apos;s inside an AI as it learns?
             </h3>
             <p className="text-white/50 text-sm leading-relaxed mb-6">
-              LLMBreaker lets you <strong className="text-white/70">build, train, and dissect</strong> a real transformer —
+              Pocket GPT lets you <strong className="text-white/70">build, train, and dissect</strong> a real transformer —
               the same architecture powering GPT-4, Claude, and Gemini. It&apos;s tiny
               (~15K–250K parameters vs GPT-4&apos;s ~1.8 trillion), but the principles are identical.
               This isn&apos;t a simulation. You&apos;ll see real embeddings, real attention weights, real backpropagation.
