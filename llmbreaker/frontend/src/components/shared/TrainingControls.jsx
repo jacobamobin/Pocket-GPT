@@ -2,13 +2,12 @@ import { motion } from 'framer-motion'
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { FiPlay, FiPause, FiSquare, FiSkipForward, FiSettings } from 'react-icons/fi'
 import { SESSION_STATUS } from '../../types/index.js'
-import InfoIcon from './InfoIcon'
 
 function IconButton({ onClick, disabled, title, children, variant = 'default' }) {
   const variants = {
-    default:  'icon-btn',
-    primary:  'icon-btn primary',
-    danger:   'icon-btn danger',
+    default: 'icon-btn',
+    primary: 'icon-btn primary',
+    danger: 'icon-btn danger',
   }
   return (
     <motion.button
@@ -37,13 +36,14 @@ export default function TrainingControls({
   isTraining,
   displayStep = null,
   onScrub,
+  className = '',
 }) {
-  const isIdle      = !status || status === SESSION_STATUS.IDLE
-  const isRunning   = status === SESSION_STATUS.RUNNING
-  const isPaused    = status === SESSION_STATUS.PAUSED
+  const isIdle = !status || status === SESSION_STATUS.IDLE
+  const isRunning = status === SESSION_STATUS.RUNNING
+  const isPaused = status === SESSION_STATUS.PAUSED
   const isCompleted = status === SESSION_STATUS.COMPLETED
-  const isStopped   = status === SESSION_STATUS.STOPPED
-  const isActive    = isRunning || isPaused
+  const isStopped = status === SESSION_STATUS.STOPPED
+  const isActive = isRunning || isPaused
 
   const progress = maxIters > 0 ? Math.round((currentIter / maxIters) * 100) : 0
   const barRef = useRef(null)
@@ -118,10 +118,9 @@ export default function TrainingControls({
   const scrubProgress = displayStep != null ? Math.round((displayStep / maxIters) * 100) : null
 
   return (
-    <div className="control-card flex flex-col gap-4">
+    <div className={`control-card flex flex-col gap-4 ${className}`}>
       <div className="section-header">
         <span>Controls</span>
-        <InfoIcon topicId="training-controls" />
       </div>
 
       {/* Main control row */}
@@ -232,10 +231,10 @@ export default function TrainingControls({
         <div className="flex items-center gap-1.5">
           <span className={`
             w-1.5 h-1.5 rounded-full
-            ${isRunning   ? 'bg-green-400 animate-pulse' : ''}
-            ${isPaused    ? 'bg-yellow-400' : ''}
+            ${isRunning ? 'bg-green-400 animate-pulse' : ''}
+            ${isPaused ? 'bg-yellow-400' : ''}
             ${isCompleted ? 'bg-gold-base' : ''}
-            ${isStopped   ? 'bg-white/30' : ''}
+            ${isStopped ? 'bg-white/30' : ''}
             ${status === SESSION_STATUS.ERROR ? 'bg-red-400' : ''}
           `} />
           <span className="text-xs text-white/50 capitalize">{status}</span>

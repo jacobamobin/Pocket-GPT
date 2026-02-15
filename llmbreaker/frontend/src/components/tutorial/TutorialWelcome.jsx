@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FiEye, FiFilm, FiFeather } from 'react-icons/fi'
+import { FiEye, FiFilm, FiFeather, FiZap } from 'react-icons/fi'
 import { useTutorial } from '../../contexts/TutorialContext'
 
 export default function TutorialWelcome() {
@@ -44,7 +44,7 @@ export default function TutorialWelcome() {
             <div className="relative">
               <div className="absolute inset-0 bg-gold-base blur-xl opacity-20 rounded-full" />
               <div className="relative w-20 h-20 rounded-2xl bg-gold-subtle border border-gold-muted flex items-center justify-center shadow-lg">
-                <span className="text-3xl">⚡</span>
+                <FiZap className="w-8 h-8 text-gold-base" />
               </div>
             </div>
           </div>

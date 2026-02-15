@@ -1,34 +1,34 @@
 import { useContext, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { UIContext }      from '../../contexts/UIContext'
-import { useTutorial }    from '../../contexts/TutorialContext'
-import { FEATURE_TYPE }   from '../../types/index.js'
-import { useWebSocket }   from '../../hooks/useWebSocket'
-import Header             from './Header'
-import TabBar             from './TabBar'
-import InfoDrawer         from '../shared/InfoDrawer'
+import { UIContext } from '../../contexts/UIContext'
+import { useTutorial } from '../../contexts/TutorialContext'
+import { FEATURE_TYPE } from '../../types/index.js'
+import { useWebSocket } from '../../hooks/useWebSocket'
+import Header from './Header'
+import TabBar from './TabBar'
+import InfoDrawer from '../shared/InfoDrawer'
 import TutorialSpotlight from '../tutorial/TutorialSpotlight'
-import TutorialWelcome   from '../tutorial/TutorialWelcome'
+import TutorialWelcome from '../tutorial/TutorialWelcome'
 import TutorialSwitchPrompt from '../tutorial/TutorialSwitchPrompt'
 import GenerationDrawer from '../generation/GenerationDrawer'
-import WatchItLearnTab    from '../tabs/WatchItLearnTab'
+import WatchItLearnTab from '../tabs/WatchItLearnTab'
 import AttentionCinemaTab from '../tabs/AttentionCinemaTab'
-import StyleTransferTab   from '../tabs/StyleTransferTab'
+import StyleTransferTab from '../tabs/StyleTransferTab'
 
 function TabContent({ activeTab }) {
-  if (activeTab === FEATURE_TYPE.WATCH_LEARN)      return <WatchItLearnTab />
+  if (activeTab === FEATURE_TYPE.WATCH_LEARN) return <WatchItLearnTab />
   if (activeTab === FEATURE_TYPE.ATTENTION_CINEMA) return <AttentionCinemaTab />
-  if (activeTab === FEATURE_TYPE.STYLE_TRANSFER)   return <StyleTransferTab />
+  if (activeTab === FEATURE_TYPE.STYLE_TRANSFER) return <StyleTransferTab />
   return null
 }
 
 export default function Dashboard() {
   const { state: ui, dispatch: uiDispatch } = useContext(UIContext)
   const { state: tutorial, actions: tutorialActions } = useTutorial()
-  const { connected }                       = useWebSocket()
-  const [previousTab, setPreviousTab]       = useState(ui.activeTab)
+  const { connected } = useWebSocket()
+  const [previousTab, setPreviousTab] = useState(ui.activeTab)
   const [showSwitchPrompt, setShowSwitchPrompt] = useState(false)
-  const [pendingTab, setPendingTab]         = useState(null)
+  const [pendingTab, setPendingTab] = useState(null)
 
   useEffect(() => {
     if (!ui.successToast) return
@@ -119,13 +119,13 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="mx-4 mt-3 px-4 py-2.5 rounded-lg bg-blue-950/70 border border-blue-500/40
-                       text-blue-200 text-sm flex items-center justify-between"
+            className="mx-4 mt-3 px-4 py-2.5 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-gold-muted
+                       text-gold-light text-sm flex items-center justify-between"
           >
             <span>{ui.errorToast}</span>
             <button
               onClick={() => uiDispatch({ type: 'CLEAR_ERROR' })}
-              className="ml-4 text-blue-400 hover:text-white transition-colors text-lg leading-none"
+              className="ml-4 text-gold-base hover:text-gold-hover transition-colors text-lg leading-none"
               aria-label="Dismiss"
             >
               ×

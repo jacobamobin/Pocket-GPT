@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import InfoIcon from '../shared/InfoIcon'
 
 // ── Char group classification ─────────────────────────────────────────────────
 const CHAR_GROUPS = {
@@ -124,12 +123,12 @@ function HoverPanel({ idx, labels, coords, pos }) {
       <div className="flex items-baseline gap-2 mb-2">
         <span className="text-2xl font-mono font-bold" style={{ color: meta.css }}>{displayChar}</span>
         <div>
-          <div className="text-slate-300 font-medium">{meta.label}</div>
-          <div className="text-slate-500 font-mono">{cp}</div>
+          <div className="text-white/60 font-medium">{meta.label}</div>
+          <div className="text-white/30 font-mono">{cp}</div>
         </div>
       </div>
       <div className="border-t border-neural-border pt-2">
-        <div className="text-slate-500 mb-1">Nearest neighbors</div>
+        <div className="text-white/30 mb-1">Nearest neighbors</div>
         {neighbors.map(({ i, sim }) => {
           const nc = labels[i]
           if (!nc) return null
@@ -137,12 +136,12 @@ function HoverPanel({ idx, labels, coords, pos }) {
           const pct = Math.round(clamp(sim, 0, 1) * 100)
           return (
             <div key={i} className="flex items-center justify-between gap-3 py-0.5">
-              <span className="font-mono w-12 text-slate-300" style={{ color: GROUP_META[getGroup(nc)].css }}>{nd}</span>
+              <span className="font-mono w-12 text-white/60" style={{ color: GROUP_META[getGroup(nc)].css }}>{nd}</span>
               <div className="flex items-center gap-1.5 flex-1">
                 <div className="flex-1 h-1 bg-neural-border rounded-full overflow-hidden">
-                  <div className="h-full rounded-full bg-cyan-500" style={{ width: `${pct}%` }} />
+                  <div className="h-full rounded-full bg-gold-base" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="text-slate-500 w-7 text-right">{pct}%</span>
+                <span className="text-white/30 w-7 text-right">{pct}%</span>
               </div>
             </div>
           )
@@ -177,10 +176,9 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
     const H = wrapper.clientHeight || 360
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false })
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
     renderer.setSize(W, H)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.setClearColor(0x0a1628)
 
     // Scene + lights
     const scene = new THREE.Scene()
@@ -430,14 +428,13 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
     }>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Embedding Space</h3>
-          <InfoIcon topicId="watch-it-learn" />
+          <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">Embedding Space</h3>
         </div>
         <div className="flex items-center gap-3">
-          {latest && <span className="text-xs text-slate-500 font-mono">step {latest.step}</span>}
+          {latest && <span className="text-xs text-white/30 font-mono">step {latest.step}</span>}
           <button
             onClick={() => setIsFullscreen(f => !f)}
-            className="text-slate-500 hover:text-white transition-colors p-1"
+            className="text-white/30 hover:text-white transition-colors p-1"
             title={isFullscreen ? 'Exit fullscreen (ESC)' : 'Fullscreen'}
           >
             {isFullscreen ? (
@@ -471,12 +468,12 @@ export default function EmbeddingStarMap({ embeddingSnapshots = [], vocabInfo })
         {Object.entries(GROUP_META).map(([key, { label, css }]) => (
           <div key={key} className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: css }} />
-            <span className="text-slate-500">{label}s</span>
+            <span className="text-white/30">{label}s</span>
           </div>
         ))}
       </div>
 
-      <p className="text-xs text-slate-500 mt-2">
+      <p className="text-xs text-white/30 mt-2">
         {!latest
           ? 'Start training to watch embeddings form.'
           : 'Drag to orbit · Scroll to zoom · Hover a node for details'}

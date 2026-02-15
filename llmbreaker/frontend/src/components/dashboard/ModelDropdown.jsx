@@ -11,11 +11,11 @@ export default function ModelDropdown() {
   const { state: training } = useContext(TrainingContext)
   const { state: ui, dispatch: uiDispatch } = useContext(UIContext)
 
-  const [open, setOpen]                   = useState(false)
-  const [saveName, setSaveName]           = useState('')
-  const [saving, setSaving]               = useState(false)
-  const [renamingId, setRenamingId]       = useState(null)
-  const [renameVal, setRenameVal]         = useState('')
+  const [open, setOpen] = useState(false)
+  const [saveName, setSaveName] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [renamingId, setRenamingId] = useState(null)
+  const [renameVal, setRenameVal] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const ref = useRef(null)
 
@@ -138,7 +138,7 @@ export default function ModelDropdown() {
                         value={renameVal}
                         onChange={e => setRenameVal(e.target.value)}
                         onKeyDown={e => {
-                          if (e.key === 'Enter')  handleRename(m.id)
+                          if (e.key === 'Enter') handleRename(m.id)
                           if (e.key === 'Escape') setRenamingId(null)
                         }}
                         onBlur={(e) => {

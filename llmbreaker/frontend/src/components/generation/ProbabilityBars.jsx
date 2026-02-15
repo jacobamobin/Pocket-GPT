@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { useGeneration } from '../../contexts/GenerationContext'
 
 function escapeToken(token) {
-  if (token === ' ')  return '(space)'
+  if (token === ' ') return '(space)'
   if (token === '\n') return '\\n'
   if (token === '\t') return '\\t'
   if (token === '\r') return '\\r'
@@ -16,7 +16,7 @@ export default function ProbabilityBars() {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+      <p className="text-xs font-medium text-white/40 uppercase tracking-wider">
         Next Token Probabilities
       </p>
       <div className="space-y-1">
@@ -30,38 +30,37 @@ export default function ProbabilityBars() {
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.15, delay: index * 0.03 }}
-              className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
-                isHighlighted
-                  ? 'bg-cyan-950/50 border border-cyan-500/40'
-                  : 'border border-transparent hover:bg-slate-800/50'
-              }`}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${isHighlighted
+                  ? 'bg-gold-subtle border border-gold-muted'
+                  : 'border border-transparent hover:bg-white/[0.03]'
+                }`}
               onClick={() => actions.setHighlightedIndex(index)}
             >
-              <span className="w-3 text-cyan-400 text-xs shrink-0">
+              <span className="w-3 text-gold-light text-xs shrink-0">
                 {isHighlighted ? '→' : ''}
               </span>
 
-              <span className="w-16 font-mono text-sm text-slate-300 shrink-0 truncate">
+              <span className="w-16 font-mono text-sm text-white/60 shrink-0 truncate">
                 {escapeToken(item.token)}
               </span>
 
-              <div className="flex-1 h-4 bg-slate-800 rounded-sm overflow-hidden">
+              <div className="flex-1 h-4 bg-white/10 rounded-sm overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
-                  className={`h-full ${isHighlighted ? 'bg-cyan-500' : 'bg-blue-600'}`}
+                  className={`h-full ${isHighlighted ? 'bg-gold-base' : 'bg-gold-muted'}`}
                 />
               </div>
 
-              <span className="w-10 text-right text-xs text-slate-400 shrink-0">
+              <span className="w-10 text-right text-xs text-white/40 shrink-0">
                 {pct}%
               </span>
             </motion.div>
           )
         })}
       </div>
-      <p className="text-xs text-slate-600">↑↓ navigate · Enter or Step to accept</p>
+      <p className="text-xs text-white/20">↑↓ navigate · Enter or Step to accept</p>
     </div>
   )
 }

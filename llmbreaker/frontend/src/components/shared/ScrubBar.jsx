@@ -24,7 +24,7 @@ export default function ScrubBar({ steps = [], displayStep, onDisplayStep }) {
   if (steps.length < 2) return null
 
   function handleChange(e) {
-    const idx  = Number(e.target.value)
+    const idx = Number(e.target.value)
     const step = steps[idx]
     // Snap back to live when dragged to the latest step
     onDisplayStep(idx === steps.length - 1 ? null : step)
@@ -40,12 +40,12 @@ export default function ScrubBar({ steps = [], displayStep, onDisplayStep }) {
         {/* Current step label */}
         <span className="text-xs shrink-0 w-24">
           {isLive ? (
-            <span className="flex items-center gap-1.5 text-cyan-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse inline-block" />
+            <span className="flex items-center gap-1.5 text-gold-light">
+              <span className="w-1.5 h-1.5 rounded-full bg-gold-light animate-pulse inline-block" />
               Live
             </span>
           ) : (
-            <span className="text-slate-300 font-mono">
+            <span className="text-white/60 font-mono">
               step {displayStep?.toLocaleString()}
             </span>
           )}
@@ -62,20 +62,20 @@ export default function ScrubBar({ steps = [], displayStep, onDisplayStep }) {
           className="flex-1 h-2 bg-neural-border rounded-lg appearance-none cursor-pointer
                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5
                      [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full
-                     [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:cursor-pointer
-                     [&::-webkit-slider-thumb]:hover:bg-blue-400"
+                     [&::-webkit-slider-thumb]:bg-gold-base [&::-webkit-slider-thumb]:cursor-pointer
+                     [&::-webkit-slider-thumb]:hover:bg-gold-light"
         />
 
         {/* Right side: last step + Live button */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[10px] text-slate-600 font-mono">
+          <span className="text-[10px] text-white/20 font-mono">
             {steps[steps.length - 1]?.toLocaleString()}
           </span>
           {!isLive && (
             <button
               onClick={() => onDisplayStep(null)}
-              className="px-2 py-1 text-[10px] rounded border border-cyan-500/40
-                         bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+              className="px-2 py-1 text-[10px] rounded border border-gold-base/40
+                         bg-gold-base/10 text-gold-light hover:bg-gold-base/20 transition-colors"
             >
               Live
             </button>
@@ -83,7 +83,7 @@ export default function ScrubBar({ steps = [], displayStep, onDisplayStep }) {
         </div>
       </div>
 
-      <p className="text-[10px] text-slate-700 mt-1.5 text-center">
+      <p className="text-[10px] text-white/15 mt-1.5 text-center">
         ← drag to rewind through training history · drag right to return to live
       </p>
     </motion.div>

@@ -1,46 +1,46 @@
 import { useState, useContext, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { TrainingContext } from '../../contexts/TrainingContext'
-import { MetricsContext }  from '../../contexts/MetricsContext'
-import { UIContext }       from '../../contexts/UIContext'
-import { useWebSocket }    from '../../hooks/useWebSocket'
+import { MetricsContext } from '../../contexts/MetricsContext'
+import { UIContext } from '../../contexts/UIContext'
+import { useWebSocket } from '../../hooks/useWebSocket'
 import { useTrainingSession } from '../../hooks/useTrainingSession'
 import { useTabPersistence } from '../../hooks/useTabPersistence'
 import { createSession, uploadDataset, datasetFromText } from '../../utils/apiClient'
-import { SESSION_STATUS }  from '../../types/index.js'
-import TrainingControls    from '../shared/TrainingControls'
-import ViewModeToggle      from './ViewModeToggle'
-import LayerHeadSelector   from './LayerHeadSelector'
+import { SESSION_STATUS } from '../../types/index.js'
+import TrainingControls from '../shared/TrainingControls'
+import ViewModeToggle from './ViewModeToggle'
+import LayerHeadSelector from './LayerHeadSelector'
 import AttentionHeatmapGrid from './AttentionHeatmapGrid'
 import AttentionEvolutionDisplay from './AttentionEvolutionDisplay'
-import Heatmap2D           from './Heatmap2D'
-import Heatmap3D           from './Heatmap3D'
-import InfoIcon            from '../shared/InfoIcon'
-import DatasetSelector     from '../shared/DatasetSelector'
-import TextInputPanel      from './TextInputPanel'
-import ModelInfoCard       from '../shared/ModelInfoCard'
+import Heatmap2D from './Heatmap2D'
+import Heatmap3D from './Heatmap3D'
+import InfoIcon from '../shared/InfoIcon'
+import DatasetSelector from '../shared/DatasetSelector'
+import TextInputPanel from './TextInputPanel'
+import ModelInfoCard from '../shared/ModelInfoCard'
 
 export default function AttentionCinemaTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
-  const { state: metrics, dispatch: metricsDispatch  } = useContext(MetricsContext)
-  const { dispatch: uiDispatch }                         = useContext(UIContext)
-  const { socket }                                       = useWebSocket()
+  const { state: metrics, dispatch: metricsDispatch } = useContext(MetricsContext)
+  const { dispatch: uiDispatch } = useContext(UIContext)
+  const { socket } = useWebSocket()
 
   // Local state
-  const [sessionId,         setSessionId]     = useState(null)
-  const [starting,          setStarting]      = useState(false)
-  const [viewMode,          setViewMode]      = useState('evolution') // 'evolution' | 'grid' | 'detail'
-  const [renderMode,        setRenderMode]    = useState('2d')          // '2d' | '3d'
-  const [selectedLayer,     setSelectedLayer] = useState(0)
-  const [selectedHead,      setSelectedHead]  = useState(0)
-  const [playbackStep,      setPlaybackStep]  = useState(null)          // null = follow latest
-  const [maxItersConfig,    setMaxItersConfig] = useState(5000)
+  const [sessionId, setSessionId] = useState(null)
+  const [starting, setStarting] = useState(false)
+  const [viewMode, setViewMode] = useState('evolution') // 'evolution' | 'grid' | 'detail'
+  const [renderMode, setRenderMode] = useState('2d')          // '2d' | '3d'
+  const [selectedLayer, setSelectedLayer] = useState(0)
+  const [selectedHead, setSelectedHead] = useState(0)
+  const [playbackStep, setPlaybackStep] = useState(null)          // null = follow latest
+  const [maxItersConfig, setMaxItersConfig] = useState(5000)
   const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
-  const [modelSizeConfig,   setModelSizeConfig] = useState('medium')
-  const [datasetId,         setDatasetId]     = useState('shakespeare')
-  const [text,              setText]          = useState('')
-  const [uploadedId,        setUploadedId]    = useState(null)
-  const [useCustom,         setUseCustom]     = useState(false)
+  const [modelSizeConfig, setModelSizeConfig] = useState('medium')
+  const [datasetId, setDatasetId] = useState('shakespeare')
+  const [text, setText] = useState('')
+  const [uploadedId, setUploadedId] = useState(null)
+  const [useCustom, setUseCustom] = useState(false)
 
   // Persist state when navigating away
   const { savedState, clear } = useTabPersistence('attention_cinema', {
@@ -67,8 +67,8 @@ export default function AttentionCinemaTab() {
       if (savedState.renderMode !== undefined) setRenderMode(savedState.renderMode)
       if (savedState.selectedLayer !== undefined) setSelectedLayer(savedState.selectedLayer)
       if (savedState.selectedHead !== undefined) setSelectedHead(savedState.selectedHead)
-      if (savedState.datasetId  !== undefined) setDatasetId(savedState.datasetId)
-      if (savedState.useCustom  !== undefined) setUseCustom(savedState.useCustom)
+      if (savedState.datasetId !== undefined) setDatasetId(savedState.datasetId)
+      if (savedState.useCustom !== undefined) setUseCustom(savedState.useCustom)
     }
   }, [savedState, sessionId])
 
@@ -76,11 +76,11 @@ export default function AttentionCinemaTab() {
   const controls = useTrainingSession(socket, sessionId)
 
   async function handleUploadFile(file) {
-    const isTxt  = file.name.toLowerCase().endsWith('.txt')
+    const isTxt = file.name.toLowerCase().endsWith('.txt')
     const isDocx = file.name.toLowerCase().endsWith('.docx')
     if (isTxt) {
       const reader = new FileReader()
-      reader.onload  = (e) => { setText(e.target.result || ''); setUploadedId(null) }
+      reader.onload = (e) => { setText(e.target.result || ''); setUploadedId(null) }
       reader.onerror = () => uiDispatch({ type: 'SHOW_ERROR', payload: 'Failed to read file' })
       reader.readAsText(file, 'utf-8')
     } else if (isDocx) {
@@ -98,11 +98,11 @@ export default function AttentionCinemaTab() {
   }
 
   // Derived data
-  const session    = sessionId ? training.sessions[sessionId] : null
-  const snapshots  = sessionId ? (metrics[sessionId]?.attentionSnapshots ?? []) : []
-  const status     = session?.status ?? null
+  const session = sessionId ? training.sessions[sessionId] : null
+  const snapshots = sessionId ? (metrics[sessionId]?.attentionSnapshots ?? []) : []
+  const status = session?.status ?? null
   const currentIter = session?.currentIter ?? 0
-  const maxIters    = session?.maxIters ?? 5000
+  const maxIters = session?.maxIters ?? 5000
   const modelConfig = session?.modelConfig ?? { n_layer: 4, n_head: 4 }
 
   // Sorted unique steps with snapshot data
@@ -147,11 +147,11 @@ export default function AttentionCinemaTab() {
 
       const data = await createSession({
         feature_type: 'attention_cinema',
-        dataset_id:   resolvedDatasetId,
+        dataset_id: resolvedDatasetId,
         hyperparameters: {
-          max_iters:     maxItersConfig,
+          max_iters: maxItersConfig,
           eval_interval: evalIntervalConfig,
-          model_size:    modelSizeConfig,
+          model_size: modelSizeConfig,
         },
       })
 
@@ -161,7 +161,7 @@ export default function AttentionCinemaTab() {
       metricsDispatch({ type: 'INIT_SESSION', payload: { sessionId: sid } })
 
       setTimeout(() => {
-        socket?.emit('join_session',   { session_id: sid })
+        socket?.emit('join_session', { session_id: sid })
         socket?.emit('start_training', { session_id: sid })
         trainingDispatch({ type: 'SESSION_STARTED', payload: { session_id: sid } })
       }, 50)
@@ -172,9 +172,9 @@ export default function AttentionCinemaTab() {
     }
   }
 
-  const handlePause     = () => controls.pause()
-  const handleStop      = () => controls.stop()
-  const handleStep      = () => controls.step()
+  const handlePause = () => controls.pause()
+  const handleStop = () => controls.stop()
+  const handleStep = () => controls.step()
 
   function handleSelectCell(layer, head) {
     setSelectedLayer(layer)
@@ -187,40 +187,43 @@ export default function AttentionCinemaTab() {
 
       {/* Tab heading */}
       <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold text-slate-200">Attention Cinema</h2>
+        <h2 className="text-lg font-semibold text-white">Attention Cinema</h2>
         <InfoIcon topicId="attention-cinema" />
       </div>
 
       {/* Top row: corpus + controls + view toggle */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
         {/* Corpus */}
-        <div className="flex flex-col gap-2" data-tutorial="attention-dataset">
-          {!useCustom ? (
-            <DatasetSelector
-              value={datasetId}
-              onChange={setDatasetId}
-              onError={(msg) => uiDispatch({ type: 'SHOW_ERROR', payload: msg })}
-              disabled={status === SESSION_STATUS.RUNNING || starting}
-            />
-          ) : (
-            <TextInputPanel
-              text={text}
-              onChange={(v) => { setText(v); setUploadedId(null) }}
-              onUploadFile={handleUploadFile}
-              disabled={status === SESSION_STATUS.RUNNING || starting}
-              placeholder="Paste your text corpus here..."
-            />
-          )}
+        <div className="flex flex-col" data-tutorial="attention-dataset">
+          <div className="flex-1">
+            {!useCustom ? (
+              <DatasetSelector
+                value={datasetId}
+                onChange={setDatasetId}
+                onError={(msg) => uiDispatch({ type: 'SHOW_ERROR', payload: msg })}
+                disabled={status === SESSION_STATUS.RUNNING || starting}
+                className="h-full"
+              />
+            ) : (
+              <TextInputPanel
+                text={text}
+                onChange={(v) => { setText(v); setUploadedId(null) }}
+                onUploadFile={handleUploadFile}
+                disabled={status === SESSION_STATUS.RUNNING || starting}
+                placeholder="Paste your text corpus here..."
+              />
+            )}
+          </div>
           <button
             onClick={() => { setUseCustom(v => !v); setText(''); setUploadedId(null) }}
             disabled={status === SESSION_STATUS.RUNNING || starting}
-            className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors self-start disabled:opacity-40"
+            className="text-[10px] text-white/30 hover:text-gold-light transition-colors self-start disabled:opacity-40 mt-2"
           >
             {useCustom ? '← use built-in dataset' : 'or paste / upload custom text →'}
           </button>
         </div>
 
-        <div className="flex flex-col gap-2" data-tutorial="attention-controls">
+        <div className="flex flex-col" data-tutorial="attention-controls">
           <TrainingControls
             status={status}
             currentIter={currentIter}
@@ -233,16 +236,18 @@ export default function AttentionCinemaTab() {
             isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
             displayStep={playbackStep}
             onScrub={setPlaybackStep}
+            className="h-full"
           />
         </div>
 
-        <div className="flex flex-col gap-2" data-tutorial="view-mode-toggle">
+        <div className="flex flex-col" data-tutorial="view-mode-toggle">
           <ViewModeToggle
-          viewMode={viewMode}
-          onViewMode={setViewMode}
-          renderMode={renderMode}
-          onRenderMode={setRenderMode}
-        />
+            viewMode={viewMode}
+            onViewMode={setViewMode}
+            renderMode={renderMode}
+            onRenderMode={setRenderMode}
+            className="h-full"
+          />
         </div>
       </div>
 
@@ -263,11 +268,11 @@ export default function AttentionCinemaTab() {
           >
             <div data-tutorial="layer-head-selector">
               <LayerHeadSelector
-              layer={selectedLayer}
-              head={selectedHead}
-              onLayer={setSelectedLayer}
-              onHead={setSelectedHead}
-            />
+                layer={selectedLayer}
+                head={selectedHead}
+                onLayer={setSelectedLayer}
+                onHead={setSelectedHead}
+              />
             </div>
           </motion.div>
         )}
@@ -277,18 +282,17 @@ export default function AttentionCinemaTab() {
       <AnimatePresence mode="wait">
         {snapshots.length === 0 ? (
           <div key="empty" className="card min-h-[260px]">
-            <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
+            <h3 className="section-title mb-4">
               Attention Visualization
             </h3>
-            <div className="flex flex-col items-center justify-center h-40 gap-3 text-slate-600 text-sm">
+            <div className="flex flex-col items-center justify-center h-40 gap-3 text-white/30 text-sm">
               {!session ? (
                 <>
                   <p>Start training to watch attention patterns form.</p>
                   <button
                     onClick={handlePlay}
                     disabled={starting}
-                    className="px-4 py-2 rounded-lg border border-blue-600 bg-blue-600 text-white text-sm
-                               hover:bg-blue-500 transition-colors disabled:opacity-40"
+                    className="btn-gold disabled:opacity-40"
                   >
                     {starting ? 'Starting…' : '▶ Start Training'}
                   </button>
@@ -314,10 +318,10 @@ export default function AttentionCinemaTab() {
               />
             ) : viewMode === 'grid' ? (
               <div className="card" data-tutorial="attention-grid">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
+                <h3 className="section-title mb-4">
                   All Attention Patterns
                   {displayStep !== null && (
-                    <span className="ml-3 text-xs text-slate-500 font-normal normal-case">
+                    <span className="ml-3 text-xs text-white/30 font-normal normal-case">
                       — step {displayStep}
                     </span>
                   )}
@@ -332,10 +336,10 @@ export default function AttentionCinemaTab() {
             ) : (
               /* Detail mode */
               <div className="card min-h-[260px]" data-tutorial="heatmap-detail">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
+                <h3 className="section-title mb-4">
                   Attention Detail — Layer {selectedLayer}, Head {selectedHead}
                   {displayStep !== null && (
-                    <span className="ml-3 text-xs text-slate-500 font-normal normal-case">
+                    <span className="ml-3 text-xs text-white/30 font-normal normal-case">
                       — step {displayStep}
                     </span>
                   )}
@@ -353,9 +357,9 @@ export default function AttentionCinemaTab() {
                     </div>
                   )
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-40 text-slate-600 text-sm">
+                  <div className="flex flex-col items-center justify-center h-40 text-white/30 text-sm">
                     <p>No snapshot available for this layer/head</p>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-white/20 mt-1">
                       Wait for next checkpoint or select a different layer/head
                     </p>
                   </div>

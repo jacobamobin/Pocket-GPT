@@ -24,14 +24,14 @@ export default function AttentionEvolutionDisplay({ snapshots, layer, head }) {
     return (
       <div className="card">
         <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">
             Attention Evolution
           </h3>
           <InfoIcon topicId="attention-evolution" />
         </div>
-        <div className="flex flex-col items-center justify-center h-40 text-slate-600 text-sm gap-2">
+        <div className="flex flex-col items-center justify-center h-40 text-white/20 text-sm gap-2">
           <p>Need at least 2 checkpoints to show evolution</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-white/30">
             Keep training or wait for more snapshots
           </p>
         </div>
@@ -46,19 +46,19 @@ export default function AttentionEvolutionDisplay({ snapshots, layer, head }) {
   return (
     <div className="card">
       <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+        <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">
           Attention Evolution — Layer {layer}, Head {head}
         </h3>
         <InfoIcon topicId="attention-evolution" />
       </div>
 
       {/* Progress indicator */}
-      <div className="mb-4 px-3 py-2 rounded-md bg-slate-800/50 border border-slate-700">
+      <div className="mb-4 px-3 py-2 rounded-md bg-white/[0.05]/50 border border-white/10">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400">Training progress:</span>
-          <span className="font-mono text-cyan-400">
+          <span className="text-white/40">Training progress:</span>
+          <span className="font-mono text-gold-light">
             Step {early.step} → {late.step}
-            <span className="text-slate-500 ml-2">(+{late.step - early.step} steps)</span>
+            <span className="text-white/30 ml-2">(+{late.step - early.step} steps)</span>
           </span>
         </div>
       </div>
@@ -68,15 +68,15 @@ export default function AttentionEvolutionDisplay({ snapshots, layer, head }) {
         {/* Early training */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wider">
               Early Training
             </h4>
-            <span className="text-xs text-slate-500 font-mono">Step {early.step}</span>
+            <span className="text-xs text-white/30 font-mono">Step {early.step}</span>
           </div>
-          <div className="rounded-lg border border-slate-700 p-2 bg-slate-800/30">
+          <div className="rounded-lg border border-white/10 p-2 bg-white/[0.05]/30">
             <Heatmap2D matrix={early.matrix} tokens={early.tokens} size="medium" />
           </div>
-          <p className="text-xs text-slate-500 italic">
+          <p className="text-xs text-white/30 italic">
             {improvementPercent < 25
               ? 'Random/unfocused - model hasn\'t learned patterns yet'
               : 'Starting to show some structure but still noisy'}
@@ -86,15 +86,15 @@ export default function AttentionEvolutionDisplay({ snapshots, layer, head }) {
         {/* Late training */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+            <h4 className="text-xs font-semibold text-gold-light uppercase tracking-wider">
               Current
             </h4>
-            <span className="text-xs text-slate-500 font-mono">Step {late.step}</span>
+            <span className="text-xs text-white/30 font-mono">Step {late.step}</span>
           </div>
-          <div className="rounded-lg border border-cyan-500/30 p-2 bg-cyan-950/20">
+          <div className="rounded-lg border border-gold-base/30 p-2 bg-cyan-950/20">
             <Heatmap2D matrix={late.matrix} tokens={late.tokens} size="medium" />
           </div>
-          <p className="text-xs text-cyan-400 italic">
+          <p className="text-xs text-gold-light italic">
             {improvementPercent >= 75
               ? 'Well-structured attention - model has learned meaningful patterns'
               : improvementPercent >= 50
@@ -109,9 +109,9 @@ export default function AttentionEvolutionDisplay({ snapshots, layer, head }) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="mt-4 px-4 py-3 rounded-md bg-blue-950/30 border border-blue-500/30"
+        className="mt-4 px-4 py-3 rounded-md bg-gold-subtle border border-gold-base/30"
       >
-        <p className="text-xs text-blue-300">
+        <p className="text-xs text-gold-light">
           <strong className="text-blue-200">Key Insight:</strong> Watch how attention becomes more diagonal and focused during training.
           Well-trained attention heads focus on relevant token relationships, not random noise.
         </p>

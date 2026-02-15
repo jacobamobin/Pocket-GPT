@@ -30,7 +30,7 @@ export default function Heatmap2D({ matrix, tokens = [], size = 'large' }) {
 
   if (!matrix || matrix.length === 0) {
     return (
-      <div className="flex items-center justify-center text-slate-600 text-sm w-full h-full min-h-[120px]">
+      <div className="flex items-center justify-center text-white/20 text-sm w-full h-full min-h-[120px]">
         No data
       </div>
     )
@@ -118,7 +118,7 @@ export default function Heatmap2D({ matrix, tokens = [], size = 'large' }) {
 
       {/* Hover info */}
       {isLarge && (
-        <p className="text-xs text-slate-500 font-mono mt-1.5 h-4">
+        <p className="text-xs text-white/30 font-mono mt-1.5 h-4">
           {hovered
             ? `"${displayTok(toks[hovered.r] || '?')}" attends to "${displayTok(toks[hovered.c] || '?')}" = ${hovered.val.toFixed(4)}`
             : 'Brighter = more attention. Hover for exact values.'}

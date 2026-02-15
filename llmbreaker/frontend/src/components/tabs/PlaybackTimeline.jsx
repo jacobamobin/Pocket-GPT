@@ -35,43 +35,43 @@ export default function PlaybackTimeline({
   const btnBase = `
     flex items-center justify-center w-8 h-8 rounded-md border text-xs
     transition-all duration-150 focus:outline-none
-    border-neural-border bg-neural-surface text-slate-300
-    hover:text-white hover:border-blue-500/60
+    border-neural-border bg-neural-surface text-white/60
+    hover:text-white hover:border-gold-base/60
     disabled:opacity-40 disabled:cursor-not-allowed
   `
 
   return (
     <div className="card flex flex-col gap-3">
-      <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+      <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">
         Playback Timeline
       </h3>
 
       {steps.length === 0 ? (
-        <p className="text-slate-600 text-sm text-center py-2">
+        <p className="text-white/20 text-sm text-center py-2">
           Attention snapshots will appear here every 50 steps
         </p>
       ) : (
         <>
           {/* Scrubber */}
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-600 font-mono w-4">0</span>
+            <span className="text-xs text-white/20 font-mono w-4">0</span>
             <input
               type="range"
               min={0}
               max={maxIters}
               value={sliderVal}
               onChange={handleSlider}
-              className="flex-1 accent-blue-500 cursor-pointer"
+              className="flex-1 accent-gold-base cursor-pointer"
             />
-            <span className="text-xs text-slate-600 font-mono w-8 text-right">{maxIters}</span>
+            <span className="text-xs text-white/20 font-mono w-8 text-right">{maxIters}</span>
           </div>
 
           {/* Step counter + checkpoint dots */}
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-400 font-mono">
+            <span className="text-xs text-white/40 font-mono">
               Step {sliderVal.toLocaleString()} / {maxIters.toLocaleString()}
             </span>
-            <span className="text-xs text-slate-600">
+            <span className="text-xs text-white/20">
               {steps.length} checkpoint{steps.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -87,7 +87,7 @@ export default function PlaybackTimeline({
 
             <button
               onClick={onPlayToggle}
-              className={`${btnBase} ${isPlaying ? 'border-blue-500 bg-blue-500/20 text-blue-300' : ''}`}
+              className={`${btnBase} ${isPlaying ? 'border-gold-base bg-gold-base/20 text-gold-light' : ''}`}
               title={isPlaying ? 'Pause auto-advance' : 'Auto-advance through checkpoints'}
             >
               {isPlaying
@@ -108,7 +108,7 @@ export default function PlaybackTimeline({
             {currentStep !== null && (
               <button
                 onClick={() => onStepChange(null)}
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                className="text-xs text-gold-light hover:text-gold-light transition-colors"
                 title="Jump to latest snapshot"
               >
                 Follow Live

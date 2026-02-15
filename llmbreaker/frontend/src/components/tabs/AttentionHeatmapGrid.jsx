@@ -31,23 +31,23 @@ export default function AttentionHeatmapGrid({ snapshots, currentStep, onSelectC
   return (
     <div className="space-y-4">
       {/* Educational header */}
-      <div className="px-4 py-3 rounded-md bg-slate-800/50 border border-slate-700">
+      <div className="px-4 py-3 rounded-md bg-white/[0.05]/50 border border-white/10">
         <div className="flex items-center gap-2 mb-2">
-          <p className="text-xs text-slate-400">
-            <strong className="text-slate-300">What you're seeing:</strong> Attention patterns show which tokens each head focuses on when generating text.</p>
+          <p className="text-xs text-white/40">
+            <strong className="text-white/60">What you're seeing:</strong> Attention patterns show which tokens each head focuses on when generating text.</p>
           <InfoIcon topicId="attention-heatmap" />
         </div>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-white/40">
           Watch how patterns become more structured during training.
         </p>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-blue-500" />
-            <span className="text-slate-400">High attention</span>
+            <div className="w-3 h-3 rounded bg-gold-base" />
+            <span className="text-white/40">High attention</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-slate-800" />
-            <span className="text-slate-400">Low attention</span>
+            <div className="w-3 h-3 rounded bg-white/[0.05]" />
+            <span className="text-white/40">Low attention</span>
           </div>
         </div>
       </div>
@@ -69,17 +69,17 @@ export default function AttentionHeatmapGrid({ snapshots, currentStep, onSelectC
               onClick={() => onSelectCell(layer, head)}
               className="
                 bg-neural-surface border border-neural-border rounded-lg p-2
-                cursor-pointer hover:border-blue-500/50 transition-colors duration-150
+                cursor-pointer hover:border-gold-base/50 transition-colors duration-150
               "
               title={`Click to view Layer ${layer}, Head ${head} in Detail Mode`}
             >
-              <p className="text-xs text-slate-500 font-mono mb-2">
+              <p className="text-xs text-white/30 font-mono mb-2">
                 L{layer} H{head}
               </p>
               {snap ? (
                 <Heatmap2D matrix={snap.matrix} tokens={snap.tokens} size="small" />
               ) : (
-                <div className="flex items-center justify-center h-16 text-slate-700 text-xs">
+                <div className="flex items-center justify-center h-16 text-white/15 text-xs">
                   {snapshots.length === 0 ? 'Start training' : 'Waiting…'}
                 </div>
               )}
@@ -90,8 +90,8 @@ export default function AttentionHeatmapGrid({ snapshots, currentStep, onSelectC
 
       {/* Learning insights */}
       {snapshots.length > 0 && (
-        <div className="px-4 py-2 rounded-md bg-cyan-950/30 border border-cyan-500/30">
-          <p className="text-xs text-cyan-400">
+        <div className="px-4 py-2 rounded-md bg-cyan-950/30 border border-gold-base/30">
+          <p className="text-xs text-gold-light">
             {(() => {
               const step = currentStep ?? snapshots[snapshots.length - 1]?.step ?? 0
               if (step < 500) return 'Early training: Attention is mostly random. Keep watching!'

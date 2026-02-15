@@ -1,6 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import InfoIcon from '../shared/InfoIcon'
 
 /**
  * Token Stream Live-View
@@ -10,14 +9,18 @@ import InfoIcon from '../shared/InfoIcon'
  */
 
 const CHAR_COLORS = [
-  '#60a5fa', // blue-400
-  '#34d399', // emerald-400
-  '#fbbf24', // amber-400
-  '#f472b6', // pink-400
-  '#a78bfa', // violet-400
-  '#22d3ee', // cyan-400
-  '#fb923c', // orange-400
-  '#4ade80', // green-400
+  '#60a5fa', // blue
+  '#f472b6', // pink
+  '#34d399', // green
+  '#fbbf24', // yellow
+  '#a78bfa', // purple
+  '#fb923c', // orange
+  '#60a5fa', // blue
+  '#e879f9', // magenta
+  '#2dd4bf', // teal
+  '#f87171', // red
+  '#818cf8', // indigo
+  '#fb7185', // rose
 ]
 
 function charColor(charIdx) {
@@ -74,12 +77,11 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
     return (
       <div className="card">
         <div className="flex items-center gap-2 mb-3">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+          <h3 className="section-title">
             Token Stream
           </h3>
-          <InfoIcon topicId="watch-it-learn" />
         </div>
-        <div className="flex items-center justify-center h-28 text-slate-600 text-sm">
+        <div className="flex items-center justify-center h-28 text-white/30 text-sm">
           Start training to see the token stream
         </div>
       </div>
@@ -90,21 +92,16 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
     <div className="card">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+          <h3 className="section-title">
             Token Stream
           </h3>
-          <span className="text-xs text-slate-500 font-mono">
+          <span className="text-xs text-white/30 font-mono">
             vocab: {vocab.length} chars
           </span>
         </div>
         <button
           onClick={() => setShowTokenizer(v => !v)}
-          className={`
-            px-3 py-1 text-xs font-medium rounded-md border transition-all duration-150
-            ${showTokenizer
-              ? 'border-blue-500 bg-blue-500/20 text-blue-300'
-              : 'border-neural-border bg-neural-surface text-slate-400 hover:text-white hover:border-blue-500/60'}
-          `}
+          className={`toggle-btn ${showTokenizer ? 'active' : 'inactive'}`}
         >
           Tokenize Me
         </button>
@@ -112,16 +109,16 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
 
       {/* Scrolling token stream — shows training text being sliced */}
       <div className="mb-3">
-        <p className="text-xs text-slate-500 mb-1.5">
+        <p className="text-xs text-white/30 mb-1.5">
           The model reads text as individual characters, each mapped to an ID number:
         </p>
         <div
           ref={scrollRef}
-          className="flex gap-px overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700"
+          className="flex gap-px overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/20"
           style={{ maxHeight: 80 }}
         >
           {visibleTokens.length === 0 ? (
-            <span className="text-slate-600 text-xs">Waiting for training data...</span>
+            <span className="text-white/30 text-xs">Waiting for training data...</span>
           ) : (
             visibleTokens.slice(-120).map((tok, i) => (
               <motion.div
@@ -141,7 +138,7 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
                 >
                   {tok.char === ' ' ? '␣' : tok.char === '\n' ? '↵' : tok.char}
                 </span>
-                <span className="text-[9px] text-slate-600 font-mono">{tok.id}</span>
+                <span className="text-[9px] text-white/20 font-mono">{tok.id}</span>
               </motion.div>
             ))
           )}
@@ -158,8 +155,8 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="border-t border-neural-border pt-3 space-y-2">
-              <label className="text-xs text-slate-400 block">
+            <div className="border-t border-white/10 pt-3 space-y-2">
+              <label className="text-xs text-white/40 block">
                 Type anything to see how the model breaks it into token IDs:
               </label>
               <input
@@ -167,9 +164,7 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 placeholder='Try typing your name...'
-                className="w-full bg-neural-surface border border-neural-border rounded-lg
-                           px-3 py-2 text-sm text-white placeholder-slate-600
-                           focus:outline-none focus:border-blue-500 transition-colors"
+                className="input-field"
               />
 
               {userTokens.length > 0 && (
@@ -192,7 +187,7 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
                       >
                         {tok.char === ' ' ? '␣' : tok.char}
                       </span>
-                      <span className={`text-[10px] font-mono mt-0.5 ${tok.known ? 'text-slate-400' : 'text-red-400'}`}>
+                      <span className={`text-[10px] font-mono mt-0.5 ${tok.known ? 'text-white/40' : 'text-red-400'}`}>
                         {tok.known ? tok.id : '?'}
                       </span>
                     </motion.div>
@@ -201,7 +196,7 @@ export default function TokenStreamDisplay({ vocabInfo, currentStep }) {
               )}
 
               {userTokens.length > 0 && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-white/30">
                   Your text as IDs: [{userTokens.map(t => t.known ? t.id : '?').join(', ')}]
                   {userTokens.some(t => !t.known) && (
                     <span className="text-red-400 ml-1">

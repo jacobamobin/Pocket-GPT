@@ -225,7 +225,7 @@ export default function Heatmap3D({ matrix, tokens = [] }) {
 
   if (!matrix || matrix.length === 0) {
     return (
-      <div className="flex items-center justify-center h-72 text-slate-600 text-sm">
+      <div className="flex items-center justify-center h-72 text-white/20 text-sm">
         No attention data yet
       </div>
     )
@@ -234,7 +234,7 @@ export default function Heatmap3D({ matrix, tokens = [] }) {
   return (
     <div className="w-full rounded-lg overflow-hidden">
       <div className="flex items-center gap-2 mb-1 px-1">
-        <span className="text-xs text-slate-500 font-mono">3D Attention View</span>
+        <span className="text-xs text-white/30 font-mono">3D Attention View</span>
         <InfoIcon topicId="attention-3d" />
       </div>
       <canvas
@@ -243,11 +243,11 @@ export default function Heatmap3D({ matrix, tokens = [] }) {
         style={{ height: 320, display: 'block' }}
       />
       <div className="flex items-center justify-between mt-1 px-1">
-        <p className="text-xs text-slate-600">
+        <p className="text-xs text-white/20">
           Drag to rotate · Scroll to zoom · Showing first {Math.min((matrix || []).length, MAX_3D)}×{Math.min((matrix || []).length, MAX_3D)} tokens
         </p>
         <div className="flex items-center gap-3 text-[10px]">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-400" />Key</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gold-light" />Key</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400" />Query</span>
         </div>
       </div>

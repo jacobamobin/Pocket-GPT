@@ -1,11 +1,10 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LinePath } from '@visx/shape'
 import { scaleLinear } from '@visx/scale'
 import { AxisBottom, AxisLeft } from '@visx/axis'
 import { GridRows } from '@visx/grid'
 import { localPoint } from '@visx/event'
-import InfoIcon from './InfoIcon'
 
 const MARGIN = { top: 16, right: 24, bottom: 40, left: 52 }
 
@@ -18,9 +17,25 @@ const ANNOTATIONS = [
 export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHoverStep, displayStep = null }) {
   const [tooltip, setTooltip] = useState(null)   // { x, y, step, train, val }
   const [hovered, setHovered] = useState(false)
+  const containerRef = useRef(null)
+  const [width, setWidth] = useState(680)
 
-  const W = 680, H = 240
-  const innerW = W - MARGIN.left - MARGIN.right
+  const H = 240
+
+  // Update width on resize
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setWidth(containerRef.current.offsetWidth)
+      }
+    }
+
+    updateWidth()
+    window.addEventListener('resize', updateWidth)
+    return () => window.removeEventListener('resize', updateWidth)
+  }, [])
+
+  const innerW = Math.max(width - MARGIN.left - MARGIN.right, 200)
   const innerH = H - MARGIN.top - MARGIN.bottom
 
   // Calculate perplexity (exp of loss) - more intuitive than raw loss
@@ -28,7 +43,7 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
 
   const xScale = useMemo(() => scaleLinear({
     domain: [0, maxIters],
-    range:  [0, innerW],
+    range: [0, innerW],
   }), [maxIters, innerW])
 
   const allLosses = lossHistory.flatMap(d => [d.train_loss, d.val_loss]).filter(Boolean)
@@ -37,8 +52,8 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
 
   const yScale = useMemo(() => scaleLinear({
     domain: [yMin, yMax],
-    range:  [innerH, 0],
-    nice:   true,
+    range: [innerH, 0],
+    nice: true,
   }), [yMin, yMax, innerH])
 
   const handleMouseMove = useCallback((e) => {
@@ -49,7 +64,7 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
       Math.abs(b.step - xVal) < Math.abs(a.step - xVal) ? b : a
     )
     const cx = MARGIN.left + xScale(closest.step)
-    const cy = MARGIN.top  + yScale(closest.train_loss)
+    const cy = MARGIN.top + yScale(closest.train_loss)
     setTooltip({ x: cx, y: cy, ...closest })
     onHoverStep?.(closest.step)
   }, [lossHistory, xScale, yScale, onHoverStep])
@@ -61,32 +76,31 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
   }, [onHoverStep])
 
   return (
-    <div className="card">
+    <div className="card" ref={containerRef}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Learning Progress</h3>
-          <InfoIcon topicId="loss-curve" />
+          <h3 className="section-title">Learning Progress</h3>
         </div>
-        <div className="flex items-center gap-4 text-xs text-slate-500">
+        <div className="flex items-center gap-4 text-xs text-white/30">
           <span className="flex items-center gap-1.5">
-            <span className="w-6 h-0.5 bg-blue-500 inline-block" />Train
+            <span className="w-6 h-0.5 bg-gold-base inline-block" />Train
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-6 h-0.5 bg-cyan-400 border-dashed inline-block" style={{ borderTop: '2px dashed #22d3ee', height: 0 }} />Val
+            <span className="w-6 h-0.5 bg-gold-light border-dashed inline-block" style={{ borderTop: '2px dashed #c9b8a0', height: 0 }} />Val
           </span>
         </div>
       </div>
 
       {/* Learning quality indicator */}
       {lossHistory.length > 0 && (
-        <div className="mb-3 px-3 py-2 rounded-md bg-slate-800/50 border border-slate-700">
+        <div className="mb-3 px-3 py-2 rounded-md bg-white/[0.03] border border-white/10">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-400">Latest perplexity:</span>
-            <span className="font-mono text-cyan-400">
+            <span className="text-white/40">Latest perplexity:</span>
+            <span className="font-mono text-gold-light">
               {getPerplexity(lossHistory[lossHistory.length - 1]?.train_loss || 0)}
             </span>
           </div>
-          <div className="text-xs text-slate-500 mt-1">
+          <div className="text-xs text-white/30 mt-1">
             {(() => {
               const ppl = parseFloat(getPerplexity(lossHistory[lossHistory.length - 1]?.train_loss || 999))
               if (ppl < 5) return 'Excellent - model is learning well!'
@@ -99,53 +113,54 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
       )}
 
       {lossHistory.length === 0 ? (
-        <div className="flex items-center justify-center h-40 text-slate-600 text-sm">
+        <div className="flex items-center justify-center h-40 text-white/30 text-sm">
           Start training to see the loss curve
         </div>
       ) : (
         <div className="overflow-x-auto">
           <svg
-            width={W} height={H}
+            width={width} height={H}
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={handleMouseLeave}
             className="cursor-crosshair"
+            style={{ display: 'block' }}
           >
             <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
               {/* Grid */}
               <GridRows
                 scale={yScale} width={innerW} numTicks={5}
-                stroke="#1e3a5f" strokeOpacity={0.5}
+                stroke="rgba(167,139,113,0.15)" strokeOpacity={1}
               />
 
               {/* Milestone annotations */}
               {ANNOTATIONS.filter(a => lossHistory.some(d => d.step >= a.step)).map(a => (
                 <g key={a.step} transform={`translate(${xScale(a.step)},0)`}>
-                  <line y1={0} y2={innerH} stroke="#1e3a5f" strokeDasharray="3,3" />
+                  <line y1={0} y2={innerH} stroke="rgba(167,139,113,0.2)" strokeDasharray="3,3" />
                   <text
                     y={-4} textAnchor="middle"
-                    fill="#334155" fontSize={9} fontFamily="monospace"
+                    fill="rgba(167,139,113,0.4)" fontSize={9} fontFamily="monospace"
                   >{a.label}</text>
                 </g>
               ))}
 
-              {/* Val loss (dashed cyan) */}
+              {/* Val loss (dashed gold-light) */}
               <LinePath
                 data={lossHistory}
                 x={d => xScale(d.step)}
                 y={d => yScale(d.val_loss)}
-                stroke="#22d3ee"
+                stroke="#c9b8a0"
                 strokeWidth={1.5}
                 strokeDasharray="4,3"
                 strokeOpacity={0.7}
               />
 
-              {/* Train loss (solid blue) */}
+              {/* Train loss (solid gold) */}
               <LinePath
                 data={lossHistory}
                 x={d => xScale(d.step)}
                 y={d => yScale(d.train_loss)}
-                stroke="#3b82f6"
+                stroke="#a78b71"
                 strokeWidth={2}
               />
 
@@ -156,7 +171,7 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
                   <circle
                     cx={xScale(last.step)}
                     cy={yScale(last.train_loss)}
-                    r={3} fill="#60a5fa"
+                    r={3} fill="#c9b8a0"
                   />
                 )
               })()}
@@ -166,7 +181,7 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
                 <line
                   x1={xScale(displayStep)} y1={0}
                   x2={xScale(displayStep)} y2={innerH}
-                  stroke="#60A5FA" strokeDasharray="3 3" strokeOpacity={0.7} strokeWidth={1.5}
+                  stroke="#c9b8a0" strokeDasharray="3 3" strokeOpacity={0.7} strokeWidth={1.5}
                 />
               )}
 
@@ -176,12 +191,12 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
                   <line
                     x1={tooltip.x - MARGIN.left} y1={0}
                     x2={tooltip.x - MARGIN.left} y2={innerH}
-                    stroke="#3b82f6" strokeOpacity={0.4} strokeWidth={1}
+                    stroke="#a78b71" strokeOpacity={0.4} strokeWidth={1}
                   />
                   <circle
                     cx={tooltip.x - MARGIN.left}
                     cy={yScale(tooltip.train_loss)}
-                    r={4} fill="#3b82f6" stroke="#0d1b2a" strokeWidth={2}
+                    r={4} fill="#a78b71" stroke="#0a0a0a" strokeWidth={2}
                   />
                 </g>
               )}
@@ -189,17 +204,17 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
               {/* Axes */}
               <AxisBottom
                 top={innerH} scale={xScale} numTicks={6}
-                stroke="#1e3a5f" tickStroke="#1e3a5f"
-                tickLabelProps={() => ({ fill: '#475569', fontSize: 10, textAnchor: 'middle', fontFamily: 'monospace' })}
+                stroke="rgba(167,139,113,0.2)" tickStroke="rgba(167,139,113,0.2)"
+                tickLabelProps={() => ({ fill: 'rgba(255,255,255,0.3)', fontSize: 10, textAnchor: 'middle', fontFamily: 'monospace' })}
                 label="Training Step"
-                labelProps={{ fill: '#475569', fontSize: 10, textAnchor: 'middle', dy: 28 }}
+                labelProps={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, textAnchor: 'middle', dy: 28 }}
               />
               <AxisLeft
                 scale={yScale} numTicks={5}
-                stroke="#1e3a5f" tickStroke="#1e3a5f"
-                tickLabelProps={() => ({ fill: '#475569', fontSize: 10, textAnchor: 'end', dx: -4, fontFamily: 'monospace' })}
+                stroke="rgba(167,139,113,0.2)" tickStroke="rgba(167,139,113,0.2)"
+                tickLabelProps={() => ({ fill: 'rgba(255,255,255,0.3)', fontSize: 10, textAnchor: 'end', dx: -4, fontFamily: 'monospace' })}
                 label="Loss"
-                labelProps={{ fill: '#475569', fontSize: 10, textAnchor: 'middle', transform: 'rotate(-90)', dx: -innerH/2, dy: -40 }}
+                labelProps={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, textAnchor: 'middle', transform: 'rotate(-90)', dx: -innerH / 2, dy: -40 }}
               />
             </g>
 
@@ -212,15 +227,15 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
                   transition={{ duration: 0.1 }}
                 >
                   {(() => {
-                    const bx = Math.min(tooltip.x + 10, W - 120)
+                    const bx = Math.min(tooltip.x + 10, width - 120)
                     const by = Math.max(tooltip.y - 42, 8)
                     return (
                       <g transform={`translate(${bx},${by})`}>
-                        <rect width={110} height={38} rx={4} fill="#0d1b2a" stroke="#1e3a5f" />
-                        <text x={8} y={14} fill="#93c5fd" fontSize={10} fontFamily="monospace">
+                        <rect width={110} height={38} rx={4} fill="#0a0a0a" stroke="rgba(167,139,113,0.3)" />
+                        <text x={8} y={14} fill="#c9b8a0" fontSize={10} fontFamily="monospace">
                           Step {tooltip.step}
                         </text>
-                        <text x={8} y={28} fill="#60a5fa" fontSize={10} fontFamily="monospace">
+                        <text x={8} y={28} fill="#a78b71" fontSize={10} fontFamily="monospace">
                           PPL {getPerplexity(tooltip.train_loss || 0)}
                         </text>
                       </g>

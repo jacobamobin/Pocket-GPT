@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import FileUploader from './FileUploader'
 import { listDatasets, uploadDataset } from '../../utils/apiClient'
-import InfoIcon from './InfoIcon'
 
-export default function DatasetSelector({ value, onChange, onError, disabled }) {
-  const [datasets, setDatasets]     = useState([])
-  const [uploading, setUploading]   = useState(false)
-  const [loading, setLoading]       = useState(true)
+export default function DatasetSelector({ value, onChange, onError, disabled, className = '' }) {
+  const [datasets, setDatasets] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     listDatasets()
@@ -24,11 +23,11 @@ export default function DatasetSelector({ value, onChange, onError, disabled }) 
       const data = await uploadDataset(file)
       // Inject the user dataset into the local list and select it
       const userDs = {
-        name:         data.dataset_id,
+        name: data.dataset_id,
         display_name: data.filename,
-        char_count:   data.char_count,
-        vocab_size:   data.vocab_size,
-        word_count:   data.word_count,
+        char_count: data.char_count,
+        vocab_size: data.vocab_size,
+        word_count: data.word_count,
       }
       setDatasets(prev => [...prev, userDs])
       onChange(data.dataset_id)
@@ -40,14 +39,13 @@ export default function DatasetSelector({ value, onChange, onError, disabled }) 
   }
 
   return (
-    <div className="card flex flex-col gap-4">
+    <div className={`card flex flex-col gap-4 ${className}`}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Dataset</h3>
-          <InfoIcon topicId="dataset-selector" />
+        <div className="section-header mb-0">
+          <span>Dataset</span>
         </div>
         {uploading && (
-          <span className="text-xs text-blue-400 animate-pulse">Uploading…</span>
+          <span className="text-xs text-gold-light animate-pulse">Uploading…</span>
         )}
       </div>
 
@@ -57,26 +55,26 @@ export default function DatasetSelector({ value, onChange, onError, disabled }) 
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
           disabled={disabled || loading}
-          className="w-full appearance-none bg-neural-surface border border-neural-border
+          className="w-full appearance-none bg-neural-surface border border-white/10
                      rounded-lg px-3 py-2.5 text-sm text-white pr-8
-                     focus:outline-none focus:border-blue-500 transition-colors
-                     disabled:opacity-40 disabled:cursor-not-allowed"
+                     focus:outline-none focus:border-gold-base focus:shadow-[0_0_0_3px_rgba(167,139,113,0.1)]
+                     transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <option value="" disabled>{loading ? 'Loading…' : 'Select dataset…'}</option>
           {datasets.map(ds => (
             <option key={ds.name} value={ds.name}>{ds.display_name}</option>
           ))}
         </select>
-        <svg className="pointer-events-none absolute right-2.5 top-3 w-4 h-4 text-slate-500"
+        <svg className="pointer-events-none absolute right-2.5 top-3 w-4 h-4 text-white/40"
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
 
-      <div className="flex items-center gap-3 text-xs text-slate-500">
-        <span className="border-t border-neural-border flex-1" />
+      <div className="flex items-center gap-3 text-xs text-white/30">
+        <span className="border-t border-white/10 flex-1" />
         <span>OR</span>
-        <span className="border-t border-neural-border flex-1" />
+        <span className="border-t border-white/10 flex-1" />
       </div>
 
       <FileUploader onFile={handleFile} disabled={disabled || uploading} />
@@ -90,16 +88,16 @@ export default function DatasetSelector({ value, onChange, onError, disabled }) 
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-t border-neural-border pt-3 grid grid-cols-3 gap-2"
+            className="border-t border-white/10 pt-3 grid grid-cols-3 gap-2"
           >
             {[
-              { label: 'Chars',  value: selected.char_count.toLocaleString() },
-              { label: 'Words',  value: selected.word_count.toLocaleString() },
-              { label: 'Vocab',  value: selected.vocab_size },
+              { label: 'Chars', value: selected.char_count.toLocaleString() },
+              { label: 'Words', value: selected.word_count.toLocaleString() },
+              { label: 'Vocab', value: selected.vocab_size },
             ].map(({ label, value: v }) => (
               <div key={label} className="flex flex-col items-center gap-0.5">
-                <span className="text-xs text-slate-500 uppercase tracking-wider">{label}</span>
-                <span className="text-sm font-mono text-blue-300">{v}</span>
+                <span className="text-xs text-white/40 uppercase tracking-wider">{label}</span>
+                <span className="stat-value">{v}</span>
               </div>
             ))}
           </motion.div>

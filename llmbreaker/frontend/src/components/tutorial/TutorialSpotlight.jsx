@@ -288,17 +288,17 @@ export default function TutorialSpotlight() {
           <div className="px-5 py-4 border-b border-neural-border bg-neural-surface/50">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-gold-light uppercase tracking-wider">
                   {chapter?.title || 'Tutorial'}
                 </span>
-                <span className="text-slate-600">·</span>
-                <span className="text-xs text-slate-500">
+                <span className="text-white/20">·</span>
+                <span className="text-xs text-white/30">
                   Step {stepIndex + 1} of {totalSteps}
                 </span>
               </div>
               <button
                 onClick={actions.endTutorial}
-                className="text-slate-500 hover:text-white transition-colors text-lg leading-none p-1"
+                className="text-white/30 hover:text-white transition-colors text-lg leading-none p-1"
                 aria-label="Exit tutorial"
               >
                 ×
@@ -309,12 +309,12 @@ export default function TutorialSpotlight() {
           {/* Body */}
           <div className="px-5 py-4">
             {/* Title */}
-            <h3 className="text-base font-semibold text-slate-200 mb-3">
+            <h3 className="text-base font-semibold text-white mb-3">
               {step.title}
             </h3>
 
             {/* Content */}
-            <div className="text-sm text-slate-400 leading-relaxed mb-4">
+            <div className="text-sm text-white/40 leading-relaxed mb-4">
               {typeof step.content === 'string' ? (
                 <p dangerouslySetInnerHTML={{ __html: step.content }} />
               ) : (
@@ -324,7 +324,7 @@ export default function TutorialSpotlight() {
 
             {/* Visual diagram */}
             {VisualComponent && (
-              <div className="mb-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+              <div className="mb-4 p-3 bg-white/[0.03]/50 rounded-lg border border-white/10/50">
                 <VisualComponent />
               </div>
             )}
@@ -335,14 +335,14 @@ export default function TutorialSpotlight() {
           <div className="px-5 py-3 border-t border-neural-border bg-neural-surface/30 flex items-center justify-between">
             <button
               onClick={handlePrev}
-              className="text-sm text-slate-500 hover:text-slate-300 transition-colors px-3 py-1.5 rounded-md hover:bg-slate-800/50"
+              className="text-sm text-white/30 hover:text-white/60 transition-colors px-3 py-1.5 rounded-md hover:bg-white/[0.05]/50"
             >
               ← {isFirstStep ? 'Exit' : 'Back'}
             </button>
 
             <button
               onClick={handleNext}
-              className="text-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-md transition-colors font-medium"
+              className="text-sm bg-gold-base hover:bg-gold-base text-white px-4 py-1.5 rounded-md transition-colors font-medium"
             >
               {isLastStep ? 'Complete' : 'Next →'}
             </button>

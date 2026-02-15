@@ -14,13 +14,13 @@ function GroupSection({ title, subtitle, open, onToggle, children }) {
         className="flex items-center justify-between px-3 py-2 bg-neural-surface/80 cursor-pointer hover:bg-neural-border/30 transition-colors"
       >
         <div>
-          <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">{title}</span>
-          <span className="ml-2 text-xs text-slate-500">{subtitle}</span>
+          <span className="text-xs font-semibold text-white/60 uppercase tracking-wider">{title}</span>
+          <span className="ml-2 text-xs text-white/30">{subtitle}</span>
         </div>
         <motion.svg
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.15 }}
-          className="w-3 h-3 text-slate-500 flex-shrink-0"
+          className="w-3 h-3 text-white/30 flex-shrink-0"
           fill="none" stroke="currentColor" viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -39,8 +39,8 @@ function ConfigRow({ label, sublabel, children }) {
   return (
     <div>
       <div className="mb-1">
-        <span className="text-xs font-medium text-slate-400">{label}</span>
-        {sublabel && <p className="text-xs text-slate-600 mt-0.5">{sublabel}</p>}
+        <span className="text-xs font-medium text-white/40">{label}</span>
+        {sublabel && <p className="text-xs text-white/20 mt-0.5">{sublabel}</p>}
       </div>
       {children}
     </div>
@@ -61,8 +61,8 @@ function PillGroup({ options, value, onChange, disabled }) {
             transition-all duration-150
             disabled:opacity-40 disabled:cursor-not-allowed
             ${String(value) === String(opt.value)
-              ? 'border-blue-500 text-blue-300 bg-blue-500/10'
-              : 'border-neural-border text-slate-400 bg-neural-surface hover:text-white hover:border-blue-500/50'
+              ? 'border-gold-base text-gold-light bg-gold-base/10'
+              : 'border-neural-border text-white/40 bg-neural-surface hover:text-white hover:border-gold-base/50'
             }
           `}
         >
@@ -88,10 +88,10 @@ function SliderWithValue({ min, max, step, value, onChange, format, disabled }) 
                    disabled:opacity-40 disabled:cursor-not-allowed
                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5
                    [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:hover:bg-blue-400"
+                   [&::-webkit-slider-thumb]:bg-gold-base [&::-webkit-slider-thumb]:cursor-pointer
+                   [&::-webkit-slider-thumb]:hover:bg-gold-light"
       />
-      <span className="text-sm text-slate-300 font-mono w-16 text-right flex-shrink-0">
+      <span className="text-sm text-white/60 font-mono w-16 text-right flex-shrink-0">
         {format ? format(value) : value}
       </span>
     </div>
@@ -107,7 +107,7 @@ function Toggle({ value, onChange, disabled }) {
       className={`
         relative w-10 h-5 rounded-full transition-colors duration-200
         disabled:opacity-40 disabled:cursor-not-allowed
-        ${value ? 'bg-blue-500' : 'bg-neural-border'}
+        ${value ? 'bg-gold-base' : 'bg-neural-border'}
       `}
     >
       <span className={`
@@ -203,7 +203,7 @@ export default function TrainingConfigPanel({
                 onChange={handleModelSizeChange}
                 disabled={isLocked}
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-white/30 mt-1">
                 {modelSizes[modelSize].description}
               </p>
             </ConfigRow>
@@ -231,7 +231,7 @@ export default function TrainingConfigPanel({
                 format={(v) => v.toFixed(2)}
                 disabled={isLocked}
               />
-              <div className="flex justify-between text-xs text-slate-600 mt-1">
+              <div className="flex justify-between text-xs text-white/20 mt-1">
                 <span>0.00 Off</span><span>0.50 Heavy</span>
               </div>
             </ConfigRow>
@@ -287,10 +287,10 @@ export default function TrainingConfigPanel({
                 format={(v) => v.toLocaleString()}
                 disabled={isLocked}
               />
-              <div className="flex justify-between text-xs text-slate-600 mt-1">
+              <div className="flex justify-between text-xs text-white/20 mt-1">
                 <span>500</span><span>15,000</span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-white/30 mt-1">
                 Recommended: {modelSizes[modelSize].recommendedSteps.toLocaleString()}+ for {modelSizes[modelSize].label} model
               </p>
             </ConfigRow>
@@ -321,7 +321,7 @@ export default function TrainingConfigPanel({
                 format={(v) => v.toFixed(1)}
                 disabled={isLocked}
               />
-              <div className="flex justify-between text-xs text-slate-600 mt-1">
+              <div className="flex justify-between text-xs text-white/20 mt-1">
                 <span>0.3 Focused</span><span>1.5 Wild</span>
               </div>
             </ConfigRow>
@@ -337,7 +337,7 @@ export default function TrainingConfigPanel({
                 format={(v) => `every ${v}`}
                 disabled={isLocked}
               />
-              <div className="flex justify-between text-xs text-slate-600 mt-1">
+              <div className="flex justify-between text-xs text-white/20 mt-1">
                 <span>25</span><span>200</span>
               </div>
             </ConfigRow>
@@ -359,11 +359,11 @@ export default function TrainingConfigPanel({
           ${isTraining ? 'opacity-50 cursor-not-allowed' : ''}
         `}
       >
-        <span className="text-sm font-medium text-slate-300">Training Configuration</span>
+        <span className="text-sm font-medium text-white/60">Training Configuration</span>
         <motion.svg
           animate={{ rotate: isExpanded ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="w-4 h-4 text-slate-400"
+          className="w-4 h-4 text-white/40"
           fill="none" stroke="currentColor" viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

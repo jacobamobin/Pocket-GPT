@@ -37,10 +37,10 @@ const PHASES = [
     phase: 3,
     title: 'Mastering Grammar & Structure',
     subtitle: 'Learning sentence patterns, punctuation, and capitalisation',
-    color: 'text-cyan-400',
-    bgColor: 'bg-cyan-500/10 border-cyan-500/30',
-    dotColor: 'bg-cyan-400',
-    icon: '✍️',
+    color: 'text-gold-light',
+    bgColor: 'bg-gold-subtle border-gold-muted',
+    dotColor: 'bg-gold-light',
+    icon: '',
   },
   {
     maxStep: Infinity,
@@ -50,7 +50,7 @@ const PHASES = [
     color: 'text-green-400',
     bgColor: 'bg-green-500/10 border-green-500/30',
     dotColor: 'bg-green-400',
-    icon: '🎭',
+    icon: '',
   },
 ]
 
@@ -91,7 +91,7 @@ export default function PhaseLabel({ currentStep = 0, maxIters = 5000, status })
         </div>
 
         {/* Subtitle */}
-        <p className="text-xs text-slate-400 mb-3">{phase.subtitle}</p>
+        <p className="text-xs text-white/40 mb-3">{phase.subtitle}</p>
 
         {/* Phase progress dots */}
         <div className="flex items-center gap-1.5">
@@ -101,18 +101,17 @@ export default function PhaseLabel({ currentStep = 0, maxIters = 5000, status })
                 className={`
                   w-2 h-2 rounded-full transition-all duration-300
                   ${p.current ? `${p.dotColor} animate-pulse scale-125` :
-                    p.active ? p.dotColor : 'bg-slate-700'}
+                    p.active ? p.dotColor : 'bg-white/20'}
                 `}
                 title={`Phase ${p.phase}: ${p.title}`}
               />
               {i < PHASES.length - 1 && (
-                <div className={`w-6 h-0.5 rounded-full transition-colors duration-300 ${
-                  progress[i + 1]?.active ? 'bg-slate-500' : 'bg-slate-800'
-                }`} />
+                <div className={`w-6 h-0.5 rounded-full transition-colors duration-300 ${progress[i + 1]?.active ? 'bg-white/30' : 'bg-white/10'
+                  }`} />
               )}
             </div>
           ))}
-          <span className="text-[10px] text-slate-600 ml-2 font-mono">
+          <span className="text-[10px] text-white/20 ml-2 font-mono">
             {currentStep.toLocaleString()} / {maxIters.toLocaleString()}
           </span>
         </div>

@@ -38,23 +38,35 @@
 
   /* Primary button - white with black text, full width capable */
   .btn-primary {
-    @apply px-6 py-3 bg-white text-black rounded-full
-           transition-all duration-200 hover:-translate-y-0.5
-           hover:bg-gold-hover hover:shadow-lg font-semibold text-sm;
+    @apply px-6 py-3 bg-white text-black rounded-full transition-all duration-200 hover:-translate-y-0.5 hover:bg-gold-hover hover:shadow-lg font-semibold text-sm;
   }
 
   /* Secondary button - transparent with border */
   .btn-secondary {
-    @apply px-6 py-3 bg-transparent text-white rounded-full
-           border border-white/20 hover:border-gold-base hover:bg-gold-subtle
-           transition-all duration-200 font-semibold text-sm;
+    @apply px-6 py-3 bg-transparent text-white rounded-full border border-white/20 hover:border-gold-base hover:bg-gold-subtle transition-all duration-200 font-semibold text-sm;
+  }
+
+  /* Gold accent button - for in-context CTAs (replaces blue buttons) */
+  .btn-gold {
+    @apply px-4 py-2 rounded-lg border border-gold-muted bg-gold-subtle text-gold-light text-sm font-semibold hover:bg-gold-base hover:text-neural-bg hover:border-gold-base transition-all duration-200;
+  }
+
+  /* Toggle button - for view mode toggles and option selectors */
+  .toggle-btn {
+    @apply px-3 py-1.5 text-xs font-medium rounded-md border transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gold-base/60;
+  }
+
+  .toggle-btn.active {
+    @apply border-gold-base bg-gold-subtle text-gold-light;
+  }
+
+  .toggle-btn.inactive {
+    @apply border-white/10 bg-neural-surface text-white/40 hover:text-white/60 hover:border-white/20;
   }
 
   /* Icon button - standardized square button for toolbar use */
   .icon-btn {
-    @apply w-10 h-10 flex items-center justify-center rounded-lg border border-white/10
-           bg-neural-surface text-white/60 hover:text-white hover:border-gold-base/50
-           transition-all duration-150;
+    @apply w-10 h-10 flex items-center justify-center rounded-lg border border-white/10 bg-neural-surface text-white/60 hover:text-white hover:border-gold-base/50 transition-all duration-150;
   }
 
   .icon-btn.primary {
@@ -68,9 +80,12 @@
   /* ===== CARD STANDARDIZATION ===== */
 
   .card {
-    @apply bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-2xl p-4
-           shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:bg-white/[0.05] hover:border-white/15
-           transition-all duration-300;
+    @apply bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-2xl p-4 transition-all duration-300;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  .card:hover {
+    @apply bg-white/[0.05] border-white/15;
   }
 
   /* Control card - fixed minimum height for layout consistency */
@@ -104,24 +119,38 @@
 
   /* Standard input field */
   .input-field {
-    @apply w-full bg-neural-surface border border-white/10 rounded-lg px-3 py-2 text-sm
-           text-white placeholder:text-white/30 focus:outline-none focus:border-gold-base
-           transition-colors duration-200;
+    @apply w-full bg-neural-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-gold-base transition-colors duration-200;
+  }
+
+  .input-field:focus {
+    box-shadow: 0 0 0 3px rgba(167, 139, 113, 0.1);
   }
 
   /* Dropdown select */
   .select-field {
-    @apply w-full bg-neural-surface border border-white/10 rounded-lg px-3 py-2 text-sm
-           text-white focus:outline-none focus:border-gold-base transition-colors duration-200;
+    @apply w-full bg-neural-surface border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-gold-base transition-colors duration-200;
+  }
+
+  /* Section title - standardized for tab section headers */
+  .section-title {
+    @apply text-sm font-semibold text-white/80 uppercase tracking-wider;
+  }
+
+  /* Metadata value - for displaying stats inline */
+  .stat-value {
+    @apply text-sm font-mono text-gold-light;
   }
 }
 
 /* Tutorial spotlight pulse animation - gold accent */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     box-shadow: 0 0 20px rgba(167, 139, 113, 0.5), inset 0 0 20px rgba(167, 139, 113, 0.2);
   }
+
   50% {
     opacity: 0.8;
     box-shadow: 0 0 30px rgba(167, 139, 113, 0.8), inset 0 0 30px rgba(167, 139, 113, 0.4);

@@ -1,18 +1,17 @@
 import { useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import InfoIcon from '../shared/InfoIcon'
 
 /**
  * Colour-codes each character based on its position in the training timeline.
- * Early samples are grey; later samples shift blue then cyan.
+ * Early samples are dim; later samples shift through a gold spectrum.
  */
 function colorForProgress(sampleIndex, totalSamples) {
-  if (totalSamples <= 1) return '#94a3b8'   // slate-400
+  if (totalSamples <= 1) return '#8b7d6b'   // muted bronze (single sample)
   const t = sampleIndex / (totalSamples - 1)
-  if (t < 0.3) return '#475569'             // slate-600 (early gibberish)
-  if (t < 0.6) return '#3b82f6'             // blue-500
-  if (t < 0.85) return '#60a5fa'            // blue-400
-  return '#67e8f9'                           // cyan-300 (well-learned)
+  if (t < 0.3) return '#6b5f50'             // dark bronze (early gibberish)
+  if (t < 0.6) return '#a78b71'             // gold-base
+  if (t < 0.85) return '#c9b8a0'            // gold-light
+  return '#e8d5b7'                           // warm cream (well-learned)
 }
 
 export default function TextProgressionDisplay({ samples = [], highlightStep = null }) {
@@ -27,12 +26,11 @@ export default function TextProgressionDisplay({ samples = [], highlightStep = n
     return (
       <div className="card">
         <div className="flex items-center gap-2 mb-3">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+          <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">
             Generated Text Progression
           </h3>
-          <InfoIcon topicId="text-progression" />
         </div>
-        <div className="flex items-center justify-center h-28 text-slate-600 text-sm">
+        <div className="flex items-center justify-center h-28 text-white/20 text-sm">
           Text samples will appear here every {50} steps
         </div>
       </div>
@@ -41,7 +39,7 @@ export default function TextProgressionDisplay({ samples = [], highlightStep = n
 
   return (
     <div className="card">
-      <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">
+      <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">
         Generated Text Progression
       </h3>
 
@@ -53,7 +51,7 @@ export default function TextProgressionDisplay({ samples = [], highlightStep = n
           {samples.map((s, idx) => {
             const isHighlighted = highlightStep !== null &&
               Math.abs(s.step - highlightStep) ===
-                Math.min(...samples.map(ss => Math.abs(ss.step - highlightStep)))
+              Math.min(...samples.map(ss => Math.abs(ss.step - highlightStep)))
 
             const charColor = colorForProgress(idx, samples.length)
 
@@ -66,12 +64,12 @@ export default function TextProgressionDisplay({ samples = [], highlightStep = n
                 className={`
                   flex gap-3 items-baseline px-3 py-2 rounded-lg text-sm transition-colors duration-200
                   ${isHighlighted
-                    ? 'bg-blue-500/15 border border-blue-500/30'
+                    ? 'bg-gold-base/15 border border-gold-base/30'
                     : 'hover:bg-neural-surface'}
                 `}
               >
                 {/* Step label */}
-                <span className="text-xs text-slate-500 font-mono shrink-0 w-16 text-right">
+                <span className="text-xs text-white/30 font-mono shrink-0 w-16 text-right">
                   step {s.step}
                 </span>
 
@@ -85,7 +83,7 @@ export default function TextProgressionDisplay({ samples = [], highlightStep = n
 
                 {/* Highlight indicator */}
                 {isHighlighted && (
-                  <span className="shrink-0 text-blue-400 text-xs ml-auto">◄</span>
+                  <span className="shrink-0 text-gold-light text-xs ml-auto">◄</span>
                 )}
               </motion.div>
             )

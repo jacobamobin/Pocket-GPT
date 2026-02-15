@@ -38,7 +38,7 @@ export default function LandingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          LLMBreaker
+          Pocket GPT
         </motion.h1>
 
         {/* Tagline */}
@@ -49,7 +49,7 @@ export default function LandingPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.25 }}
         >
-          See intelligence emerge in real-time
+          Train and breakdown your own GPT models - all on device
         </motion.p>
 
         {/* Launch button */}
@@ -72,12 +72,12 @@ export default function LandingPage() {
 
       {/* Footer note */}
       <motion.p
-        className="absolute bottom-5 text-white/30 text-xs tracking-wide select-none"
+        className="absolute bottom-5 text-white/30 text-xs tracking-wide select-none text-center px-6"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.6 }}
       >
-        Built for Hackathon 2026 · Runs 100% locally
+        Made for CTRL HACK DEL 2.0 by Jacob Mobin and Ethan Cha
       </motion.p>
     </div>
   )

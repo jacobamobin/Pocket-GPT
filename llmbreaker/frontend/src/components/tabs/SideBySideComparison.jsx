@@ -91,7 +91,7 @@ function HighlightedText({ text, phrases }) {
     <>
       {parts.map((p, i) =>
         p.h
-          ? <mark key={i} className="bg-blue-500/25 text-blue-300 rounded-sm">{p.t}</mark>
+          ? <mark key={i} className="bg-gold-base/25 text-gold-light rounded-sm">{p.t}</mark>
           : <span key={i}>{p.t}</span>
       )}
     </>
@@ -114,8 +114,8 @@ function computeConfidenceMetrics(finalStats) {
 function MetricRow({ label, value }) {
   return (
     <div className="flex justify-between items-center py-1 border-b border-neural-border/40 last:border-0">
-      <span className="text-xs text-slate-500">{label}</span>
-      <span className="text-xs text-blue-300 font-mono">{value}</span>
+      <span className="text-xs text-white/30">{label}</span>
+      <span className="text-xs text-gold-light font-mono">{value}</span>
     </div>
   )
 }
@@ -146,10 +146,10 @@ export default function SideBySideComparison({ originalText, samples, finalStats
 
   return (
     <div className="card flex flex-col gap-4">
-      <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+      <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider">
         Style Comparison
         {phrases.size > 0 && (
-          <span className="ml-3 text-xs text-blue-400 font-normal normal-case">
+          <span className="ml-3 text-xs text-gold-light font-normal normal-case">
             {phrases.size} shared phrase{phrases.size !== 1 ? 's' : ''} highlighted
           </span>
         )}
@@ -158,24 +158,24 @@ export default function SideBySideComparison({ originalText, samples, finalStats
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* ── Left: Original ── */}
         <div className="flex flex-col gap-3">
-          <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+          <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wide">
             Original Text
           </h4>
           <div className="
             bg-neural-bg border border-neural-border rounded-lg p-3
-            text-xs text-slate-300 font-mono leading-relaxed min-h-[120px]
+            text-xs text-white/60 font-mono leading-relaxed min-h-[120px]
             overflow-y-auto max-h-48
           ">
             <HighlightedText text={origExcerpt} phrases={phrases} />
             {originalText.length > 400 && (
-              <span className="text-slate-600"> …({(originalText.length - 400).toLocaleString()} more chars)</span>
+              <span className="text-white/20"> …({(originalText.length - 400).toLocaleString()} more chars)</span>
             )}
           </div>
 
           {/* Style metrics */}
           {styleMetrics && (
             <div className="bg-neural-surface border border-neural-border rounded-lg px-3 py-2">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1.5 font-semibold">
+              <p className="text-xs text-white/30 uppercase tracking-wide mb-1.5 font-semibold">
                 Style Metrics
               </p>
               <MetricRow
@@ -196,24 +196,24 @@ export default function SideBySideComparison({ originalText, samples, finalStats
 
         {/* ── Right: Generated ── */}
         <div className="flex flex-col gap-3">
-          <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+          <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wide">
             Generated (Your Style)
           </h4>
           <div className="
             bg-neural-bg border border-neural-border rounded-lg p-3
-            text-xs text-slate-300 font-mono leading-relaxed min-h-[120px]
+            text-xs text-white/60 font-mono leading-relaxed min-h-[120px]
             overflow-y-auto max-h-48
           ">
             {genExcerpt
               ? <HighlightedText text={genExcerpt} phrases={phrases} />
-              : <span className="text-slate-600">Generated text will appear here during training…</span>
+              : <span className="text-white/20">Generated text will appear here during training…</span>
             }
           </div>
 
           {/* Confidence metrics */}
           {confMetrics && (
             <div className="bg-neural-surface border border-neural-border rounded-lg px-3 py-2">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1.5 font-semibold">
+              <p className="text-xs text-white/30 uppercase tracking-wide mb-1.5 font-semibold">
                 Confidence Metrics
               </p>
               <MetricRow

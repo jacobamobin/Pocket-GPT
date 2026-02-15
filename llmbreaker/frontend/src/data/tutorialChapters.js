@@ -26,7 +26,7 @@ const CHAPTERS = {
         content: `
           Large Language Models like GPT-4, Claude, and Gemini feel like magic. They answer questions, write code, and hold conversations. But <strong>how do they actually work?</strong><br><br>
 
-          LLMBreaker lets you <strong>build, train, and dissect</strong> a real transformer model—the same architecture powering modern LLMs. It's tiny (15K-250K parameters vs GPT-4's ~1.8 trillion), but the principles are identical.<br><br>
+          LLMBreaker lets you <strong>build, train, and dissect</strong> a real transformer model-the same architecture powering modern LLMs. It's tiny (15K-250K parameters vs GPT-4's ~1.8 trillion), but the principles are identical.<br><br>
 
           This isn't a dumbed-down simulation. You'll see real embeddings, real attention weights, real backpropagation. Everything scales from this tiny model to the giants.
         `.trim(),
@@ -37,14 +37,14 @@ const CHAPTERS = {
         position: 'center',
         title: 'Three Experiments, One Journey',
         content: `
-          <strong>🎓 Watch It Learn</strong><br>
+          <strong>Watch It Learn</strong><br>
           Train a GPT-style model from scratch. Watch it go from random noise to coherent text. Understand tokens, embeddings, loss curves, and emergent learning phases.<br><br>
 
-          <strong>🎬 Attention Cinema</strong><br>
+          <strong>Attention Cinema</strong><br>
           Visualize the transformer's breakthrough mechanism: self-attention. See how the model decides which words to focus on, and how multi-head attention captures multiple relationships simultaneously.<br><br>
 
-          <strong>✨ Style Transfer</strong><br>
-          Fine-tune a model on your own writing. Watch it learn your unique voice—word choice, sentence structure, tone. Experience how AI can be personalized.
+          <strong>Style Transfer</strong><br>
+          Fine-tune a model on your own writing. Watch it learn your unique voice - word choice, sentence structure, tone. Experience how AI can be personalized.
         `.trim(),
         visual: null,
       },
@@ -72,11 +72,11 @@ const CHAPTERS = {
         position: 'center',
         title: 'Understanding Tokens',
         content: `
-          Before we begin, let's understand what a <strong>token</strong> is. LLMs don't see text like we do—they break it into small pieces called tokens.<br><br>
+          Before we begin, let's understand what a <strong>token</strong> is. LLMs don't see text like we do-they break it into small pieces called tokens.<br><br>
 
           <strong>What's a token?</strong> Usually a few characters or a word. For example, "hello" might be one token, while "transformer" could be split into "trans" + "former".<br><br>
 
-          This tiny model works at the <strong>character level</strong>—each letter, space, and punctuation mark is a separate token. So "cat" becomes three tokens: "c", "a", "t".<br><br>
+          This tiny model works at the <strong>character level</strong>-each letter, space, and punctuation mark is a separate token. So "cat" becomes three tokens: "c", "a", "t".<br><br>
 
           The model's job? Predict the next token given what came before. That's it. Everything else emerges from this simple pattern.
         `.trim(),
@@ -87,11 +87,11 @@ const CHAPTERS = {
         position: 'right',
         title: 'Choose Your Training Data',
         content: `
-          The model learns by studying examples—this is called the <strong>training corpus</strong>. Pick Shakespeare to learn formal English with lots of "thee" and "thou", or Tiny Stories for simple modern language.<br><br>
+          The model learns by studying examples-this is called the <strong>training corpus</strong>. Pick Shakespeare to learn formal English with lots of "thee" and "thou", or Tiny Stories for simple modern language.<br><br>
 
           <strong>Why does data matter?</strong> The model can only learn patterns it sees. Feed it Shakespeare, and it learns archaic English. Feed it code, and it learns programming syntax.<br><br>
 
-          Real LLMs like GPT-4 train on trillions of tokens from books, websites, code, and more. This tiny model trains on thousands—but the principle is identical.
+          Real LLMs like GPT-4 train on trillions of tokens from books, websites, code, and more. This tiny model trains on thousands-but the principle is identical.
         `.trim(),
         visual: null,
       },
@@ -100,10 +100,10 @@ const CHAPTERS = {
         position: 'right',
         title: 'Training Controls',
         content: `
-          <strong>Play ▶:</strong> Start training—the model reads tokens and adjusts its internal weights<br>
-          <strong>Pause ⏸:</strong> Pause to examine the current state<br>
-          <strong>Next ⏭:</strong> Step forward one training iteration<br>
-          <strong>Settings ⚙:</strong> Adjust model architecture (layers, heads, embedding size) and hyperparameters (learning rate, batch size)<br><br>
+          <strong>Play ▶:</strong> Start training-the model reads tokens and adjusts its internal weights<br>
+          <strong>Pause:</strong> Pause to examine the current state<br>
+          <strong>Next:</strong> Step forward one training iteration<br>
+          <strong>Settings:</strong> Adjust model architecture (layers, heads, embedding size) and hyperparameters (learning rate, batch size)<br><br>
 
           Each training step, the model: <strong>1)</strong> Predicts the next token, <strong>2)</strong> Compares its guess to the actual answer, <strong>3)</strong> Adjusts its weights to do better next time. Repeat millions of times!
         `.trim(),
@@ -116,9 +116,9 @@ const CHAPTERS = {
         content: `
           Watch the model generate tokens in real-time! Each token is first converted into a <strong>vector</strong> (a list of numbers called an <strong>embedding</strong>).<br><br>
 
-          <strong>Why embeddings?</strong> Neural networks can't understand "a" or "b"—they need numbers. Each character gets mapped to a unique vector in high-dimensional space. Similar characters end up close together.<br><br>
+          <strong>Why embeddings?</strong> Neural networks can't understand "a" or "b"-they need numbers. Each character gets mapped to a unique vector in high-dimensional space. Similar characters end up close together.<br><br>
 
-          At first, embeddings are random, so the model outputs gibberish. As it trains, embeddings organize themselves—vowels cluster together, consonants form another group, and meaningful patterns emerge.
+          At first, embeddings are random, so the model outputs gibberish. As it trains, embeddings organize themselves-vowels cluster together, consonants form another group, and meaningful patterns emerge.
         `.trim(),
         visual: null,
       },
@@ -143,11 +143,11 @@ const CHAPTERS = {
           Amazingly, the model learns in distinct phases without being explicitly programmed to do so:<br><br>
 
           <strong>Phase 1 - Character Distribution:</strong> Learns which tokens are common (spaces, "e", "t")<br>
-          <strong>Phase 2 - Bigrams & Common Words:</strong> Learns "th", "he", "the", "and"<br>
-          <strong>Phase 3 - Grammar & Syntax:</strong> Learns sentence structure, punctuation, capitalization<br>
+          <strong>Phase 2 - Bigrams and Common Words:</strong> Learns "th", "he", "the", "and"<br>
+          <strong>Phase 3 - Grammar and Syntax:</strong> Learns sentence structure, punctuation, capitalization<br>
           <strong>Phase 4 - Style:</strong> Captures the unique "voice" of the training text<br><br>
 
-          This hierarchical learning emerges from the transformer's <strong>multi-layer architecture</strong>—early layers capture simple patterns, later layers compose them into complex structures.
+          This hierarchical learning emerges from the transformer's <strong>multi-layer architecture</strong>-early layers capture simple patterns, later layers compose them into complex structures.
         `.trim(),
         visual: null,
       },
@@ -174,11 +174,11 @@ const CHAPTERS = {
         title: 'Chapter Complete!',
         content: `
           You now understand the fundamentals:<br><br>
-          ✓ Tokens are the atomic units of text<br>
-          ✓ Embeddings map tokens to high-dimensional vectors<br>
-          ✓ Loss measures prediction accuracy<br>
-          ✓ Training is next-token prediction at scale<br>
-          ✓ Complex behaviors emerge from simple patterns<br><br>
+          - Tokens are the atomic units of text<br>
+          - Embeddings map tokens to high-dimensional vectors<br>
+          - Loss measures prediction accuracy<br>
+          - Training is next-token prediction at scale<br>
+          - Complex behaviors emerge from simple patterns<br><br>
 
           Ready to see <strong>how</strong> transformers process these tokens? Let's visualize attention patterns in Attention Cinema!
         `.trim(),
@@ -212,7 +212,7 @@ const CHAPTERS = {
         position: 'right',
         title: 'Pick a Text to Analyze',
         content: `
-          Attention patterns reveal <strong>which tokens the model looks at</strong> when processing each position. Choose a dataset and train a model—we'll capture attention snapshots at every layer and head.<br><br>
+          Attention patterns reveal <strong>which tokens the model looks at</strong> when processing each position. Choose a dataset and train a model-we'll capture attention snapshots at every layer and head.<br><br>
 
           <strong>Why visualize?</strong> Attention is often called the "interpretability" mechanism of transformers. By seeing what the model focuses on, we gain insight into <em>how</em> it understands language.<br><br>
 
@@ -229,7 +229,7 @@ const CHAPTERS = {
 
           <strong>What are we capturing?</strong> For each token, the model computes a weighted sum of all previous token embeddings. The weights (0 to 1, summing to 1) are the <strong>attention scores</strong>.<br><br>
 
-          Watch how attention evolves: early in training it's random noise. As the model learns, clear patterns emerge—some heads focus on adjacent tokens, others on syntactic relationships, still others on long-range semantic connections.
+          Watch how attention evolves: early in training it's random noise. As the model learns, clear patterns emerge-some heads focus on adjacent tokens, others on syntactic relationships, still others on long-range semantic connections.
         `.trim(),
         visual: null,
       },
@@ -253,7 +253,7 @@ const CHAPTERS = {
         position: 'top',
         title: 'Multi-Head Attention Explained',
         content: `
-          Each cell is an <strong>attention head</strong>—an independent attention computation. Your model has multiple heads per layer, typically 4-8 in tiny models, up to 96 in GPT-4.<br><br>
+          Each cell is an <strong>attention head</strong>-an independent attention computation. Your model has multiple heads per layer, typically 4-8 in tiny models, up to 96 in GPT-4.<br><br>
 
           <strong>Why multiple heads?</strong> Language has many dimensions: syntax, semantics, coreference, style. One attention pattern can't capture everything. Multiple heads let the model attend to different aspects simultaneously.<br><br>
 
@@ -268,7 +268,7 @@ const CHAPTERS = {
         content: `
           Transformers stack multiple <strong>layers</strong> (typically 12-96), each with multiple heads. This creates a <strong>hierarchical representation</strong>.<br><br>
 
-          <strong>Layer 1 (Early):</strong> Local patterns—bigrams, adjacent tokens, syntax<br>
+          <strong>Layer 1 (Early):</strong> Local patterns-bigrams, adjacent tokens, syntax<br>
           <strong>Layer 2-3 (Middle):</strong> Phrase-level relationships, dependency structure<br>
           <strong>Layer 4+ (Deep):</strong> Long-range semantics, coreference, abstract meaning<br><br>
 
@@ -287,7 +287,7 @@ const CHAPTERS = {
 
           <strong>How to read it:</strong> Cell (i,j) shows how much token i attends to token j. Bright = high attention. The model is "looking at" that token.<br><br>
 
-          <strong>Causal masking:</strong> Notice the triangular pattern? Future tokens are masked (forced to zero). The model can't "cheat" by looking ahead. This ensures autoregressive generation—predicting one token at a time, left-to-right.<br><br>
+          <strong>Causal masking:</strong> Notice the triangular pattern? Future tokens are masked (forced to zero). The model can't "cheat" by looking ahead. This ensures autoregressive generation-predicting one token at a time, left-to-right.<br><br>
 
           <strong>Common patterns:</strong> Diagonal = local attention. Vertical lines = important anchor tokens. Stripes = repeating structure (like code indentation).
         `.trim(),
@@ -318,12 +318,12 @@ const CHAPTERS = {
         content: `
           You now understand the transformer's secret weapon:<br><br>
 
-          ✓ Self-attention dynamically focuses on relevant context<br>
-          ✓ Multi-head attention captures multiple relationships simultaneously<br>
-          ✓ Stacked layers build hierarchical representations<br>
-          ✓ Attention weights are interpretable—we can "see" what the model is thinking<br><br>
+          - Self-attention dynamically focuses on relevant context<br>
+          - Multi-head attention captures multiple relationships simultaneously<br>
+          - Stacked layers build hierarchical representations<br>
+          - Attention weights are interpretable-we can "see" what the model is thinking<br><br>
 
-          This mechanism scales from tiny models (15K params) to massive ones (1T+ params) because it's fundamentally parallel—unlike RNNs, it doesn't bottleneck on sequential processing.<br><br>
+          This mechanism scales from tiny models (15K params) to massive ones (1T+ params) because it's fundamentally parallel-unlike RNNs, it doesn't bottleneck on sequential processing.<br><br>
 
           Ready to see transformers in action on your own writing? Let's try Style Transfer!
         `.trim(),
@@ -348,7 +348,7 @@ const CHAPTERS = {
 
           <strong>Fine-tuning:</strong> Take that pre-trained model and continue training on a small specialized dataset (your writing, legal documents, medical texts). Cheap! Takes minutes on a laptop.<br><br>
 
-          Style transfer is fine-tuning for personal writing style. The model already knows English grammar—now it learns <em>your</em> voice.
+          Style transfer is fine-tuning for personal writing style. The model already knows English grammar-now it learns <em>your</em> voice.
         `.trim(),
         visual: null,
       },
@@ -424,7 +424,7 @@ const CHAPTERS = {
 
           <strong>Quantitative metrics:</strong> Perplexity (lower = better), BLEU score (measures similarity), but honestly? Human judgment is king. If it sounds like you, it worked.<br><br>
 
-          <strong>Real-world challenge:</strong> Style transfer is an open research problem. We can mimic surface patterns, but capturing deeper aspects—humor, creativity, personality—remains hard. You're seeing the state-of-the-art!
+          <strong>Real-world challenge:</strong> Style transfer is an open research problem. We can mimic surface patterns, but capturing deeper aspects-humor, creativity, personality-remains hard. You're seeing the state-of-the-art!
         `.trim(),
         visual: null,
       },
@@ -437,7 +437,7 @@ const CHAPTERS = {
 
           <strong>Domain adaptation:</strong> Medical LLM, legal LLM, code LLM<br>
           <strong>Instruction tuning:</strong> Train models to follow instructions (ChatGPT, Claude)<br>
-          <strong>RLHF:</strong> Reinforcement Learning from Human Feedback—fine-tune using ratings<br>
+          <strong>RLHF:</strong> Reinforcement Learning from Human Feedback-fine-tune using ratings<br>
           <strong>LoRA/QLoRA:</strong> Efficient fine-tuning of massive models by freezing most weights<br><br>
 
           The entire modern LLM ecosystem follows this pattern: <strong>pre-train once</strong> (expensive, foundational), <strong>fine-tune many times</strong> (cheap, specialized). You just experienced the fine-tuning half!
@@ -447,7 +447,7 @@ const CHAPTERS = {
       {
         target: null,
         position: 'center',
-        title: 'Tutorial Complete! 🎉',
+        title: 'Tutorial Complete!',
         content: `
           You've completed the full LLMBreaker tutorial and learned:<br><br>
 
@@ -457,7 +457,7 @@ const CHAPTERS = {
 
           <strong>Key takeaway:</strong> Modern LLMs are simple in principle (predict the next token using attention-based transformers) but incredibly powerful in practice. Scale + architecture + data = emergent intelligence.<br><br>
 
-          Now go experiment! Try different datasets, architectures, and styles. You have the tools to understand how these "magic" systems actually work. 🚀
+          Now go experiment! Try different datasets, architectures, and styles. You have the tools to understand how these "magic" systems actually work.
         `.trim(),
         visual: null,
       },

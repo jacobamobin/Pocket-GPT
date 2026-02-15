@@ -1,34 +1,34 @@
 import { useState, useContext, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { TrainingContext } from '../../contexts/TrainingContext'
-import { MetricsContext }  from '../../contexts/MetricsContext'
-import { UIContext }       from '../../contexts/UIContext'
-import { useWebSocket }    from '../../hooks/useWebSocket'
+import { MetricsContext } from '../../contexts/MetricsContext'
+import { UIContext } from '../../contexts/UIContext'
+import { useWebSocket } from '../../hooks/useWebSocket'
 import { useTrainingSession } from '../../hooks/useTrainingSession'
 import { useTabPersistence } from '../../hooks/useTabPersistence'
 import { createSession, datasetFromText, uploadDataset } from '../../utils/apiClient'
 import { SESSION_STATUS } from '../../types/index.js'
-import TrainingControls    from '../shared/TrainingControls'
-import LossCurveChart      from '../shared/LossCurveChart'
-import TextInputPanel      from './TextInputPanel'
+import TrainingControls from '../shared/TrainingControls'
+import LossCurveChart from '../shared/LossCurveChart'
+import TextInputPanel from './TextInputPanel'
 import StyleEvolutionDisplay from './StyleEvolutionDisplay'
-import InfoIcon            from '../shared/InfoIcon'
+import InfoIcon from '../shared/InfoIcon'
 
 export default function StyleTransferTab() {
   const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
-  const { state: metrics, dispatch: metricsDispatch  } = useContext(MetricsContext)
-  const { dispatch: uiDispatch }                         = useContext(UIContext)
-  const { socket }                                       = useWebSocket()
+  const { state: metrics, dispatch: metricsDispatch } = useContext(MetricsContext)
+  const { dispatch: uiDispatch } = useContext(UIContext)
+  const { socket } = useWebSocket()
 
   // Local state
-  const [sessionId,         setSessionId]    = useState(null)
-  const [text,              setText]       = useState('')
-  const [uploadedId,        setUploadedId]   = useState(null)
-  const [starting,          setStarting]     = useState(false)
-  const [maxItersConfig,    setMaxItersConfig] = useState(5000)
+  const [sessionId, setSessionId] = useState(null)
+  const [text, setText] = useState('')
+  const [uploadedId, setUploadedId] = useState(null)
+  const [starting, setStarting] = useState(false)
+  const [maxItersConfig, setMaxItersConfig] = useState(5000)
   const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
-  const [modelSizeConfig,   setModelSizeConfig] = useState('medium')
-  const [viewMode,          setViewMode]      = useState('overview')
+  const [modelSizeConfig, setModelSizeConfig] = useState('medium')
+  const [viewMode, setViewMode] = useState('overview')
 
   // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
@@ -58,12 +58,12 @@ export default function StyleTransferTab() {
   }, [savedState, sessionId])
 
   // Derived data
-  const session     = sessionId ? training.sessions[sessionId] : null
-  const sessionMet   = sessionId ? metrics[sessionId] : null
-  const status       = session?.status ?? null
-  const isActive     = status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED
+  const session = sessionId ? training.sessions[sessionId] : null
+  const sessionMet = sessionId ? metrics[sessionId] : null
+  const status = session?.status ?? null
+  const isActive = status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED
   const currentIter = session?.currentIter ?? 0
-  const maxIters     = session?.maxIters ?? 5000
+  const maxIters = session?.maxIters ?? 5000
 
   // Clear saved state when training completes or user starts fresh
   useEffect(() => {
@@ -94,7 +94,7 @@ export default function StyleTransferTab() {
         setText('')   // clear textarea since we're using an upload
         uiDispatch({
           type: 'SHOW_SUCCESS',
-          payload: `✓ ${file.name} uploaded (${data.word_count?.toLocaleString() ?? '?'} words, vocab ${data.vocab_size})`
+          payload: `${file.name} uploaded (${data.word_count?.toLocaleString() ?? '?'} words, vocab ${data.vocab_size})`
         })
       } catch (err) {
         uiDispatch({ type: 'SHOW_ERROR', payload: err.message })
@@ -125,7 +125,7 @@ export default function StyleTransferTab() {
       // Create session
       const data = await createSession({
         feature_type: 'style_transfer',
-        dataset_id:   datasetId,
+        dataset_id: datasetId,
         hyperparameters: { max_iters: maxItersConfig, eval_interval: evalIntervalConfig },
       })
 
@@ -135,10 +135,10 @@ export default function StyleTransferTab() {
       trainingDispatch({
         type: 'CREATE_SESSION',
         payload: {
-          sessionId:      sid,
-          featureType:    'style_transfer',
-          status:         'idle',
-          modelConfig:    data.model_config,
+          sessionId: sid,
+          featureType: 'style_transfer',
+          status: 'idle',
+          modelConfig: data.model_config,
           trainingConfig: data.training_config,
         },
       })
@@ -146,7 +146,7 @@ export default function StyleTransferTab() {
 
       // Emit start after a tick so hook has re-bound to new sessionId
       setTimeout(() => {
-        socket?.emit('join_session',    { session_id: sid })
+        socket?.emit('join_session', { session_id: sid })
         socket?.emit('start_training', { session_id: sid })
         trainingDispatch({ type: 'SESSION_STARTED', payload: { session_id: sid } })
       }, 50)
@@ -157,16 +157,16 @@ export default function StyleTransferTab() {
     }
   }
 
-  const handlePause     = () => controls.pause()
-  const handleStop      = () => controls.stop()
-  const handleStep      = () => controls.step()
+  const handlePause = () => controls.pause()
+  const handleStop = () => controls.stop()
+  const handleStep = () => controls.step()
 
   return (
     <div className="p-6 flex flex-col gap-6 max-w-6xl mx-auto">
 
       {/* Tab heading */}
       <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold text-slate-200">Style Transfer</h2>
+        <h2 className="text-lg font-semibold text-white">Style Transfer</h2>
         <InfoIcon topicId="style-transfer" />
       </div>
 
@@ -198,19 +198,19 @@ export default function StyleTransferTab() {
 
       {/* Learning Progress Banner */}
       {isActive && sessionMet?.samples && sessionMet.samples.length > 0 && (
-        <div className="card bg-gradient-to-r from-blue-950/30 to-cyan-950/30 border-cyan-500/30">
+        <div className="card bg-gold-subtle border-gold-muted">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <h3 className="text-sm font-semibold text-cyan-300 uppercase tracking-wider">
+              <div className="w-2 h-2 rounded-full bg-gold-base animate-pulse" />
+              <h3 className="text-sm font-semibold text-gold-light uppercase tracking-wider">
                 Learning Your Style
               </h3>
             </div>
-            <span className="text-xs text-cyan-400 font-mono">
+            <span className="text-xs text-gold-light font-mono">
               {sessionMet.samples.length} sample{sessionMet.samples.length !== 1 ? 's' : ''} generated
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-2">
+          <p className="text-xs text-white/40 mt-2">
             The model is analyzing your writing patterns and learning to replicate them.
             Watch samples evolve to match your style!
           </p>
@@ -252,19 +252,13 @@ export default function StyleTransferTab() {
 
       {/* View Mode Toggle */}
       <div className="flex justify-center" data-tutorial="view-toggle">
-        <div className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 p-2">
-          <span className="text-xs text-slate-400 uppercase tracking-wide">View:</span>
+        <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-2">
+          <span className="text-xs text-white/40 uppercase tracking-wide">View:</span>
           {['overview', 'evolution'].map(mode => (
             <button
               key={mode}
               onClick={() => setViewMode(mode)}
-              className={`
-                px-3 py-1.5 text-xs font-medium rounded-md border transition-all duration-150
-                focus:outline-none focus:ring-1 focus:ring-blue-500/60
-                ${viewMode === mode
-                  ? 'border-blue-500 bg-blue-500/20 text-blue-300'
-                  : 'border-slate-600 bg-slate-700 text-slate-400 hover:text-slate-200'}
-              `}
+              className={`toggle-btn ${viewMode === mode ? 'active' : 'inactive'}`}
               title={mode === 'evolution' ? 'Evolution: Watch style develop over time' : 'Overview: Side-by-side comparison'}
             >
               {mode === 'evolution' ? 'Evolution' : 'Overview'}
@@ -275,14 +269,14 @@ export default function StyleTransferTab() {
 
       {/* Completion banner */}
       {status === SESSION_STATUS.COMPLETED && sessionMet?.finalStats && (
-        <div className="card border-green-500/40 bg-green-950/30 text-center py-4">
-          <p className="text-green-300 font-medium">Style transfer complete!</p>
-          <p className="text-slate-400 text-sm mt-1">
-            Final loss: <span className="text-green-300 font-mono">
+        <div className="card border-gold-muted bg-gold-subtle text-center py-4">
+          <p className="text-gold-light font-medium">Style transfer complete!</p>
+          <p className="text-white/40 text-sm mt-1">
+            Final loss: <span className="text-gold-light font-mono">
               {sessionMet.finalStats.finalTrainLoss?.toFixed(4)}
             </span>
             &nbsp;·&nbsp;
-            Time: <span className="text-green-300 font-mono">
+            Time: <span className="text-gold-light font-mono">
               {sessionMet.finalStats.totalTime?.toFixed(1)}s
             </span>
           </p>
@@ -291,7 +285,7 @@ export default function StyleTransferTab() {
 
       {/* "Not enough text" hint when idle and nothing is typed */}
       {!session && !starting && !uploadedId && text.length === 0 && (
-        <p className="text-center text-slate-600 text-sm -mt-2">
+        <p className="text-center text-white/20 text-sm -mt-2">
           Type or paste your writing sample above to get started.
           The model needs at least 10 words to learn your style.
         </p>
