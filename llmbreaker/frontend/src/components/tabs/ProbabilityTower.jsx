@@ -25,7 +25,7 @@ const CANDIDATE_COLORS = [
   { bg: 'bg-white/[0.02]', border: 'border-white/10', text: 'text-white/30' },
 ]
 
-export default function ProbabilityTower({ tokenProbabilities = [], samples = [] }) {
+export default function ProbabilityTower({ tokenProbabilities = [], samples = [], className = '' }) {
   const [temperature, setTemperature] = useState(0.8)
 
   const latest = tokenProbabilities.length > 0
@@ -60,7 +60,7 @@ export default function ProbabilityTower({ tokenProbabilities = [], samples = []
 
   if (!latest) {
     return (
-      <div className="card">
+      <div className={`card ${className}`}>
         <div className="flex items-center gap-2 mb-3">
           <h3 className="section-title">
             Next-Token Prediction

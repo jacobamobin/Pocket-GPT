@@ -59,6 +59,16 @@ export default function WatchItLearnTab() {
     }
   }, [savedState, sessionId])
 
+  // Sync when a model is loaded from the model library (CREATE_SESSION dispatched externally)
+  useEffect(() => {
+    const activeId = training.activeSessionId
+    if (!activeId || activeId === sessionId) return
+    const s = training.sessions[activeId]
+    if (!s || s.featureType !== 'watch_learn' || s.status !== 'idle') return
+    setSessionId(activeId)
+    metricsDispatch({ type: 'INIT_SESSION', payload: { sessionId: activeId } })
+  }, [training.activeSessionId]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Bind WebSocket listeners for this session
   const controls = useTrainingSession(socket, sessionId)
 
@@ -84,7 +94,15 @@ export default function WatchItLearnTab() {
       return
     }
 
-    // For completed/stopped/idle: create a fresh session
+    // If a model was loaded (sessionId exists, status idle), start the existing session
+    if (sessionId && status === SESSION_STATUS.IDLE) {
+      socket?.emit('join_session', { session_id: sessionId })
+      socket?.emit('start_training', { session_id: sessionId })
+      trainingDispatch({ type: 'SESSION_STARTED', payload: { session_id: sessionId } })
+      return
+    }
+
+    // For completed/stopped/null: create a fresh session
     setStarting(true)
     try {
       const LR_MAP = { slow: 1e-4, balanced: 1e-3, fast: 3e-3 }
@@ -158,16 +176,17 @@ export default function WatchItLearnTab() {
       </div>
 
       {/* Top row: dataset + controls */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div data-tutorial="dataset-selector">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <div data-tutorial="dataset-selector" className="flex flex-col">
           <DatasetSelector
             value={datasetId}
             onChange={setDatasetId}
             onError={handleDatasetError}
             disabled={status === SESSION_STATUS.RUNNING || starting}
+            className="h-full"
           />
         </div>
-        <div data-tutorial="training-controls">
+        <div data-tutorial="training-controls" className="flex flex-col">
           <TrainingControls
             className="h-full"
             status={status}
@@ -182,6 +201,7 @@ export default function WatchItLearnTab() {
             isTraining={status === SESSION_STATUS.RUNNING || status === SESSION_STATUS.PAUSED}
             displayStep={displayStep}
             onScrub={setDisplayStep}
+            className="h-full"
           />
         </div>
       </div>
@@ -205,21 +225,25 @@ export default function WatchItLearnTab() {
       </div>
 
       {/* Text progression + Probability tower side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <div className="lg:col-span-2 flex flex-col">
           <TextProgressionDisplay
             samples={sessionMetrics?.samples ?? []}
             highlightStep={displayStep ?? hoverStep}
+            className="h-full"
           />
         </div>
-        <ProbabilityTower
-          tokenProbabilities={
-            displayStep != null
-              ? (sessionMetrics?.tokenProbabilities ?? []).filter(p => p.step <= displayStep)
-              : (sessionMetrics?.tokenProbabilities ?? [])
-          }
-          samples={sessionMetrics?.samples ?? []}
-        />
+        <div className="flex flex-col">
+          <ProbabilityTower
+            tokenProbabilities={
+              displayStep != null
+                ? (sessionMetrics?.tokenProbabilities ?? []).filter(p => p.step <= displayStep)
+                : (sessionMetrics?.tokenProbabilities ?? [])
+            }
+            samples={sessionMetrics?.samples ?? []}
+            className="h-full"
+          />
+        </div>
       </div>
 
       {/* Embedding star map */}

@@ -83,10 +83,12 @@ export default function LossCurveChart({ lossHistory = [], maxIters = 500, onHov
         </div>
         <div className="flex items-center gap-4 text-xs text-white/30">
           <span className="flex items-center gap-1.5">
-            <span className="w-6 h-0.5 bg-gold-base inline-block" />Train
+            <svg width="24" height="8"><line x1="0" y1="4" x2="24" y2="4" stroke="#a78b71" strokeWidth="2" /></svg>
+            Train
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-6 h-0.5 bg-gold-light border-dashed inline-block" style={{ borderTop: '2px dashed #c9b8a0', height: 0 }} />Val
+            <svg width="24" height="8"><line x1="0" y1="4" x2="24" y2="4" stroke="#c9b8a0" strokeWidth="2" strokeDasharray="4,3" /></svg>
+            Val
           </span>
         </div>
       </div>
