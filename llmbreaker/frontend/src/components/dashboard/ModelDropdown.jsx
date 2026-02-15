@@ -1,5 +1,6 @@
 import { useState, useContext, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { FiChevronDown, FiEdit2, FiTrash2 } from 'react-icons/fi'
 import { ModelContext } from '../../contexts/ModelContext'
 import { TrainingContext } from '../../contexts/TrainingContext'
 import { UIContext } from '../../contexts/UIContext'
@@ -77,20 +78,13 @@ export default function ModelDropdown() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1 rounded-md border border-slate-700
-                   bg-slate-800/60 hover:border-slate-500 text-slate-300 text-xs transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1 rounded-md border border-white/10
+                   bg-neural-surface hover:border-gold-base/50 text-white/60 text-xs transition-colors"
       >
-        <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
-        </svg>
         <span>Models{models.length > 0 ? ` (${models.length})` : ''}</span>
-        <svg
-          className={`w-3 h-3 text-slate-500 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <FiChevronDown
+          className={`w-3 h-3 text-white/40 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+        />
       </button>
 
       <AnimatePresence>
@@ -101,26 +95,26 @@ export default function ModelDropdown() {
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.12 }}
             className="absolute right-0 top-full mt-1.5 w-72 z-50
-                       bg-slate-900 border border-slate-700 rounded-lg shadow-2xl overflow-hidden"
+                       bg-neural-surface border border-white/10 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md"
           >
             {/* Save current session */}
             {activeSession && (
-              <div className="p-3 border-b border-slate-700/60">
-                <p className="text-[10px] text-slate-500 mb-2 uppercase tracking-wider">Save current model</p>
+              <div className="p-3 border-b border-white/10">
+                <p className="text-[10px] text-white/40 mb-2 uppercase tracking-wider font-semibold">Save current model</p>
                 <div className="flex gap-2">
                   <input
                     value={saveName}
                     onChange={e => setSaveName(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleSave()}
                     placeholder={`Model ${models.length + 1}`}
-                    className="flex-1 text-xs bg-slate-800 border border-slate-600 rounded px-2 py-1.5
-                               text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500"
+                    className="flex-1 text-xs bg-neural-card border border-white/10 rounded px-2 py-1.5
+                               text-white placeholder:text-white/30 focus:outline-none focus:border-gold-base"
                   />
                   <button
                     onClick={handleSave}
                     disabled={saving || !saveName.trim()}
-                    className="px-3 py-1.5 text-xs rounded bg-blue-600 text-white
-                               hover:bg-blue-500 disabled:opacity-40 transition-colors"
+                    className="px-3 py-1.5 text-xs rounded bg-white text-black font-semibold
+                               hover:bg-gold-hover disabled:opacity-40 transition-colors"
                   >
                     {saving ? '…' : 'Save'}
                   </button>
@@ -131,12 +125,12 @@ export default function ModelDropdown() {
             {/* Model list */}
             <div className="max-h-64 overflow-y-auto">
               {models.length === 0 ? (
-                <p className="text-xs text-slate-600 text-center py-6">No saved models yet</p>
+                <p className="text-xs text-white/30 text-center py-6">No saved models yet</p>
               ) : (
                 models.slice().reverse().map(m => (
                   <div
                     key={m.id}
-                    className="flex items-center gap-2 px-3 py-2.5 hover:bg-slate-800/50 group"
+                    className="flex items-center gap-2 px-3 py-2.5 hover:bg-white/[0.05] group"
                   >
                     {renamingId === m.id ? (
                       <input
@@ -155,13 +149,13 @@ export default function ModelDropdown() {
                           }
                           handleRename(m.id)
                         }}
-                        className="flex-1 text-xs bg-slate-800 border border-blue-500 rounded
-                                   px-2 py-1 text-slate-200 focus:outline-none"
+                        className="flex-1 text-xs bg-neural-card border border-gold-base rounded
+                                   px-2 py-1 text-white focus:outline-none"
                       />
                     ) : (
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-200 truncate">{m.name}</p>
-                        <p className="text-[10px] text-slate-500">
+                        <p className="text-xs text-white truncate">{m.name}</p>
+                        <p className="text-[10px] text-white/40">
                           step {m.step?.toLocaleString()}
                           {m.train_loss != null && ` · loss ${m.train_loss.toFixed(3)}`}
                         </p>
@@ -180,7 +174,7 @@ export default function ModelDropdown() {
                           </button>
                           <button
                             onClick={() => setConfirmDeleteId(null)}
-                            className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-400 hover:bg-slate-600 border border-slate-600"
+                            className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/60 hover:bg-white/20 border border-white/10"
                           >
                             No
                           </button>
@@ -189,23 +183,17 @@ export default function ModelDropdown() {
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                           <button
                             onClick={() => { setRenamingId(m.id); setRenameVal(m.name) }}
-                            className="text-slate-500 hover:text-slate-300 p-1"
+                            className="text-white/40 hover:text-gold-base p-1"
                             title="Rename"
                           >
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
+                            <FiEdit2 className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => setConfirmDeleteId(m.id)}
-                            className="text-slate-500 hover:text-red-400 p-1"
+                            className="text-white/40 hover:text-red-400 p-1"
                             title="Delete"
                           >
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            <FiTrash2 className="w-3 h-3" />
                           </button>
                         </div>
                       )

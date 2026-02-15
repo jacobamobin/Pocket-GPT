@@ -1,12 +1,13 @@
 import { useContext } from 'react'
 import { motion } from 'framer-motion'
+import { FiEye, FiFilm, FiFeather } from 'react-icons/fi'
 import { UIContext }    from '../../contexts/UIContext'
 import { FEATURE_TYPE } from '../../types/index.js'
 
 const TABS = [
-  { id: FEATURE_TYPE.WATCH_LEARN,      label: 'Watch It Learn',   icon: '📝' },
-  { id: FEATURE_TYPE.ATTENTION_CINEMA, label: 'Attention Cinema', icon: '🎬' },
-  { id: FEATURE_TYPE.STYLE_TRANSFER,   label: 'Style Transfer',   icon: '✨' },
+  { id: FEATURE_TYPE.WATCH_LEARN,      label: 'Watch It Learn',   Icon: FiEye },
+  { id: FEATURE_TYPE.ATTENTION_CINEMA, label: 'Attention Cinema', Icon: FiFilm },
+  { id: FEATURE_TYPE.STYLE_TRANSFER,   label: 'Style Transfer',   Icon: FiFeather },
 ]
 
 export default function TabBar() {
@@ -14,11 +15,12 @@ export default function TabBar() {
 
   return (
     <nav
-      className="flex border-b border-neural-border bg-neural-surface shrink-0 px-2"
+      className="flex border-b border-white/10 bg-neural-bg shrink-0 px-2"
       role="tablist"
     >
       {TABS.map(tab => {
         const isActive = state.activeTab === tab.id
+        const Icon = tab.Icon
         return (
           <button
             key={tab.id}
@@ -28,19 +30,19 @@ export default function TabBar() {
             className={`
               relative flex items-center gap-2 px-5 py-3.5 text-sm font-medium
               transition-colors duration-150 outline-none
-              ${isActive ? 'text-white' : 'text-slate-500 hover:text-slate-300'}
+              ${isActive ? 'text-white' : 'text-white/40 hover:text-white/60'}
             `}
             title={tab.label}
             data-tutorial={`tab-${tab.id}`}
           >
-            <span className="text-base leading-none">{tab.icon}</span>
+            <Icon className="w-4 h-4" />
             <span>{tab.label}</span>
 
             {/* Active indicator bar — animate with Framer Motion layout */}
             {isActive && (
               <motion.span
                 layoutId="tab-indicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-400"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold-base to-gold-light"
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}

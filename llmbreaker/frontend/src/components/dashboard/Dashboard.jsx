@@ -143,13 +143,13 @@ export default function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="mx-4 mt-2 px-4 py-2.5 rounded-lg bg-green-950/70 border border-green-500/40
-                       text-green-200 text-sm flex items-center justify-between"
+            className="mx-4 mt-2 px-4 py-2.5 rounded-lg bg-neural-surface/70 border border-gold-muted
+                       text-gold-light text-sm flex items-center justify-between"
           >
             <span>{ui.successToast}</span>
             <button
               onClick={() => uiDispatch({ type: 'CLEAR_SUCCESS' })}
-              className="ml-4 text-green-400 hover:text-white transition-colors text-lg leading-none"
+              className="ml-4 text-gold-base hover:text-gold-hover transition-colors text-lg leading-none"
               aria-label="Dismiss"
             >
               ×

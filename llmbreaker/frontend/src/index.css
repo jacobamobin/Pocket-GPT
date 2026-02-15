@@ -4,49 +4,126 @@
 
 @layer base {
   html {
-    @apply bg-neural-bg text-white;
+    @apply bg-neural-bg text-white font-sans;
   }
 
   body {
     margin: 0;
     min-height: 100vh;
-    background: #050a14;
+    background: #0a0a0a;
     color: rgba(255, 255, 255, 0.9);
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
   * {
     box-sizing: border-box;
   }
+
+  *:focus-visible {
+    outline: 2px solid #a78b71;
+    outline-offset: 2px;
+  }
+}
+
+/* Dot grid background pattern */
+.bg-dots {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: 0 0;
 }
 
 @layer components {
+  /* ===== BUTTON STANDARDIZATION ===== */
+
+  /* Primary button - white with black text, full width capable */
   .btn-primary {
-    @apply px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg
+    @apply px-6 py-3 bg-white text-black rounded-full
            transition-all duration-200 hover:-translate-y-0.5
-           hover:shadow-lg hover:shadow-blue-500/25 font-medium;
+           hover:bg-gold-hover hover:shadow-lg font-semibold text-sm;
   }
 
+  /* Secondary button - transparent with border */
   .btn-secondary {
-    @apply px-4 py-2 bg-neural-card hover:bg-neural-border text-blue-300
-           border border-neural-border hover:border-blue-500 rounded-lg
-           transition-all duration-200 font-medium;
+    @apply px-6 py-3 bg-transparent text-white rounded-full
+           border border-white/20 hover:border-gold-base hover:bg-gold-subtle
+           transition-all duration-200 font-semibold text-sm;
   }
+
+  /* Icon button - standardized square button for toolbar use */
+  .icon-btn {
+    @apply w-10 h-10 flex items-center justify-center rounded-lg border border-white/10
+           bg-neural-surface text-white/60 hover:text-white hover:border-gold-base/50
+           transition-all duration-150;
+  }
+
+  .icon-btn.primary {
+    @apply w-10 h-10 border-white bg-white text-black hover:bg-gold-hover;
+  }
+
+  .icon-btn.danger {
+    @apply w-10 h-10 border-white/10 bg-neural-surface text-white/40 hover:text-white hover:border-red-500/50;
+  }
+
+  /* ===== CARD STANDARDIZATION ===== */
 
   .card {
-    @apply bg-neural-card border border-neural-border rounded-xl p-4;
+    @apply bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-2xl p-4
+           shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:bg-white/[0.05] hover:border-white/15
+           transition-all duration-300;
+  }
+
+  /* Control card - fixed minimum height for layout consistency */
+  .control-card {
+    @apply card min-h-[140px];
+  }
+
+  /* Section header - standardized typography for card headers */
+  .section-header {
+    @apply text-xs font-semibold text-white/60 uppercase tracking-widest font-sans mb-4 flex items-center gap-2;
+  }
+
+  /* Fallback for browsers without backdrop-filter support */
+  @supports not (backdrop-filter: blur(10px)) {
+    .card {
+      @apply bg-neural-surface;
+    }
+  }
+
+  /* ===== LAYOUT STANDARDIZATION ===== */
+
+  /* Standard control row - for buttons and inputs in a row */
+  .control-row {
+    @apply flex items-center gap-2;
+  }
+
+  /* Standard label text for inputs */
+  .input-label {
+    @apply text-xs font-semibold text-white/60 uppercase tracking-widest mb-2 block;
+  }
+
+  /* Standard input field */
+  .input-field {
+    @apply w-full bg-neural-surface border border-white/10 rounded-lg px-3 py-2 text-sm
+           text-white placeholder:text-white/30 focus:outline-none focus:border-gold-base
+           transition-colors duration-200;
+  }
+
+  /* Dropdown select */
+  .select-field {
+    @apply w-full bg-neural-surface border border-white/10 rounded-lg px-3 py-2 text-sm
+           text-white focus:outline-none focus:border-gold-base transition-colors duration-200;
   }
 }
 
-/* Tutorial spotlight pulse animation */
+/* Tutorial spotlight pulse animation - gold accent */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.5), inset 0 0 20px rgba(34, 211, 238, 0.2);
+    box-shadow: 0 0 20px rgba(167, 139, 113, 0.5), inset 0 0 20px rgba(167, 139, 113, 0.2);
   }
   50% {
     opacity: 0.8;
-    box-shadow: 0 0 30px rgba(34, 211, 238, 0.8), inset 0 0 30px rgba(34, 211, 238, 0.4);
+    box-shadow: 0 0 30px rgba(167, 139, 113, 0.8), inset 0 0 30px rgba(167, 139, 113, 0.4);
   }
 }

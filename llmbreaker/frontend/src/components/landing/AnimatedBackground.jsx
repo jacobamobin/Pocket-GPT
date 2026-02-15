@@ -71,7 +71,7 @@ export default function AnimatedBackground() {
           ctx.beginPath()
           ctx.moveTo(a.x, a.y)
           ctx.lineTo(b.x, b.y)
-          ctx.strokeStyle = `rgba(59,130,246,${(fade * pulse * 0.6).toFixed(3)})`
+          ctx.strokeStyle = `rgba(167,139,113,${(fade * pulse * 0.6).toFixed(3)})`
           ctx.lineWidth = fade * 1.2
           ctx.stroke()
         }
@@ -83,8 +83,8 @@ export default function AnimatedBackground() {
 
         // Outer glow
         const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, NODE_RADIUS * 4)
-        grad.addColorStop(0, `rgba(6,182,212,${(glow * 0.35).toFixed(3)})`)
-        grad.addColorStop(1, 'rgba(6,182,212,0)')
+        grad.addColorStop(0, `rgba(167,139,113,${(glow * 0.35).toFixed(3)})`)
+        grad.addColorStop(1, 'rgba(167,139,113,0)')
         ctx.beginPath()
         ctx.arc(n.x, n.y, NODE_RADIUS * 4, 0, Math.PI * 2)
         ctx.fillStyle = grad
@@ -93,7 +93,7 @@ export default function AnimatedBackground() {
         // Core dot
         ctx.beginPath()
         ctx.arc(n.x, n.y, NODE_RADIUS, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(96,165,250,${(0.7 + glow * 0.3).toFixed(3)})`
+        ctx.fillStyle = `rgba(201,184,160,${(0.7 + glow * 0.3).toFixed(3)})`
         ctx.fill()
       }
 
