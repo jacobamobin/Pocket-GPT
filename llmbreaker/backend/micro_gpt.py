@@ -1,3 +1,9 @@
+# Architecture based on bdunaganGPT by Brian Dunagan
+# https://github.com/bdunagan/bdunaganGPT
+# MIT License
+# Which is itself based on Andrej Karpathy's "Zero to Hero" series:
+# https://karpathy.ai/zero-to-hero.html
+
 """
 MicroGPT — ~7,900 parameter character-level transformer.
 
