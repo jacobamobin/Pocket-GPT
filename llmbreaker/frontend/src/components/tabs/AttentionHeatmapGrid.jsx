@@ -90,7 +90,7 @@ export default function AttentionHeatmapGrid({ snapshots, currentStep, onSelectC
 
       {/* Learning insights */}
       {snapshots.length > 0 && (
-        <div className="px-4 py-2 rounded-md bg-cyan-950/30 border border-gold-base/30">
+        <div className="px-4 py-2 rounded-md bg-gold-subtle border border-gold-base/30">
           <p className="text-xs text-gold-light">
             {(() => {
               const step = currentStep ?? snapshots[snapshots.length - 1]?.step ?? 0

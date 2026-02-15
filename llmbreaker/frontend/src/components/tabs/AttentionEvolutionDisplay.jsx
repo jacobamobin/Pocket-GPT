@@ -91,7 +91,7 @@ export default function AttentionEvolutionDisplay({ snapshots, layer, head }) {
             </h4>
             <span className="text-xs text-white/30 font-mono">Step {late.step}</span>
           </div>
-          <div className="rounded-lg border border-gold-base/30 p-2 bg-cyan-950/20">
+          <div className="rounded-lg border border-gold-base/30 p-2 bg-gold-subtle">
             <Heatmap2D matrix={late.matrix} tokens={late.tokens} size="medium" />
           </div>
           <p className="text-xs text-gold-light italic">
@@ -112,7 +112,7 @@ export default function AttentionEvolutionDisplay({ snapshots, layer, head }) {
         className="mt-4 px-4 py-3 rounded-md bg-gold-subtle border border-gold-base/30"
       >
         <p className="text-xs text-gold-light">
-          <strong className="text-blue-200">Key Insight:</strong> Watch how attention becomes more diagonal and focused during training.
+          <strong className="text-gold-light">Key Insight:</strong> Watch how attention becomes more diagonal and focused during training.
           Well-trained attention heads focus on relevant token relationships, not random noise.
         </p>
       </motion.div>

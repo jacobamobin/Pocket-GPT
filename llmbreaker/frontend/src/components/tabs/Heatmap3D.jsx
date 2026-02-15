@@ -77,7 +77,7 @@ export default function Heatmap3D({ matrix, tokens = [] }) {
     const toks = tokens.slice(0, N)
 
     // --- Renderer ---
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
     const W = canvas.parentElement?.clientWidth  || 500
     const H = 320
     renderer.setSize(W, H)
@@ -85,11 +85,11 @@ export default function Heatmap3D({ matrix, tokens = [] }) {
 
     // --- Scene ---
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x0a1628)
+    scene.background = null
 
     // --- Lighting ---
     scene.add(new THREE.AmbientLight(0xffffff, 0.5))
-    const sun = new THREE.DirectionalLight(0x93c5fd, 1.2)
+    const sun = new THREE.DirectionalLight(0xc9b8a0, 1.2)
     sun.position.set(N, N * 2, N * 1.5)
     scene.add(sun)
 
@@ -101,8 +101,8 @@ export default function Heatmap3D({ matrix, tokens = [] }) {
     const STEP   = 1.0
     const MAX_H  = N * 0.6
     const center = ((N - 1) * STEP) / 2
-    const lowColor  = new THREE.Color(0xdbeafe)  // blue-100
-    const highColor = new THREE.Color(0x1e3a8a)  // blue-900
+    const lowColor  = new THREE.Color(0xffffff)  // white
+    const highColor = new THREE.Color(0x3d2e1e)  // deep brown
 
     for (let r = 0; r < N; r++) {
       for (let c = 0; c < N; c++) {
@@ -118,7 +118,7 @@ export default function Heatmap3D({ matrix, tokens = [] }) {
     }
 
     // Grid floor
-    const grid = new THREE.GridHelper((N + 1) * STEP, N + 1, 0x1e3a5f, 0x1e3a5f)
+    const grid = new THREE.GridHelper((N + 1) * STEP, N + 1, 0x444444, 0x444444)
     grid.position.y = -0.01
     scene.add(grid)
 
@@ -128,7 +128,7 @@ export default function Heatmap3D({ matrix, tokens = [] }) {
     // X-axis labels (columns = key tokens) — along the front edge (positive Z)
     for (let c = 0; c < N; c++) {
       const label = toks[c] != null ? displayTok(toks[c]) : String(c)
-      const sprite = makeTextSprite(label, { color: '#60a5fa' })
+      const sprite = makeTextSprite(label, { color: '#c9b8a0' })
       sprite.position.set(c * STEP - center, -0.15, center + labelOffset)
       scene.add(sprite)
     }
@@ -136,22 +136,22 @@ export default function Heatmap3D({ matrix, tokens = [] }) {
     // Z-axis labels (rows = query tokens) — along the left edge (negative X)
     for (let r = 0; r < N; r++) {
       const label = toks[r] != null ? displayTok(toks[r]) : String(r)
-      const sprite = makeTextSprite(label, { color: '#34d399' })
+      const sprite = makeTextSprite(label, { color: '#a78b71' })
       sprite.position.set(-center - labelOffset, -0.15, r * STEP - center)
       scene.add(sprite)
     }
 
     // Axis title labels
-    const xTitle = makeAxisLabel('Key (attends to)', { color: '#60a5fa' })
+    const xTitle = makeAxisLabel('Key (attends to)', { color: '#c9b8a0' })
     xTitle.position.set(0, -0.5, center + labelOffset + 0.7)
     scene.add(xTitle)
 
-    const zTitle = makeAxisLabel('Query (from)', { color: '#34d399' })
+    const zTitle = makeAxisLabel('Query (from)', { color: '#a78b71' })
     zTitle.position.set(-center - labelOffset - 0.7, -0.5, 0)
     scene.add(zTitle)
 
     // Y-axis title (height = attention weight)
-    const yTitle = makeAxisLabel('Attention Weight', { color: '#94a3b8' })
+    const yTitle = makeAxisLabel('Attention Weight', { color: '#c9b8a0' })
     yTitle.position.set(-center - labelOffset - 0.5, MAX_H * 0.5, -center - labelOffset - 0.5)
     scene.add(yTitle)
 

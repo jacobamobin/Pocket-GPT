@@ -2,12 +2,13 @@ import { useState } from 'react'
 
 const MAX_TOKENS = 16  // show first 16 tokens for readability
 
-/** Maps a 0–1 attention weight to a white→dark-blue color */
+/** Maps a 0–1 attention weight to a white→dark-brown color */
 function attentionColor(v) {
   const t = Math.max(0, Math.min(1, v))
-  const r = Math.round(255 + t * (30  - 255))
-  const g = Math.round(255 + t * (58  - 255))
-  const b = Math.round(255 + t * (138 - 255))
+  // Lerp from white (255,255,255) to deep brown (#3d2e1e)
+  const r = Math.round(255 + t * (61 - 255))
+  const g = Math.round(255 + t * (46 - 255))
+  const b = Math.round(255 + t * (30 - 255))
   return `rgb(${r},${g},${b})`
 }
 
@@ -51,6 +52,8 @@ export default function Heatmap2D({ matrix, tokens = [], size = 'large' }) {
     <div className="flex flex-col items-start">
       <svg width={svgW} height={svgH} className={isLarge ? 'cursor-crosshair' : ''}>
         <g transform={`translate(${labelPad},${labelPad})`}>
+          {/* Grid background (visible through gaps between cells) */}
+          <rect x={0} y={0} width={N * (cellSize + gap)} height={N * (cellSize + gap)} fill="rgba(255,255,255,0.15)" rx={1} />
           {/* Cells */}
           {sub.map((row, r) =>
             row.map((val, c) => (
@@ -73,7 +76,7 @@ export default function Heatmap2D({ matrix, tokens = [], size = 'large' }) {
               key={c}
               x={c * (cellSize + gap) + cellSize / 2}
               y={-5}
-              fill="#64748b"
+              fill="#a78b71"
               fontSize={9}
               textAnchor="middle"
               fontFamily="monospace"
@@ -88,7 +91,7 @@ export default function Heatmap2D({ matrix, tokens = [], size = 'large' }) {
               key={r}
               x={-4}
               y={r * (cellSize + gap) + cellSize / 2 + 3}
-              fill="#64748b"
+              fill="#a78b71"
               fontSize={9}
               textAnchor="end"
               fontFamily="monospace"
@@ -108,9 +111,9 @@ export default function Heatmap2D({ matrix, tokens = [], size = 'large' }) {
               {Array.from({ length: bars }, (_, i) => (
                 <rect key={i} x={0} y={i} width={10} height={1} fill={attentionColor(1 - i / bars)} />
               ))}
-              <text x={13} y={6}        fill="#64748b" fontSize={8} fontFamily="monospace">1.0</text>
-              <text x={13} y={lh/2 + 4} fill="#64748b" fontSize={8} fontFamily="monospace">0.5</text>
-              <text x={13} y={lh}       fill="#64748b" fontSize={8} fontFamily="monospace">0.0</text>
+              <text x={13} y={6}        fill="#a78b71" fontSize={8} fontFamily="monospace">1.0</text>
+              <text x={13} y={lh/2 + 4} fill="#a78b71" fontSize={8} fontFamily="monospace">0.5</text>
+              <text x={13} y={lh}       fill="#a78b71" fontSize={8} fontFamily="monospace">0.0</text>
             </g>
           )
         })()}
