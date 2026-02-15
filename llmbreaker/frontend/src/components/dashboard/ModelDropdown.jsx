@@ -8,7 +8,7 @@ import { saveModel, renameModel, deleteModel, loadModelAsSession } from '../../u
 
 export default function ModelDropdown() {
   const { state: modelState, dispatch: modelDispatch } = useContext(ModelContext)
-  const { state: training } = useContext(TrainingContext)
+  const { state: training, dispatch: trainingDispatch } = useContext(TrainingContext)
   const { state: ui, dispatch: uiDispatch } = useContext(UIContext)
 
   const [open, setOpen] = useState(false)

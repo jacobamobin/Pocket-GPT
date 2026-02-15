@@ -94,7 +94,15 @@ export default function WatchItLearnTab() {
       return
     }
 
-    // For completed/stopped/idle: create a fresh session
+    // If a model was loaded (sessionId exists, status idle), start the existing session
+    if (sessionId && status === SESSION_STATUS.IDLE) {
+      socket?.emit('join_session', { session_id: sessionId })
+      socket?.emit('start_training', { session_id: sessionId })
+      trainingDispatch({ type: 'SESSION_STARTED', payload: { session_id: sessionId } })
+      return
+    }
+
+    // For completed/stopped/null: create a fresh session
     setStarting(true)
     try {
       const LR_MAP = { slow: 1e-4, balanced: 1e-3, fast: 3e-3 }
@@ -168,13 +176,8 @@ export default function WatchItLearnTab() {
       </div>
 
       {/* Top row: dataset + controls */}
-<<<<<<< Updated upstream
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div data-tutorial="dataset-selector">
-=======
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
         <div data-tutorial="dataset-selector" className="flex flex-col">
->>>>>>> Stashed changes
           <DatasetSelector
             value={datasetId}
             onChange={setDatasetId}
@@ -183,11 +186,7 @@ export default function WatchItLearnTab() {
             className="h-full"
           />
         </div>
-<<<<<<< Updated upstream
-        <div data-tutorial="training-controls">
-=======
         <div data-tutorial="training-controls" className="flex flex-col">
->>>>>>> Stashed changes
           <TrainingControls
             className="h-full"
             status={status}
