@@ -261,9 +261,9 @@ export default function TutorialSpotlight() {
             left: `${targetRect.left - 4}px`,
             width: `${targetRect.width + 8}px`,
             height: `${targetRect.height + 8}px`,
-            border: '3px solid rgb(34, 211, 238)',
+            border: '3px solid #a78b71',
             borderRadius: '8px',
-            boxShadow: '0 0 20px rgba(34, 211, 238, 0.5), inset 0 0 20px rgba(34, 211, 238, 0.2)',
+            boxShadow: '0 0 20px rgba(167, 139, 113, 0.5), inset 0 0 20px rgba(167, 139, 113, 0.2)',
             animation: 'pulse 2s ease-in-out infinite',
           }}
         />

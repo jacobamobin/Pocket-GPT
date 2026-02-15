@@ -17,20 +17,16 @@ const PHASES = [
     phase: 1,
     title: 'Learning the Alphabet',
     subtitle: 'Random noise — the model is discovering individual characters',
-    color: 'text-orange-400',
-    bgColor: 'bg-orange-500/10 border-orange-500/30',
-    dotColor: 'bg-orange-400',
-    icon: '🔤',
+    color: 'text-gold-light',
+    dotColor: 'bg-gold-light',
   },
   {
     maxStep: 1500,
     phase: 2,
     title: 'Identifying Common Words',
     subtitle: 'Recognising frequent patterns like "the", "and", spaces between words',
-    color: 'text-yellow-400',
-    bgColor: 'bg-yellow-500/10 border-yellow-500/30',
-    dotColor: 'bg-yellow-400',
-    icon: '📖',
+    color: 'text-gold-light',
+    dotColor: 'bg-gold-light',
   },
   {
     maxStep: 3000,
@@ -38,19 +34,15 @@ const PHASES = [
     title: 'Mastering Grammar & Structure',
     subtitle: 'Learning sentence patterns, punctuation, and capitalisation',
     color: 'text-gold-light',
-    bgColor: 'bg-gold-subtle border-gold-muted',
     dotColor: 'bg-gold-light',
-    icon: '',
   },
   {
     maxStep: Infinity,
     phase: 4,
     title: 'Mimicking the Style',
     subtitle: 'Fine-tuning vocabulary, rhythm, and the author\'s unique voice',
-    color: 'text-green-400',
-    bgColor: 'bg-green-500/10 border-green-500/30',
-    dotColor: 'bg-green-400',
-    icon: '',
+    color: 'text-gold-light',
+    dotColor: 'bg-gold-light',
   },
 ]
 
@@ -80,11 +72,10 @@ export default function PhaseLabel({ currentStep = 0, maxIters = 5000, status })
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 4 }}
         transition={{ duration: 0.3 }}
-        className={`px-4 py-3 rounded-lg border ${phase.bgColor}`}
+        className="px-4 py-3 rounded-lg border bg-gold-subtle border-gold-muted"
       >
         {/* Phase title */}
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-sm">{phase.icon}</span>
           <span className={`text-sm font-semibold ${phase.color}`}>
             Phase {phase.phase}: {phase.title}
           </span>
