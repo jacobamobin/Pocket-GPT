@@ -16,7 +16,7 @@ export default function Header({ connected }) {
   )
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-neural-bg/80 backdrop-blur-xl shrink-0">
+    <header className="relative z-[60] flex items-center justify-between px-6 py-4 border-b border-white/10 bg-neural-bg/80 backdrop-blur-xl shrink-0">
       {/* Logo */}
       <button
         onClick={() => navigate('/')}

@@ -243,7 +243,7 @@ export default function TutorialSpotlight() {
         animate={isExiting ? { opacity: 0 } : { opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="fixed inset-0 z-50 pointer-events-none"
+        className="fixed inset-0 z-[60] pointer-events-none"
         style={spotlightStyle}
       />
 
@@ -255,7 +255,7 @@ export default function TutorialSpotlight() {
           animate={isExiting ? { opacity: 0 } : { opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          className="fixed z-50 pointer-events-none"
+          className="fixed z-[60] pointer-events-none"
           style={{
             top: `${targetRect.top - 4}px`,
             left: `${targetRect.left - 4}px`,
@@ -275,7 +275,7 @@ export default function TutorialSpotlight() {
         animate={isExiting ? { opacity: 0, scale: 0.95, y: 8 } : { opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 8 }}
         transition={{ duration: 0.25 }}
-        className="fixed z-50 pointer-events-auto"
+        className="fixed z-[60] pointer-events-auto"
         style={{
           top: `${cardPosition.top}px`,
           left: `${cardPosition.left}px`,
