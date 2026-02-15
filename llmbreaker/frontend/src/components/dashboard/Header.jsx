@@ -49,11 +49,11 @@ export default function Header({ connected }) {
         {/* Playground button */}
         <button
           onClick={genActions.open}
-          className="px-3 py-1.5 text-sm text-white/60 hover:text-white border border-white/10 hover:border-gold-base/50 rounded-lg transition-colors flex items-center gap-1.5"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border border-white/10 bg-neural-surface text-white/60 hover:text-white/80 hover:border-gold-base/50 transition-colors"
           aria-label="Open Token Playground"
         >
           <FiPlay className="w-4 h-4" />
-          <span className="hidden md:inline">Playground</span>
+          <span>Playground</span>
         </button>
 
         {/* Tutorial button */}

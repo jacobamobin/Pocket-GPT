@@ -23,6 +23,7 @@ export default function TutorialSpotlight() {
   const { active, chapterId, stepIndex } = state
 
   const [targetRect, setTargetRect] = useState(null)
+  const [targetRadius, setTargetRadius] = useState('8px')
   const [cardPosition, setCardPosition] = useState({ top: 0, left: 0 })
   const [isExiting, setIsExiting] = useState(false)
   const [exitStep, setExitStep] = useState(null)
@@ -49,6 +50,10 @@ export default function TutorialSpotlight() {
     if (el) {
       const rect = el.getBoundingClientRect()
       setTargetRect(rect)
+      // Read the first child's border-radius (the actual card inside the wrapper)
+      const child = el.firstElementChild || el
+      const computed = window.getComputedStyle(child)
+      setTargetRadius(computed.borderRadius || '8px')
     } else {
       setTargetRect(null)
     }
@@ -262,7 +267,7 @@ export default function TutorialSpotlight() {
             width: `${targetRect.width + 8}px`,
             height: `${targetRect.height + 8}px`,
             border: '3px solid #a78b71',
-            borderRadius: '8px',
+            borderRadius: targetRadius,
             boxShadow: '0 0 20px rgba(167, 139, 113, 0.5), inset 0 0 20px rgba(167, 139, 113, 0.2)',
             animation: 'pulse 2s ease-in-out infinite',
           }}

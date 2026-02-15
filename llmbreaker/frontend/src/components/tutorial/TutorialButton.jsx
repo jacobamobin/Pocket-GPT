@@ -45,7 +45,7 @@ export default function TutorialButton() {
       <button
         onClick={() => setIsOpen(v => !v)}
         className={`
-          relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150
+          relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all duration-150
           ${active
             ? 'bg-gold-subtle border border-gold-muted text-gold-light'
             : 'bg-neural-surface border border-white/10 text-white/60 hover:text-white/80 hover:border-gold-base/50'
@@ -58,9 +58,13 @@ export default function TutorialButton() {
           <span className="absolute -top-1 -right-1 w-2 h-2 bg-gold-base rounded-full animate-pulse" />
         )}
 
-        {/* Dropdown arrow */}
+        {/* Graduation cap icon */}
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15v-3.75m0 0 5.25 3 5.25-3" />
+        </svg>
+        <span>Tutorial</span>
         <FiChevronDown
-          className={`w-3 h-3 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-3 h-3 text-white/40 transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 

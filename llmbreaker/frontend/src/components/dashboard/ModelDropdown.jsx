@@ -98,9 +98,12 @@ export default function ModelDropdown() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1.5 px-3 py-1 rounded-md border border-white/10
-                   bg-neural-surface hover:border-gold-base/50 text-white/60 text-xs transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border border-white/10
+                   bg-neural-surface hover:border-gold-base/50 text-white/60 hover:text-white/80 transition-colors"
       >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
         <span>Models{models.length > 0 ? ` (${models.length})` : ''}</span>
         <FiChevronDown
           className={`w-3 h-3 text-white/40 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
