@@ -1,4 +1,5 @@
 import { useContext } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { FiPlay } from 'react-icons/fi'
 import { TrainingContext } from '../../contexts/TrainingContext'
 import { useGeneration } from '../../contexts/GenerationContext'
@@ -8,6 +9,7 @@ import TutorialButton from '../tutorial/TutorialButton'
 export default function Header({ connected }) {
   const { state } = useContext(TrainingContext)
   const { actions: genActions } = useGeneration()
+  const navigate = useNavigate()
 
   const activeSessions = Object.values(state.sessions).filter(
     s => s.status === 'running' || s.status === 'paused'
@@ -16,12 +18,14 @@ export default function Header({ connected }) {
   return (
     <header className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-neural-bg/80 backdrop-blur-xl shrink-0">
       {/* Logo */}
-      <span
-        className="text-2xl font-serif italic font-bold text-white select-none"
+      <button
+        onClick={() => navigate('/')}
+        className="text-2xl font-serif italic font-bold text-white select-none hover:text-gold-light transition-colors duration-200 cursor-pointer bg-transparent border-none p-0"
         data-tutorial="logo"
+        aria-label="Go to home page"
       >
         LLMBreaker
-      </span>
+      </button>
 
       {/* Right side */}
       <div className="flex items-center gap-4 text-sm">
