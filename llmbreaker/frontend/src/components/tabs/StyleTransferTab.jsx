@@ -25,9 +25,9 @@ export default function StyleTransferTab() {
   const [text, setText] = useState('')
   const [uploadedId, setUploadedId] = useState(null)
   const [starting, setStarting] = useState(false)
-  const [maxItersConfig, setMaxItersConfig] = useState(5000)
-  const [evalIntervalConfig, setEvalIntervalConfig] = useState(100)
-  const [modelSizeConfig, setModelSizeConfig] = useState('medium')
+  const [maxItersConfig, setMaxItersConfig] = useState(1500)
+  const [evalIntervalConfig, setEvalIntervalConfig] = useState(50)
+  const [modelSizeConfig, setModelSizeConfig] = useState('small')
   const [viewMode, setViewMode] = useState('overview')
 
   // Bind WebSocket listeners for this session
